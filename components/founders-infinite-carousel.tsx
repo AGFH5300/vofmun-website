@@ -1,0 +1,231 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
+
+const founders = [
+  {
+    name: "Tala Swaidan",
+    role: "Secretary-General",
+    image: "/founders/TalaSwaidan_SG.png",
+  },
+  {
+    name: "Clyde Jared Robis",
+    role: "Deputy Secretary-General",
+    image: "/founders/ClydeJaredRobis_DSG.png",
+  },
+  {
+    name: "Vihaan Shukla",
+    role: "Head of Committees",
+    image: "/founders/VihaanShukla_Committees-full.png",
+  },
+  {
+    name: "Ansh Gupta",
+    role: "Head of Technology",
+    image: "/founders/AnshGupta_Tech.png",
+  },
+  {
+    name: "Aryan Shah",
+    role: "Head of Delegate Affairs",
+    image: "/founders/AryanShah_DelegateAffairs-full.png",
+  },
+  {
+    name: "Elinore Sweiss",
+    role: "Co-Head of Logistics",
+    image: "/founders/ElinoreSweiss_Logistics.png",
+  },
+  {
+    name: "Muhammad Talha Sohail",
+    role: "Co-Head of Logistics",
+    image: "/founders/MuhammadTalhaSohail_Logistics.png",
+  },
+  {
+    name: "Ammiel Lupian",
+    role: "Head of Media",
+    image: "/founders/AmmielLupian_Media.png",
+  },
+  {
+    name: "Tamara Moshawrab",
+    role: "Head of Finance",
+    image: "/founders/TamaraMoshawrab_Finance.png",
+  },
+  {
+    name: "Gabrielle Zietsman",
+    role: "Deputy Head of Committees",
+    image: "/founders/GabrielleZietsman_Committees.png",
+  },
+  {
+    name: "Reem Ghanayem",
+    role: "Deputy Head of Logistics",
+    image: "/founders/ReemGhanayem_Logistics.png",
+  },
+  {
+    name: "Farah Yu",
+    role: "Deputy Head of Media",
+    image: "/founders/FarahYu.png",
+  },
+  {
+    name: "Noya Fareed",
+    role: "Deputy Head of Media",
+    image: "/founders/NoyaFareed_Media.png",
+  },
+  {
+    name: "Noaf Qassem",
+    role: "Deputy Head of Finance",
+    image: "/founders/NoafQassem_Finance.png",
+  },
+]
+
+export function FoundersInfiniteCarousel() {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (!isAutoPlaying) return
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % founders.length)
+    }, 4000)
+
+    return () => clearInterval(interval)
+  }, [isAutoPlaying])
+
+  const nextSlide = () => {
+    setIsAutoPlaying(false)
+    setCurrentIndex((prev) => (prev + 1) % founders.length)
+    setTimeout(() => setIsAutoPlaying(true), 6000)
+  }
+
+  const prevSlide = () => {
+    setIsAutoPlaying(false)
+    setCurrentIndex((prev) => (prev - 1 + founders.length) % founders.length)
+    setTimeout(() => setIsAutoPlaying(true), 6000)
+  }
+
+  const getVisibleFounders = () => {
+    const visible = []
+    for (let i = -2; i <= 2; i++) {
+      const index = (currentIndex + i + founders.length) % founders.length
+      visible.push({ ...founders[index], position: i })
+    }
+    return visible
+  }
+
+  return (
+    <div className="relative w-full max-w-6xl mx-auto h-96 overflow-hidden">
+      {/* Navigation Arrows */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-40 bg-[#B22222] hover:bg-[#8B0000] text-white p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110"
+        aria-label="Previous founder"
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+
+      <button
+        onClick={nextSlide}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-40 bg-[#B22222] hover:bg-[#8B0000] text-white p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110"
+        aria-label="Next founder"
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+
+      {/* Carousel Container */}
+      <div className="relative w-full h-full flex items-center justify-center">
+        {getVisibleFounders().map((founder, index) => {
+          const position = founder.position
+          const isCenter = position === 0
+
+          // Calculate transform and styling based on position
+          let transform = `translateX(${position * 280}px)`
+          let scale = 1
+          let opacity = 1
+          let zIndex = 10
+
+          if (isCenter) {
+            scale = 1.2
+            zIndex = 30
+            opacity = 1
+          } else if (Math.abs(position) === 1) {
+            scale = 0.9
+            zIndex = 20
+            opacity = 0.8
+          } else {
+            scale = 0.7
+            zIndex = 10
+            opacity = 0.5
+          }
+
+          return (
+            <div
+              key={`${founder.name}-${index}`}
+              className="absolute transition-all duration-700 ease-in-out cursor-pointer"
+              style={{
+                transform: `${transform} scale(${scale})`,
+                zIndex,
+                opacity,
+              }}
+              onClick={() => {
+                if (!isCenter) {
+                  setCurrentIndex((currentIndex + position + founders.length) % founders.length)
+                }
+              }}
+            >
+              <Link
+                href="/founders"
+                className="block group"
+              >
+                <div className={`relative bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 w-64 h-80 ${
+                  isCenter 
+                    ? 'shadow-2xl' 
+                    : 'shadow-md hover:shadow-xl'
+                }`}>
+
+                  {/* Background gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
+
+                  {/* Founder Image */}
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={founder.image}
+                      alt={founder.name}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+
+                  {/* Text Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-20">
+                    <h3 className={`font-bold mb-2 drop-shadow-lg transition-all duration-300 ${
+                      isCenter ? 'text-2xl' : 'text-xl'
+                    }`}>
+                      {founder.name}
+                    </h3>
+                    <p className={`opacity-90 drop-shadow transition-all duration-300 ${
+                      isCenter ? 'text-base' : 'text-sm'
+                    }`}>
+                      {founder.role}
+                    </p>
+                  </div>
+
+                  {/* Center highlight overlay */}
+                  {isCenter && (
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#B22222]/20 via-transparent to-transparent z-15" />
+                  )}
+
+                  {/* Hover overlay for non-center cards */}
+                  {!isCenter && (
+                    <div className="absolute inset-0 bg-[#B22222]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-15" />
+                  )}
+                </div>
+              </Link>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
