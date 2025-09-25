@@ -1501,8 +1501,7 @@ export function SignupFormNew() {
                 submitted successfully.
               </p>
               <p className="text-sm text-muted-foreground">
-                We'll review your application and contact you within 48 hours with further details about your
-                registration status and next steps.
+                Thanks for applying. We will contact you within 48 hours with further details about your payment.
               </p>
               <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <Info className="h-4 w-4 text-blue-600" />
