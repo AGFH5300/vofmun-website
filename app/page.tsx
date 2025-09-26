@@ -108,8 +108,8 @@ export default function HomePage() {
               Interactive Conference Platform
             </h2>
             <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-              Our conference webapp has been developed in-house to provide delegates with a seamless and intuitive experience. 
-              This custom-built platform integrates all essential tools and resources needed for effective participation in Model UN conferences.
+              Our conference webapp has been developed in-house to provide all our delegates, chairs, and admin staff with a seamless and intuitive experience. 
+              VOFMUN One - our custom-built platform - integrates all essential tools and resources needed for effective participation throughout the conference!
             </p>
             <FeaturesSlideshow />
           </div>
@@ -121,8 +121,7 @@ export default function HomePage() {
               Meet Our Founding Team
             </h2>
             <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto text-base">
-              Dedicated young leaders committed to fostering global dialogue and
-              diplomatic excellence!
+              Meet the experienced team behind VOFMUN's success!
             </p>
 
             <FoundersInfiniteCarousel />
@@ -132,7 +131,7 @@ export default function HomePage() {
                 href="/founders"
                 className="inline-flex items-center space-x-2 bg-gray-700 hover:bg-gray-800 text-white px-8 py-4 rounded-lg font-medium transition-all duration-300 hover:scale-105 shadow-lg"
               >
-                <span>Meet All Our Founders</span>
+                <span>Meet All Founders</span>
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -215,7 +214,8 @@ export default function HomePage() {
               Diverse Participation
             </h2>
             <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-              Our conference brings together a diverse community of delegates, each bringing unique perspectives shaped by their cultures and backgrounds. It’s a celebration of global thinking, where diplomacy and dialogue connect people from all walks of life.
+              Our conference brings together a diverse community of delegates, each bringing unique perspectives shaped by their cultures and backgrounds.
+              VOFMUN is a celebration of global thinking, where debate and diplomacy connect people to make a true difference.
             </p>
             <div className="max-w-4xl mx-auto">
               <InteractiveWorldMap />
