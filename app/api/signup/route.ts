@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
       emergencyContactPhone: body.formData?.emergencyPhone,
       agreeTerms: body.formData?.agreeTerms,
       agreePhotos: body.formData?.agreePhotos || false,
+      nationality: body.formData?.nationality ?? null,
     }
     
     // Validate with Zod schema
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
       }
       
       // Validate allowed committee values
-      const allowedCommittees = ['ga1', 'unodc', 'ecosoc', 'who', 'icj', 'unsc']
+      const allowedCommittees = ['ga1', 'unodc', 'ecosoc', 'who', 'icj', 'icrcc', 'uncstd']
       for (const committee of committees) {
         if (committee && !allowedCommittees.includes(committee)) {
           throw new Error('Invalid committee selection')
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
       emergency_contact_phone: userData.emergencyContactPhone,
       agree_terms: userData.agreeTerms,
       agree_photos: userData.agreePhotos,
+      nationality: userData.nationality,
       // Add role-specific data
       delegate_data: body.selectedRole === 'delegate' ? roleData : null,
       chair_data: body.selectedRole === 'chair' ? roleData : null,
