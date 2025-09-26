@@ -57,7 +57,7 @@ const ResolutionMockup = () => (
       </div>
       <div className="flex items-center space-x-2">
         <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-        <span>In Committee Review</span>
+        <span>Being Debated</span>
       </div>
     </div>
   </div>
