@@ -41,7 +41,7 @@ const ResolutionMockup = () => (
       <h4 className="font-semibold text-sm">Draft Resolution GA1 -  Bloc 1</h4>
       <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Under Review</span>
     </div>
-    <div className="text-xs text-gray-600 mb-3"> Topic: 1 - Climate Change Mitigation</div>
+    <div className="text-xs text-gray-600 mb-3"> Topic: Climate Change Mitigation Strategies</div>
     <div className="text-xs text-gray-600 mb-3"> Main Submitter: Germany</div>
     <div className="flex space-x-2 mb-3">
       <button className="bg-blue-500 text-white px-3 py-1 rounded text-xs flex items-center space-x-1">
