@@ -59,6 +59,7 @@ export const insertUserSchema = z.object({
   emergencyContactPhone: z.string().min(1, 'Emergency contact phone is required'),
   agreeTerms: z.boolean().refine(val => val === true, 'You must agree to terms and conditions'),
   agreePhotos: z.boolean().optional(),
+  nationality: z.string().length(2),
 })
 
 export const selectUserSchema = createSelectSchema(users)
