@@ -8,28 +8,28 @@ const features = [
   {
     icon: Upload,
     title: "Resolution & Amendment Submission",
-    description: "Submit and track your diplomatic resolutions and amendments through our secure platform with real-time status updates",
+    description: "Submit and track all resolutions and amendments through our secure platform with real-time status updates",
     color: "bg-blue-500",
     mockup: "resolution"
   },
   {
     icon: Users,
     title: "Networking & Messaging",
-    description: "Connect with fellow delegates and chairs before and during the conference through our safely moderated communication platform",
+    description: "Connect with fellow delegates, chairs, and admin staff before and during the conference through our safely moderated instant messaging platform",
     color: "bg-green-500",
     mockup: "networking"
   },
   {
     icon: AlertTriangle,
     title: "Live Crisis Updates",
-    description: "Real-time crisis scenarios that challenge delegates with dynamic diplomatic situations and urgent response requirements",
+    description: "Real-time crisis updates for all committees challenge delegates with dynamic diplomatic situations and an urgent need for response",
     color: "bg-red-500",
     mockup: "crisis"
   },
   {
     icon: Award,
     title: "Achievement Tracking",
-    description: "Earn recognition for outstanding diplomatic achievements, track your progress, and showcase your leadership throughout the conference",
+    description: "Earn recognition for outstanding achievements, track your progress, and showcase leadership throughout the conference",
     color: "bg-purple-500",
     mockup: "achievements"
   },
@@ -38,10 +38,11 @@ const features = [
 const ResolutionMockup = () => (
   <div className="bg-gray-50 rounded-lg p-4 mt-4 border">
     <div className="flex items-center justify-between mb-3">
-      <h4 className="font-semibold text-sm">Draft Resolution A/GA1/2026/L.3</h4>
+      <h4 className="font-semibold text-sm">Draft Resolution GA1 -  Bloc 1</h4>
       <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Under Review</span>
     </div>
-    <div className="text-xs text-gray-600 mb-3">Climate Change Mitigation Strategies</div>
+    <div className="text-xs text-gray-600 mb-3"> Topic: 1 - Climate Change Mitigation</div>
+    <div className="text-xs text-gray-600 mb-3"> Main Submitter: Germany</div>
     <div className="flex space-x-2 mb-3">
       <button className="bg-blue-500 text-white px-3 py-1 rounded text-xs flex items-center space-x-1">
         <Upload className="w-3 h-3" />
