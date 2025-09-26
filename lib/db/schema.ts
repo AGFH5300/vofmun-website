@@ -78,8 +78,15 @@ export const chairDataSchema = z.object({
     year: z.string(),
     description: z.string().optional(),
   })).min(1, 'At least one experience is required for chairs'),
-  specializations: z.array(z.string()).optional(),
-  whyChair: z.string().min(50, 'Please provide at least 50 characters explaining why you want to be a chair'),
+  committee1: z.string().optional(),
+  committee2: z.string().optional(), 
+  committee3: z.string().optional(),
+  crisisBackroomInterest: z.string().optional(),
+  whyBestFit: z.string().min(50, 'Please provide at least 50 characters explaining why you are the best fit'),
+  successfulCommittee: z.string().min(50, 'Please provide at least 50 characters on what makes a committee successful'),
+  strengthWeakness: z.string().min(50, 'Please provide at least 50 characters describing your strengths and weaknesses'),
+  crisisResponse: z.string().optional(),
+  availability: z.string().optional(),
 })
 
 export const adminDataSchema = z.object({
@@ -88,9 +95,12 @@ export const adminDataSchema = z.object({
     organization: z.string(),
     year: z.string(),
     description: z.string().optional(),
-  })).min(1, 'At least one relevant experience is required for admins'),
+  })).optional(),
   skills: z.array(z.string()).optional(),
-  whyAdmin: z.string().min(100, 'Please provide at least 100 characters explaining why you want to be an admin'),
+  whyAdmin: z.string().optional(),
+  relevantExperience: z.string().min(1, 'Relevant experience is required'),
+  previousAdmin: z.enum(['yes', 'no']),
+  understandsRole: z.enum(['yes', 'no']),
 })
 
 // Type exports
