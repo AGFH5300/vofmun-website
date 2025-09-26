@@ -78,7 +78,7 @@ const NetworkingMockup = () => (
         </div>
         <div className="flex-1">
           <div className="text-xs font-medium">Sarah Chen (Singapore)</div>
-          <div className="text-xs text-gray-500">GA1 Committee</div>
+          <div className="text-xs text-gray-500">General Assembly 1</div>
         </div>
         <MessageSquare className="w-4 h-4 text-gray-400" />
       </div>
