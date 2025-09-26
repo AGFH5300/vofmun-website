@@ -28,6 +28,7 @@ export function SignupFormNew() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showAIModal, setShowAIModal] = useState(false)
+  const [lastSubmittedRole, setLastSubmittedRole] = useState<Role | null>(null)
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -112,7 +113,7 @@ export function SignupFormNew() {
       if (!formData.nationality) {
         newErrors.nationality = "Nationality is required"
       }
-      
+
       // Academic Information Validation
       if (!formData.school.trim()) {
         newErrors.school = "School/Institution is required"
@@ -120,7 +121,7 @@ export function SignupFormNew() {
       if (!formData.grade) {
         newErrors.grade = "Please select your grade/year"
       }
-      
+
       // Additional Information Validation
       if (!formData.dietaryType) {
         newErrors.dietaryType = "Please select your dietary preference"
@@ -134,7 +135,7 @@ export function SignupFormNew() {
       if (formData.hasAllergies === "yes" && !formData.allergiesDetails.trim()) {
         newErrors.allergiesDetails = "Please provide details about your allergies"
       }
-      
+
       // Emergency Contact Validation
       if (!formData.emergencyContact.trim()) {
         newErrors.emergencyContact = "Emergency contact name is required"
@@ -142,7 +143,7 @@ export function SignupFormNew() {
       if (!formData.emergencyPhone.trim()) {
         newErrors.emergencyPhone = "Emergency contact phone is required"
       }
-      
+
       // Terms and Conditions Validation
       if (!formData.agreeTerms) {
         newErrors.agreeTerms = "You must agree to the terms and conditions"
@@ -217,7 +218,7 @@ export function SignupFormNew() {
 
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors)
-        
+
         // Scroll to first error field
         const firstErrorKey = Object.keys(newErrors)[0]
         const errorElement = document.querySelector(`[data-testid*="${firstErrorKey}"], [name="${firstErrorKey}"], #${firstErrorKey}`)
@@ -228,7 +229,7 @@ export function SignupFormNew() {
             setTimeout(() => errorElement.focus(), 500)
           }
         }
-        
+
         toast.error(`Please fix ${Object.keys(newErrors).length} error${Object.keys(newErrors).length > 1 ? 's' : ''} below`, {
           description: "All required fields must be completed before submission."
         })
@@ -256,60 +257,15 @@ export function SignupFormNew() {
       const result = await response.json()
 
       if (response.ok) {
-        setShowSuccessModal(true)
+        setLastSubmittedRole(selectedRole);
 
-        // Show success toast
+        setShowSuccessModal(true);
+
         toast.success(`Registration Successful!`, {
           description: `Your ${selectedRole} application has been submitted successfully.`,
           duration: 4000,
-        })
+        });
 
-        // Reset form after successful submission
-        setFormData({
-          firstName: "",
-          lastName: "",
-          email: "",
-          phone: "",
-          nationality: "",
-          phoneCountry: "AE",
-          school: "",
-          grade: "",
-          dietaryType: "",
-          dietaryOther: "",
-          hasAllergies: "",
-          allergiesDetails: "",
-          emergencyContact: "",
-          emergencyPhone: "",
-          emergencyPhoneCountry: "AE",
-          agreeTerms: false,
-          dateOfBirth: "",
-          role: "",
-          experience: "",
-          institution: "",
-        })
-        setSelectedRole(null)
-        setDelegateData({ experience: "", committee1: "", committee2: "", committee3: "" })
-        // Reset chair data to initial state
-        setChairData({
-          experiences: [{ conference: "", position: "", year: "", description: "" }],
-          committee1: "",
-          committee2: "",
-          committee3: "",
-          crisisBackroomInterest: "",
-          whyBestFit: "",
-          successfulCommittee: "",
-          strengthWeakness: "",
-          crisisResponse: "",
-          availability: "",
-        })
-        setAdminData({
-          experiences: [{ role: "", organization: "", year: "", description: "" }],
-          skills: [],
-          whyAdmin: "",
-          relevantExperience: "",
-          previousAdmin: "",
-          understandsRole: "",
-        })
       } else {
         // Handle specific HTTP status codes
         if (response.status === 409) {
@@ -524,7 +480,8 @@ export function SignupFormNew() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setSelectedRole(null)}
+          onClick={() => !showSuccessModal && setSelectedRole(null)}
+          disabled={showSuccessModal}
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 md:static md:ml-auto"
           data-testid="button-back-to-role-selection"
         >
@@ -629,7 +586,7 @@ export function SignupFormNew() {
               <Label htmlFor="grade" className="text-xs sm:text-sm font-medium text-gray-700">
                 Grade/Year <span className="text-red-500">*</span>
               </Label>
-              <Select onValueChange={(value) => handleInputChange("grade", value)} defaultValue={formData.grade}>
+              <Select onValueChange={(value) => handleInputChange("grade", value)} value={formData.grade}>
                 <SelectTrigger
                   data-testid="select-grade"
                   className={`text-xs sm:text-sm h-9 sm:h-10 ${errors.grade ? "border-red-500" : ""}`}
@@ -703,8 +660,8 @@ export function SignupFormNew() {
                         )}
                       </Label>
                       <Select
-                        onValueChange={(value) => setDelegateData((prev) => ({ ...prev, [`committee${num}`]: value }))}
-                        defaultValue={delegateData[`committee${num}` as keyof typeof delegateData]}
+                        onValueChange={(value) => setDelegateData((p) => ({ ...p, [`committee${num}`]: value }))}
+                        value={delegateData[`committee${num}` as keyof typeof delegateData] as string}
                       >
                         <SelectTrigger
                           data-testid={`select-committee${num}`}
@@ -913,8 +870,8 @@ export function SignupFormNew() {
                         )}
                       </Label>
                       <Select
-                        onValueChange={(value) => setChairData((prev) => ({ ...prev, [`committee${num}`]: value }))}
-                        defaultValue={chairData[`committee${num}` as 'committee1' | 'committee2' | 'committee3']}
+                        onValueChange={(value) => setChairData((p) => ({ ...p, [`committee${num}`]: value }))}
+                        value={chairData[`committee${num}` as 'committee1' | 'committee2' | 'committee3']}
                       >
                         <SelectTrigger
                           data-testid={`select-chair-committee${num}`}
@@ -1177,7 +1134,7 @@ export function SignupFormNew() {
                 </div>
               )}
 
-        
+
             </div>
           )}
 
@@ -1185,7 +1142,7 @@ export function SignupFormNew() {
             <div className="space-y-4 sm:space-6">
               <h3 className="text-lg sm:text-xl font-serif font-semibold text-primary">Admin Application</h3>
 
-            
+
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="adminExperience">
                   Describe/list all relevant experience you have that is applicable to the role of Admin staff{" "}
@@ -1294,7 +1251,7 @@ export function SignupFormNew() {
           <div className="space-y-3 sm:space-4">
             <h3 className="text-lg sm:text-xl font-serif font-semibold text-primary">Additional Information</h3>
             <div className="space-y-3 sm:space-4">
-              
+
               <div className="space-y-1.5 sm:space-y-2">
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="flex items-start gap-2">
@@ -1311,7 +1268,7 @@ export function SignupFormNew() {
                 <Label>
                   Dietary Preferences <span className="text-red-500">*</span>
                 </Label>
-                
+
                 <RadioGroup
                   value={formData.dietaryType}
                   onValueChange={(value) => handleInputChange("dietaryType", value)}
@@ -1486,38 +1443,102 @@ export function SignupFormNew() {
       </CardContent>
 
       {/* Success Modal */}
-      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+      <Dialog
+        open={showSuccessModal}
+        onOpenChange={(open) => {
+          setShowSuccessModal(open);
+          if (!open) {
+           
+            setFormData({
+              firstName: "",
+              lastName: "",
+              email: "",
+              phone: "",
+              nationality: "",
+              phoneCountry: "AE",
+              school: "",
+              grade: "",
+              dietaryType: "",
+              dietaryOther: "",
+              hasAllergies: "",
+              allergiesDetails: "",
+              emergencyContact: "",
+              emergencyPhone: "",
+              emergencyPhoneCountry: "AE",
+            // keep legacy keys if used elsewhere
+              agreeTerms: false,
+              dateOfBirth: "",
+              role: "",
+              experience: "",
+              institution: "",
+            });
+            setDelegateData({ experience: "", committee1: "", committee2: "", committee3: "" });
+            setChairData({
+              experiences: [{ conference: "", position: "", year: "", description: "" }],
+              committee1: "",
+              committee2: "",
+              committee3: "",
+              crisisBackroomInterest: "",
+              whyBestFit: "",
+              successfulCommittee: "",
+              strengthWeakness: "",
+              crisisResponse: "",
+              availability: "",
+            });
+            setAdminData({
+              experiences: [{ role: "", organization: "", year: "", description: "" }],
+              skills: [],
+              whyAdmin: "",
+              relevantExperience: "",
+              previousAdmin: "",
+              understandsRole: "",
+            });
+            setSelectedRole(null);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-green-600">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
               Registration Successful!
             </DialogTitle>
+
             <DialogDescription className="space-y-3 pt-2">
               <p>
-                Your {roleCards.find((r) => r.role === selectedRole)?.title.toLowerCase()} application has been
-                submitted successfully.
+                Your {
+                  roleCards.find((r) => r.role === lastSubmittedRole)?.title.toLowerCase() ?? "application"
+                } application has been submitted successfully.
               </p>
-              <p className="text-sm text-muted-foreground">
-                Thanks for applying. We will contact you within 48 hours with further details about your payment.
-              </p>
-              <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <Info className="h-4 w-4 text-blue-600" />
-                <p className="text-sm text-blue-800">
-                  Please check your email (including spam folder) for confirmation details.
+
+              {/* Payment / fee recap (pulls from your roleCards list) */}
+              <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm">
+                <p className="font-medium text-green-900">Next step: Payment</p>
+                <p className="text-green-800">
+                  Fee: {
+                    roleCards.find((r) => r.role === lastSubmittedRole)?.price ?? "—"
+                  }. You’ll receive a confirmation email with the payment link and instructions shortly.
                 </p>
               </div>
+
+              {/* Helpful notes */}
+              <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                <li>Check your inbox (and spam) for the payment email.</li>
+                <li>
+                  Need help? Email <a href="mailto:support@vofmun.org" className="underline">support@vofmun.org</a>.
+                </li>
+              </ul>
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-center pt-4">
+
+          <div className="flex justify-center pt-4 gap-2">
             <Button onClick={() => setShowSuccessModal(false)} className="bg-green-600 hover:bg-green-700">
               Got it, thanks!
             </Button>
           </div>
         </DialogContent>
       </Dialog>
+
+
 
        {/* AI Experience Modal */}
       <AIExperienceModal
