@@ -51,6 +51,17 @@ export const metadata: Metadata = {
     description: "Join VOFMUN - A youth-driven platform for tomorrow's leaders",
     type: "website",
   },
+
+  icons: [
+    { rel: "icon", url: "/favicons/favicon.ico" }, // legacy fallback
+    { rel: "icon", url: "/favicons/favicon-16x16.png", sizes: "16x16" },
+    { rel: "icon", url: "/favicons/favicon-32x32.png", sizes: "32x32" },
+    { rel: "apple-touch-icon", url: "/favicons/apple-touch-icon.png" },
+    { rel: "icon", url: "/favicons/android-chrome-192x192.png", sizes: "192x192" },
+    { rel: "icon", url: "/favicons/android-chrome-512x512.png", sizes: "512x512" },
+  ],
+  manifest: "/favicons/site.webmanifest",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
