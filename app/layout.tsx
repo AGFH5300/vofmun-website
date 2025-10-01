@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   },
 
   icons: [
-    { rel: "icon", url: "/favicons/favicon.ico" }, // legacy fallback
+    { rel: "icon", url: "/favicons/favicon.ico" },
     { rel: "icon", url: "/favicons/favicon-16x16.png", sizes: "16x16" },
     { rel: "icon", url: "/favicons/favicon-32x32.png", sizes: "32x32" },
     { rel: "apple-touch-icon", url: "/favicons/apple-touch-icon.png" },
