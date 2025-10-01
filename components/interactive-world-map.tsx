@@ -48,49 +48,49 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
 
   useEffect(() => {
     async function fetchDelegateCounts() {
+      let dbCounts: Record<string, number> = {}
+      
       try {
         const response = await fetch('/api/delegate-counts')
         const data = await response.json()
-        
-        const dbCounts: Record<string, number> = data.counts || {}
-        
-        const mergedData: Record<string, number> = {}
-        
-        Object.keys(minimumThresholds).forEach((countryCode) => {
-          const dbCount = dbCounts[countryCode] || 0
-          const minCount = minimumThresholds[countryCode]
-          mergedData[countryCode] = Math.max(dbCount, minCount)
-        })
-        
-        Object.keys(dbCounts).forEach((countryCode) => {
-          if (!mergedData[countryCode]) {
-            mergedData[countryCode] = dbCounts[countryCode]
-          }
-        })
-        
-        const countryDataArray: CountryData[] = Object.entries(mergedData)
-          .map(([countryCode, count]) => {
-            const countryInfo = countries.find(c => c.code === countryCode)
-            return {
-              country: countryInfo?.name || countryCode,
-              countryCode: countryCode,
-              delegates: count
-            }
-          })
-          .filter(c => c.delegates > 0)
-          .sort((a, b) => b.delegates - a.delegates)
-        
-        const total = countryDataArray.reduce((sum, country) => sum + country.delegates, 0)
-        const totalCountriesCount = countryDataArray.length
-        
-        setParticipatingCountries(countryDataArray)
-        setTotalDelegates(total)
-        setTotalCountries(totalCountriesCount)
-        setIsLoading(false)
+        dbCounts = data.counts || {}
       } catch (error) {
         console.error('Error fetching delegate counts:', error)
-        setIsLoading(false)
       }
+      
+      const mergedData: Record<string, number> = {}
+      
+      Object.keys(minimumThresholds).forEach((countryCode) => {
+        const dbCount = dbCounts[countryCode] || 0
+        const minCount = minimumThresholds[countryCode]
+        mergedData[countryCode] = Math.max(dbCount, minCount)
+      })
+      
+      Object.keys(dbCounts).forEach((countryCode) => {
+        if (!mergedData[countryCode]) {
+          mergedData[countryCode] = dbCounts[countryCode]
+        }
+      })
+      
+      const countryDataArray: CountryData[] = Object.entries(mergedData)
+        .map(([countryCode, count]) => {
+          const countryInfo = countries.find(c => c.code === countryCode)
+          return {
+            country: countryInfo?.name || countryCode,
+            countryCode: countryCode,
+            delegates: count
+          }
+        })
+        .filter(c => c.delegates > 0)
+        .sort((a, b) => b.delegates - a.delegates)
+      
+      const total = countryDataArray.reduce((sum, country) => sum + country.delegates, 0)
+      const totalCountriesCount = countryDataArray.length
+      
+      setParticipatingCountries(countryDataArray)
+      setTotalDelegates(total)
+      setTotalCountries(totalCountriesCount)
+      setIsLoading(false)
     }
 
     fetchDelegateCounts()
