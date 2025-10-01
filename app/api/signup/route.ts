@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       emergencyContactPhone: body.formData?.emergencyPhone,
       agreeTerms: body.formData?.agreeTerms,
       agreePhotos: body.formData?.agreePhotos || false,
-      nationality: body.formData?.nationality ?? null,
+      nationality: body.formData?.nationality?.toUpperCase() ?? null,
     }
     
     // Validate with Zod schema
