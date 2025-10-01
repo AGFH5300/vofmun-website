@@ -9,6 +9,7 @@ export const users = pgTable('users', {
   lastName: varchar('last_name', { length: 100 }).notNull(),
   phone: varchar('phone', { length: 20 }).notNull(),
   role: varchar('role', { length: 20 }).notNull(),
+  nationality: varchar('nationality', { length: 3 }),
   
   // Basic Information
   school: varchar('school', { length: 255 }),
