@@ -115,7 +115,7 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
           </div>
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <div className="text-2xl font-bold text-green-600">
-              {isLoading ? '...' : `${totalDelegates}+`}
+              {isLoading ? '...' : `100+`}
             </div>
             <div className="text-sm text-gray-600">Delegates</div>
           </div>
