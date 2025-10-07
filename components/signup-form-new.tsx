@@ -381,7 +381,6 @@ export function SignupFormNew() {
       title: "Delegate",
       icon: Users,
       price: "155 AED",
-      description: "Participate in committees, debate resolutions, and represent countries",
       details:
         "Delegates are the main participants who represent countries or organizations in various UN committees. You will research positions, debate issues, and work on resolutions.",
     },
@@ -390,7 +389,6 @@ export function SignupFormNew() {
       title: "Chair",
       icon: Crown,
       price: "100 AED",
-      description: "Lead committees and guide debate proceedings",
       details:
         "Chairs facilitate committee sessions, ensure proper procedure, and help guide delegates through debates. Requires prior MUN experience and leadership skills.",
     },
@@ -399,7 +397,6 @@ export function SignupFormNew() {
       title: "Admin",
       icon: Settings,
       price: "70 AED",
-      description: "Support conference operations and logistics",
       details:
         "Admins work behind the scenes to ensure smooth conference operations. Roles include tech support, logistics coordination, media coverage, and delegate affairs.",
     },
