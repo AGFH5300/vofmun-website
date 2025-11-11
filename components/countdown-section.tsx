@@ -14,7 +14,7 @@ export function CountdownSection() {
 
   useEffect(() => {
     // Set conference date (you can adjust this date)
-    const conferenceDate = new Date("2025-03-15T09:00:00")
+    const conferenceDate = new Date("2026-02-14T09:00:00")
 
     const timer = setInterval(() => {
       const now = new Date().getTime()
@@ -80,7 +80,7 @@ export function CountdownSection() {
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-serif font-semibold text-primary">Date</h3>
-                  <p className="text-sm sm:text-base text-foreground/70">March 15-16, 2025</p>
+                  <p className="text-sm sm:text-base text-foreground/70">February 14-15, 2026</p>
                 </div>
               </CardContent>
             </Card>
@@ -97,17 +97,28 @@ export function CountdownSection() {
               </CardContent>
             </Card>
 
-            <Card className="hover-lift diplomatic-shadow border-0 sm:col-span-2 md:col-span-1">
-              <CardContent className="p-4 sm:p-6 text-center space-y-3 sm:space-y-4">
-                <div className="p-2 sm:p-3 bg-secondary/10 rounded-full w-fit mx-auto">
-                  <MapPin className="h-6 w-6 sm:h-8 sm:w-8 text-secondary" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-serif font-semibold text-primary">Format</h3>
-                  <p className="text-sm sm:text-base text-foreground/70">In-Person Conference</p>
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="hover-lift diplomatic-shadow border-0 sm:col-span-2 md:col-span-1">
+                <CardContent className="p-4 sm:p-6 text-center space-y-3 sm:space-y-4">
+                  <div className="p-2 sm:p-3 bg-secondary/10 rounded-full w-fit mx-auto">
+                    <MapPin className="h-6 w-6 sm:h-8 sm:w-8 text-secondary" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base sm:text-lg font-serif font-semibold text-primary">Venue</h3>
+                    <p className="text-sm sm:text-base text-foreground/70">
+                      United Kingdom College of Business & Computing – Dubai Campus
+                    </p>
+                    <p className="text-xs sm:text-sm text-foreground/60">Academic City, Dubai</p>
+                    <a
+                      href="https://maps.app.goo.gl/jx4SsR7r58oauhedA"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-medium text-primary hover:underline"
+                    >
+                      Open in Google Maps
+                    </a>
+                  </div>
+                </CardContent>
+              </Card>
           </div>
         </div>
       </div>
