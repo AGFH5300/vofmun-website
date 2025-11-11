@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, AlertCircle, CheckCircle } from "lucide-react"
@@ -112,6 +113,15 @@ export function SignupInfo() {
             <p className="text-sm text-gray-800">
               <strong>Cancellation Policy:</strong> Refunds are available until February 1, 2026. After this date, no
               refunds will be processed.
+            </p>
+          </div>
+          <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+            <p className="text-sm text-gray-800">
+              <strong>Proof of Payment:</strong> Upload your receipt anytime on the {" "}
+              <Link href="/proof-of-payment" className="font-semibold text-[#B22222] underline-offset-4 hover:underline">
+                Proof of Payment page
+              </Link>{" "}
+              if you need to send it after registering.
             </p>
           </div>
         </CardContent>

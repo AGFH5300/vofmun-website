@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -72,6 +73,7 @@ export function SignupFormNew() {
     institution: "",
   })
 
+  const [hasPaid, setHasPaid] = useState<"yes" | "no" | "">("")
   const [paymentFullName, setPaymentFullName] = useState("")
   const [paymentRole, setPaymentRole] = useState<Role | "">("")
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null)
@@ -80,6 +82,7 @@ export function SignupFormNew() {
   const [hasEditedFullName, setHasEditedFullName] = useState(false)
   const [hasEditedPaymentRole, setHasEditedPaymentRole] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [lastPaymentStatus, setLastPaymentStatus] = useState<"yes" | "no" | null>(null)
 
   const [delegateData, setDelegateData] = useState({
     experience: "",
@@ -135,6 +138,25 @@ export function SignupFormNew() {
       }
     }
   }, [paymentProofPreview])
+
+  useEffect(() => {
+    if (hasPaid === "no") {
+      if (paymentProofPreview) {
+        URL.revokeObjectURL(paymentProofPreview)
+      }
+      setPaymentProofFile(null)
+      setPaymentProofPreview(null)
+      setIsDragActive(false)
+      setPaymentFullName("")
+      setHasEditedFullName(false)
+      setPaymentRole("")
+      setHasEditedPaymentRole(false)
+      setErrors((prev) => {
+        const { paymentFullName, paymentRole, paymentProof, paymentStatus, ...rest } = prev
+        return rest
+      })
+    }
+  }, [hasPaid, paymentProofPreview])
 
   const fileToDataURL = (file: File) =>
     new Promise<string>((resolve, reject) => {
@@ -333,16 +355,22 @@ export function SignupFormNew() {
         }
       }
 
-      if (!paymentFullName.trim()) {
-        newErrors.paymentFullName = "Please enter the payer's full name"
+      if (!hasPaid) {
+        newErrors.paymentStatus = "Please let us know if you've already paid"
       }
 
-      if (!paymentRole) {
-        newErrors.paymentRole = "Please select the role associated with this payment"
-      }
+      if (hasPaid === "yes") {
+        if (!paymentFullName.trim()) {
+          newErrors.paymentFullName = "Please enter the payer's full name"
+        }
 
-      if (!paymentProofFile) {
-        newErrors.paymentProof = "Please upload proof of payment before submitting"
+        if (!paymentRole) {
+          newErrors.paymentRole = "Please select the role associated with this payment"
+        }
+
+        if (!paymentProofFile) {
+          newErrors.paymentProof = "Please upload proof of payment before submitting"
+        }
       }
 
       if (Object.keys(newErrors).length > 0) {
@@ -378,8 +406,9 @@ export function SignupFormNew() {
         delegateData: selectedRole === "delegate" ? delegateData : null,
         chairData: selectedRole === "chair" ? chairData : null,
         adminData: selectedRole === "admin" ? adminData : null,
+        paymentStatus: hasPaid,
         paymentConfirmation:
-          paymentProofDataUrl && paymentRole
+          hasPaid === "yes" && paymentProofDataUrl && paymentRole
             ? {
                 fullName: paymentFullName.trim(),
                 role: paymentRole,
@@ -401,14 +430,20 @@ export function SignupFormNew() {
       const result = await response.json()
 
       if (response.ok) {
-        setLastSubmittedRole(selectedRole);
+        setLastSubmittedRole(selectedRole)
+        setLastPaymentStatus(hasPaid === "yes" ? "yes" : hasPaid === "no" ? "no" : null)
 
-        setShowSuccessModal(true);
+        setShowSuccessModal(true)
 
         toast.success(`Registration Successful!`, {
-          description: `Your ${selectedRole} application has been submitted successfully.`,
+          description:
+            hasPaid === "yes"
+              ? `Your ${selectedRole} application and payment confirmation have been submitted successfully.`
+              : hasPaid === "no"
+                ? `Your ${selectedRole} application has been submitted. Please remember to complete payment and upload proof later.`
+                : `Your ${selectedRole} application has been submitted successfully.`,
           duration: 4000,
-        });
+        })
 
       } else {
         // Handle specific HTTP status codes
@@ -1517,132 +1552,176 @@ export function SignupFormNew() {
           {/* Payment Confirmation */}
           <div className="space-y-3 sm:space-4">
             <h3 className="text-lg sm:text-xl font-serif font-semibold text-primary">Payment Confirmation</h3>
-            <p className="text-sm text-gray-600">
-              Please complete the payment using the Stripe link provided after submission and upload a clear image of your
-              payment receipt now. This helps us verify registrations quickly.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-              <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="paymentFullName" className="text-xs sm:text-sm font-medium text-gray-700">
-                  Full Name on Payment <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="paymentFullName"
-                  value={paymentFullName}
-                  onChange={(event) => {
-                    setPaymentFullName(event.target.value)
-                    setHasEditedFullName(true)
-                    clearError("paymentFullName")
-                  }}
-                  placeholder="Enter the name shown on your payment receipt"
-                  data-testid="input-payment-full-name"
-                  className={`text-sm sm:text-base py-2 sm:py-2.5 ${errors.paymentFullName ? "border-red-500" : ""}`}
-                />
-                {errors.paymentFullName && <p className="text-sm text-red-500">{errors.paymentFullName}</p>}
-              </div>
-
-              <div className="space-y-1.5 sm:space-y-2">
-                <Label className="text-xs sm:text-sm font-medium text-gray-700">
-                  Role Associated with Payment <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={paymentRole || undefined}
-                  onValueChange={(value) => {
-                    setPaymentRole(value as Role)
-                    setHasEditedPaymentRole(true)
-                    clearError("paymentRole")
-                  }}
-                >
-                  <SelectTrigger className={`text-sm sm:text-base ${errors.paymentRole ? "border-red-500" : ""}`}>
-                    <SelectValue placeholder="Select the role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="delegate">Delegate</SelectItem>
-                    <SelectItem value="chair">Chair</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.paymentRole && <p className="text-sm text-red-500">{errors.paymentRole}</p>}
-              </div>
-            </div>
-
-            <div className="space-y-2">
+            <div className="space-y-1.5 sm:space-y-2">
               <Label className="text-xs sm:text-sm font-medium text-gray-700">
-                Upload Proof of Payment <span className="text-red-500">*</span>
+                Have you already paid the conference fee? <span className="text-red-500">*</span>
               </Label>
-              <div
-                className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors duration-200 cursor-pointer ${
-                  isDragActive
-                    ? "border-[#B22222] bg-[#B22222]/5"
-                    : errors.paymentProof
-                      ? "border-red-500 bg-red-50"
-                      : paymentProofFile
-                        ? "border-green-500 bg-green-50"
-                        : "border-gray-300 bg-white"
-                }`}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
+              <RadioGroup
+                value={hasPaid || undefined}
+                onValueChange={(value) => {
+                  setHasPaid(value as "yes" | "no")
+                  clearError("paymentStatus")
+                }}
+                className="flex flex-col sm:flex-row gap-3"
               >
-                {isDragActive && (
-                  <div className="absolute inset-0 rounded-xl bg-[#B22222]/10 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
-                    <UploadCloud className="h-10 w-10 text-[#B22222] animate-bounce" />
-                    <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop image to upload</p>
-                  </div>
-                )}
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0]
-                    if (file) {
-                      handlePaymentProofSelect(file)
-                    }
-                    event.target.value = ""
-                  }}
-                />
-
-                {paymentProofPreview ? (
-                  <div className="w-full flex flex-col items-center space-y-3">
-                    <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={paymentProofPreview}
-                        alt="Payment proof preview"
-                        className="h-48 w-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          resetPaymentProof()
-                        }}
-                        className="absolute top-2 right-2 inline-flex items-center space-x-1 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white shadow"
-                      >
-                        <X className="h-3 w-3" />
-                        <span>Remove</span>
-                      </button>
-                    </div>
-                    <p className="text-sm font-medium text-gray-700">{paymentProofFile?.name}</p>
-                    <p className="text-xs text-gray-500">Click or drop another file to replace your upload.</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center space-y-3">
-                    <UploadCloud className="h-10 w-10 text-[#B22222]" />
-                    <p className="text-sm text-gray-700">
-                      Drag & drop your payment proof image here, or <span className="font-semibold text-[#B22222]">browse</span>
-                    </p>
-                    <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC • Max size 10MB</p>
-                  </div>
-                )}
-              </div>
-              {errors.paymentProof && <p className="text-sm text-red-500">{errors.paymentProof}</p>}
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="yes" id="has-paid-yes" />
+                  <Label htmlFor="has-paid-yes" className="text-sm text-gray-700">
+                    Yes, I've already paid
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="no" id="has-paid-no" />
+                  <Label htmlFor="has-paid-no" className="text-sm text-gray-700">
+                    Not yet
+                  </Label>
+                </div>
+              </RadioGroup>
+              {errors.paymentStatus && <p className="text-sm text-red-500">{errors.paymentStatus}</p>}
             </div>
+
+            {hasPaid === "yes" && (
+              <>
+                <p className="text-sm text-gray-600">
+                  Please upload a clear image of your payment receipt. This helps us verify registrations quickly.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="paymentFullName" className="text-xs sm:text-sm font-medium text-gray-700">
+                      Full Name on Payment <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="paymentFullName"
+                      value={paymentFullName}
+                      onChange={(event) => {
+                        setPaymentFullName(event.target.value)
+                        setHasEditedFullName(true)
+                        clearError("paymentFullName")
+                      }}
+                      placeholder="Enter the name shown on your payment receipt"
+                      data-testid="input-payment-full-name"
+                      className={`text-sm sm:text-base py-2 sm:py-2.5 ${errors.paymentFullName ? "border-red-500" : ""}`}
+                    />
+                    {errors.paymentFullName && <p className="text-sm text-red-500">{errors.paymentFullName}</p>}
+                  </div>
+
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label className="text-xs sm:text-sm font-medium text-gray-700">
+                      Role Associated with Payment <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={paymentRole || undefined}
+                      onValueChange={(value) => {
+                        setPaymentRole(value as Role)
+                        setHasEditedPaymentRole(true)
+                        clearError("paymentRole")
+                      }}
+                    >
+                      <SelectTrigger className={`text-sm sm:text-base ${errors.paymentRole ? "border-red-500" : ""}`}>
+                        <SelectValue placeholder="Select the role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="delegate">Delegate</SelectItem>
+                        <SelectItem value="chair">Chair</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.paymentRole && <p className="text-sm text-red-500">{errors.paymentRole}</p>}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs sm:text-sm font-medium text-gray-700">
+                    Upload Proof of Payment <span className="text-red-500">*</span>
+                  </Label>
+                  <div
+                    className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors duration-200 cursor-pointer ${
+                      isDragActive
+                        ? "border-[#B22222] bg-[#B22222]/5"
+                        : errors.paymentProof
+                          ? "border-red-500 bg-red-50"
+                          : paymentProofFile
+                            ? "border-green-500 bg-green-50"
+                            : "border-gray-300 bg-white"
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {isDragActive && (
+                      <div className="absolute inset-0 rounded-xl bg-[#B22222]/10 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
+                        <UploadCloud className="h-10 w-10 text-[#B22222] animate-bounce" />
+                        <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop image to upload</p>
+                      </div>
+                    )}
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0]
+                        if (file) {
+                          handlePaymentProofSelect(file)
+                        }
+                        event.target.value = ""
+                      }}
+                    />
+
+                    {paymentProofPreview ? (
+                      <div className="w-full flex flex-col items-center space-y-3">
+                        <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={paymentProofPreview}
+                            alt="Payment proof preview"
+                            className="h-48 w-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              resetPaymentProof()
+                            }}
+                            className="absolute top-2 right-2 inline-flex items-center space-x-1 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white shadow"
+                          >
+                            <X className="h-3 w-3" />
+                            <span>Remove</span>
+                          </button>
+                        </div>
+                        <p className="text-sm font-medium text-gray-700">{paymentProofFile?.name}</p>
+                        <p className="text-xs text-gray-500">Click or drop another file to replace your upload.</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center space-y-3">
+                        <UploadCloud className="h-10 w-10 text-[#B22222]" />
+                        <p className="text-sm text-gray-700">
+                          Drag & drop your payment proof image here, or <span className="font-semibold text-[#B22222]">browse</span>
+                        </p>
+                        <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC • Max size 10MB</p>
+                      </div>
+                    )}
+                  </div>
+                  {errors.paymentProof && <p className="text-sm text-red-500">{errors.paymentProof}</p>}
+                </div>
+              </>
+            )}
+
+            {hasPaid === "no" && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 space-y-2">
+                <p>You indicated you have not paid yet. That's okay—complete your payment after submitting your application.</p>
+                <p>
+                  Once you have your receipt, visit the{" "}
+                  <Link href="/proof-of-payment" className="font-semibold text-[#B22222] underline-offset-4 hover:underline">
+                    Proof of Payment page
+                  </Link>{" "}
+                  to upload it for verification.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Terms and Conditions */}
@@ -1766,12 +1845,14 @@ export function SignupFormNew() {
               understandsRole: "",
             });
             setSelectedRole(null);
+            setHasPaid("");
             setPaymentFullName("");
             setHasEditedFullName(false);
             setPaymentRole("");
             setHasEditedPaymentRole(false);
             resetPaymentProof();
             setErrors({});
+            setLastPaymentStatus(null);
           }
         }}
       >
@@ -1792,15 +1873,34 @@ export function SignupFormNew() {
               <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm">
                 <p className="font-medium text-green-900">Next steps: payment & confirmation</p>
                 <p className="text-green-800">
-                  Fee: {
-                    roleCards.find((r) => r.role === lastSubmittedRole)?.price ?? "—"
-                  }. {hasStripePaymentLink
-                    ? "Use the secure Stripe checkout link below to complete your payment."
-                    : "You'll receive a confirmation email with payment instructions shortly."}
+                  Fee: {roleCards.find((r) => r.role === lastSubmittedRole)?.price ?? "—"}
                 </p>
                 <p className="text-green-800">
-                  Keep your payment receipt handy and upload it through the proof of payment section of this form so our team can
-                  verify your registration without delay.
+                  {lastPaymentStatus === "yes"
+                    ? "Thanks for confirming your payment. Our finance team will verify your receipt within two business days."
+                    : lastPaymentStatus === "no"
+                      ? hasStripePaymentLink
+                        ? "You still need to complete your payment. Use the secure Stripe checkout link below or follow the instructions in your confirmation email."
+                        : "You still need to complete your payment. Follow the instructions in your confirmation email to finalize it."
+                      : hasStripePaymentLink
+                        ? "Use the secure Stripe checkout link below to complete your payment."
+                        : "You'll receive a confirmation email with payment instructions shortly."}
+                </p>
+                <p className="text-green-800">
+                  {lastPaymentStatus === "no"
+                    ? (
+                      <>
+                        When you have your receipt, upload it on the{" "}
+                        <Link
+                          href="/proof-of-payment"
+                          className="font-semibold text-[#B22222] underline-offset-4 hover:underline"
+                        >
+                          Proof of Payment page
+                        </Link>{" "}
+                        so we can verify your registration without delay.
+                      </>
+                    )
+                    : "Keep a copy of your payment confirmation for your records."}
                 </p>
               </div>
 
@@ -1813,7 +1913,7 @@ export function SignupFormNew() {
           </DialogHeader>
 
           <div className="flex flex-col sm:flex-row justify-center items-center gap-3 pt-4">
-            {hasStripePaymentLink && (
+            {hasStripePaymentLink && lastPaymentStatus !== "yes" && (
               <Button
                 asChild
                 className="bg-[#635BFF] hover:bg-[#4B46C2] text-white w-full sm:w-auto"
