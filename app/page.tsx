@@ -63,7 +63,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 inline-block border border-white/30 animate-fade-in-delay-2 mb-16 sm:mb-20">
+            <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 inline-block border border-white/30 animate-fade-in-delay-2 mb-10 sm:mb-12">
               <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-8">
                 <div className="text-center">
                   <div
@@ -80,7 +80,7 @@ export default function HomePage() {
                 <div className="hidden sm:block w-px h-12 bg-white/50"></div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-white drop-shadow-lg" style={{fontFamily: 'var(--font-dm-sans), sans-serif'}}>
-                    23-25 Jan
+                    14-15 Feb
                   </div>
                   <div className="text-sm text-white/90 drop-shadow" style={{fontFamily: 'var(--font-dm-sans), sans-serif'}}>2026</div>
                 </div>
@@ -95,6 +95,18 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+            <p className="text-sm sm:text-base text-white/90 drop-shadow-lg animate-fade-in-delay-2 max-w-xl mx-auto">
+              Venue: United Kingdom College of Business & Computing – Dubai Campus, Academic City, Dubai.
+              {" "}
+              <a
+                href="https://maps.app.goo.gl/jx4SsR7r58oauhedA"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-white underline-offset-4 hover:underline"
+              >
+                View on Google Maps
+              </a>
+            </p>
           </div>
 
           <div className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
