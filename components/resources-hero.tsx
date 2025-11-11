@@ -28,7 +28,7 @@ export function ResourcesHero() {
               <div className="p-3 bg-[#B22222]/10 rounded-full group-hover:bg-[#B22222]/20 transition-colors">
                 <Calendar className="h-6 w-6 text-[#B22222]" />
               </div>
-              <span className="text-sm font-medium text-gray-800">Schedule</span>
+              <span className="text-sm font-medium text-gray-800">Schedule (Coming Soon)</span>
             </a>
             <a
               href="#committees"

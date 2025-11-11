@@ -33,11 +33,27 @@ export function SignupInfo() {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-gray-800">Final Deadline:</span>
-            <span className="text-gray-600">January 10, 2026</span>
+            <span className="text-gray-600">February 1, 2026</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-gray-800">Conference Dates:</span>
-            <span className="text-gray-600">January 23-25, 2026</span>
+            <span className="text-gray-600">February 14-15, 2026</span>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <span className="text-gray-800">Venue:</span>
+            <div className="text-right space-y-1">
+              <span className="text-gray-600 block">
+                United Kingdom College of Business & Computing – Dubai Campus, Academic City
+              </span>
+              <a
+                href="https://maps.app.goo.gl/jx4SsR7r58oauhedA"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-[#B22222] hover:underline"
+              >
+                View in Google Maps
+              </a>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -94,7 +110,7 @@ export function SignupInfo() {
           </div>
           <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
             <p className="text-sm text-gray-800">
-              <strong>Cancellation Policy:</strong> Refunds are available until January 10, 2026. After this date, no
+              <strong>Cancellation Policy:</strong> Refunds are available until February 1, 2026. After this date, no
               refunds will be processed.
             </p>
           </div>
