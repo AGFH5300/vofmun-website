@@ -35,7 +35,13 @@ export const users = pgTable('users', {
   // Metadata
   registrationStatus: varchar('registration_status', { length: 20 }).default('pending'),
   paymentStatus: varchar('payment_status', { length: 20 }).default('unpaid'),
-  
+  paymentProofUrl: text('payment_proof_url'),
+  paymentProofStoragePath: text('payment_proof_storage_path'),
+  paymentProofFileName: text('payment_proof_file_name'),
+  paymentProofPayerName: text('payment_proof_payer_name'),
+  paymentProofRole: varchar('payment_proof_role', { length: 20 }),
+  paymentProofUploadedAt: timestamp('payment_proof_uploaded_at'),
+
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 })
