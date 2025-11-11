@@ -1,5 +1,5 @@
 import type React from "react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, DM_Serif_Display, Lato, Poppins } from "next/font/google";
 import "./globals.css";
 import { ScrollRestoration } from "@/components/scroll-restoration";
@@ -61,6 +61,9 @@ export const metadata: Metadata = {
     { rel: "icon", url: "/favicons/android-chrome-512x512.png", sizes: "512x512" },
   ],
   manifest: "/favicons/site.webmanifest",
+};
+
+export const viewport: Viewport = {
   themeColor: "#ffffff",
 };
 
