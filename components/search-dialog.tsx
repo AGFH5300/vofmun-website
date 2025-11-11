@@ -31,7 +31,7 @@ const searchResults = [
   },
   {
     title: "Registration",
-    description: "Sign up for VOFMUN 2025",
+    description: "Sign up for VOFMUN 2026",
     href: "/signup",
     icon: Users,
     category: "Registration",

@@ -1,4 +1,4 @@
-import { Calendar, Users, Award } from "lucide-react"
+import { Calendar, Users, MapPin } from "lucide-react"
 
 export function SignupHero() {
   return (
@@ -18,26 +18,38 @@ export function SignupHero() {
                 <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
               </div>
               <div className="text-center">
-                <div className="font-semibold text-gray-900 text-sm sm:text-base">January 23-25, 2026</div>
+                <div className="font-semibold text-gray-900 text-sm sm:text-base">February 14-15, 2026</div>
                 <div className="text-xs sm:text-sm text-gray-600">Conference Dates</div>
               </div>
             </div>
             <div className="flex flex-col items-center space-y-2 p-3 sm:p-4 bg-white/80 rounded-lg shadow-md">
               <div className="p-2 sm:p-3 bg-green-100 rounded-full">
-                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+                <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
               </div>
-              <div className="text-center">
-                <div className="font-semibold text-gray-900 text-sm sm:text-base">200+ Delegates</div>
-                <div className="text-xs sm:text-sm text-gray-600">Expected Attendance</div>
+              <div className="text-center space-y-1">
+                <div className="font-semibold text-gray-900 text-sm sm:text-base">
+                  UKCBC Dubai Campus
+                </div>
+                <div className="text-xs sm:text-sm text-gray-600">
+                  Academic City
+                </div>
+                <a
+                  href="https://maps.app.goo.gl/jx4SsR7r58oauhedA"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-medium text-[#B22222] hover:underline"
+                >
+                  View on Google Maps
+                </a>
               </div>
             </div>
             <div className="flex flex-col items-center space-y-2 p-3 sm:p-4 bg-white/80 rounded-lg shadow-md sm:col-span-2 md:col-span-1">
               <div className="p-2 sm:p-3 bg-purple-100 rounded-full">
-                <Award className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
               </div>
               <div className="text-center">
-                <div className="font-semibold text-gray-900 text-sm sm:text-base">7 Committees</div>
-                <div className="text-xs sm:text-sm text-gray-600">Diverse Topics</div>
+                <div className="font-semibold text-gray-900 text-sm sm:text-base">200+ Delegates</div>
+                <div className="text-xs sm:text-sm text-gray-600">Expected Attendance</div>
               </div>
             </div>
           </div>
