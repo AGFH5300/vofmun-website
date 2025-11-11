@@ -1712,7 +1712,7 @@ export function SignupFormNew() {
 
             {hasPaid === "no" && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 space-y-2">
-                <p>You indicated you have not paid yet. That's okay—complete your payment after submitting your application.</p>
+                <p>You indicated you have not paid yet. That's okay but please complete your payment after submitting your application.</p>
                 <p>
                   Once you have your receipt, visit the{" "}
                   <Link href="/proof-of-payment" className="font-semibold text-[#B22222] underline-offset-4 hover:underline">
