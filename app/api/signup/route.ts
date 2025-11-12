@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 
 import { createClient } from '@/utils/supabase/server'
+import {
+  ensurePaymentProofBucketExists,
+  getPaymentProofBucketName,
+  PaymentProofBucketError,
+} from '@/utils/supabase/storage'
 import { insertUserSchema, delegateDataSchema, chairDataSchema, adminDataSchema } from '@/lib/db/schema'
 import { z } from 'zod'
 
@@ -48,18 +53,31 @@ export async function POST(request: NextRequest) {
 
       const storagePath = `proof-of-payment/${new Date().toISOString().split('T')[0]}/${randomUUID()}-${fileNameWithExtension}`
 
+      const paymentProofBucket = getPaymentProofBucketName()
+
+      await ensurePaymentProofBucketExists(paymentProofBucket)
+
       const { error: uploadError } = await supabase.storage
-        .from('payment-proofs')
+        .from(paymentProofBucket)
         .upload(storagePath, fileBuffer, {
           contentType: paymentConfirmation.mimeType,
           upsert: false,
         })
 
       if (uploadError) {
+        const normalizedMessage = uploadError.message?.toLowerCase() ?? ''
+        if (normalizedMessage.includes('bucket not found')) {
+          throw new Error(
+            `Failed to upload payment proof: Supabase storage bucket "${paymentProofBucket}" was not found.` +
+              ` Create a public bucket named "${paymentProofBucket}" in your Supabase project or set SUPABASE_PAYMENT_PROOF_BUCKET ` +
+              'or SUPABASE_PAYMENT_PROOFS_BUCKET to point to an existing bucket.'
+          )
+        }
+
         throw new Error('Failed to upload payment proof: ' + uploadError.message)
       }
 
-      const { data: publicUrlData } = supabase.storage.from('payment-proofs').getPublicUrl(storagePath)
+      const { data: publicUrlData } = supabase.storage.from(paymentProofBucket).getPublicUrl(storagePath)
 
       paymentProofUrl = publicUrlData?.publicUrl ?? null
       paymentProofStoragePath = storagePath
@@ -206,10 +224,22 @@ export async function POST(request: NextRequest) {
       console.error('🔧 Solution: Run the SQL setup script in your Supabase dashboard')
     }
     
+    if (error instanceof PaymentProofBucketError) {
+      console.error('Payment proof bucket misconfiguration:', error.message)
+
+      return NextResponse.json(
+        {
+          message: error.userFacingMessage,
+          status: 'error'
+        },
+        { status: 500 }
+      )
+    }
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
-          message: 'Validation error', 
+        {
+          message: 'Validation error',
           errors: error.errors,
           status: 'error'
         },
