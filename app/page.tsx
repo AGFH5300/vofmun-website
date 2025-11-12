@@ -95,18 +95,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <p className="text-sm sm:text-base text-white/90 drop-shadow-lg animate-fade-in-delay-2 max-w-xl mx-auto">
-              Venue: United Kingdom College of Business & Computing – Dubai Campus, Academic City, Dubai.
-              {" "}
-              <a
-                href="https://maps.app.goo.gl/jx4SsR7r58oauhedA"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-white underline-offset-4 hover:underline"
-              >
-                View on Google Maps
-              </a>
-            </p>
           </div>
 
           <div className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
