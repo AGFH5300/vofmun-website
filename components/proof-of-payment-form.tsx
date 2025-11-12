@@ -16,6 +16,7 @@ const hasStripePaymentLink = stripePaymentUrl.trim().length > 0
 
 export function ProofOfPaymentForm() {
   const [hasPaid, setHasPaid] = useState<"yes" | "no" | "">("")
+  const [email, setEmail] = useState("")
   const [fullName, setFullName] = useState("")
   const [role, setRole] = useState<"delegate" | "chair" | "admin" | "">("")
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null)
@@ -41,10 +42,11 @@ export function ProofOfPaymentForm() {
       setPaymentProofFile(null)
       setPaymentProofPreview(null)
       setIsDragActive(false)
+      setEmail("")
       setFullName("")
       setRole("")
       setErrors((prev) => {
-        const { fullName, role, paymentProof, ...rest } = prev
+        const { email: _email, fullName, role, paymentProof, ...rest } = prev
         return rest
       })
     }
@@ -110,6 +112,23 @@ export function ProofOfPaymentForm() {
     }
   }
 
+  const fileToDataURL = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const result = reader.result
+        if (typeof result === "string") {
+          resolve(result)
+        } else {
+          reject(new Error("Failed to read file"))
+        }
+      }
+      reader.onerror = () => {
+        reject(new Error("Could not read the selected file"))
+      }
+      reader.readAsDataURL(file)
+    })
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -120,6 +139,13 @@ export function ProofOfPaymentForm() {
     }
 
     if (hasPaid === "yes") {
+      const trimmedEmail = email.trim()
+      if (!trimmedEmail) {
+        newErrors.email = "Email is required"
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+        newErrors.email = "Enter a valid email address"
+      }
+
       if (!fullName.trim()) {
         newErrors.fullName = "Full name is required"
       }
@@ -146,17 +172,50 @@ export function ProofOfPaymentForm() {
 
     setIsSubmitting(true)
     try {
-      // Simulate a short delay to give the user feedback
-      await new Promise((resolve) => setTimeout(resolve, 600))
+      if (!paymentProofFile) {
+        throw new Error("Please attach your payment receipt before submitting")
+      }
+
+      const paymentProofDataUrl = await fileToDataURL(paymentProofFile)
+
+      const response = await fetch("/api/payment-proof", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          fullName: fullName.trim(),
+          role: role as 'delegate' | 'chair' | 'admin',
+          paymentProof: {
+            fileName: paymentProofFile.name ?? "payment-proof",
+            mimeType: paymentProofFile.type || "image/png",
+            dataUrl: paymentProofDataUrl,
+          },
+        }),
+      })
+
+      const result = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        const errorMessage = result?.message || "We couldn't save your payment proof. Please try again."
+        toast.error(errorMessage)
+        return
+      }
+
       toast.success("Proof of payment received!", {
-        description: "We'll verify your receipt and send a confirmation email soon.",
+        description: result?.message || "We'll verify your receipt and send a confirmation email soon.",
       })
 
       setHasPaid("")
+      setEmail("")
       setFullName("")
       setRole("")
       resetPaymentProof()
       setErrors({})
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "We couldn't save your payment proof. Please try again."
+      toast.error(message)
     } finally {
       setIsSubmitting(false)
     }
@@ -184,6 +243,7 @@ export function ProofOfPaymentForm() {
             .
           </p>
           <p>If you have already paid, fill in the details below and upload your receipt.</p>
+          <p>Enter the same email you used to register so we can match your payment to your application.</p>
         </div>
 
         <form className="space-y-6" onSubmit={handleSubmit}>
@@ -217,6 +277,25 @@ export function ProofOfPaymentForm() {
 
           {hasPaid === "yes" && (
             <>
+              <div className="space-y-2">
+                <Label htmlFor="proof-email" className="text-sm font-medium text-gray-700">
+                  Email Used During Registration <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="proof-email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value)
+                    clearError("email")
+                  }}
+                  placeholder="Enter the email you registered with"
+                  className={errors.email ? "border-red-500" : ""}
+                  autoComplete="email"
+                />
+                {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="proof-full-name" className="text-sm font-medium text-gray-700">
@@ -229,7 +308,7 @@ export function ProofOfPaymentForm() {
                       setFullName(event.target.value)
                       clearError("fullName")
                     }}
-                    placeholder="Enter full name"
+                    placeholder="Enter the payer's full name"
                     className={errors.fullName ? "border-red-500" : ""}
                   />
                   {errors.fullName && <p className="text-sm text-red-500">{errors.fullName}</p>}
