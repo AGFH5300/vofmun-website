@@ -27,6 +27,14 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/proof-of-payment"
+                  className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm"
+                >
+                  Proof of Payment
+                </Link>
+              </li>
+              <li>
                 <Link href="/resources" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
                   Resources
                 </Link>
