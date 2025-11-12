@@ -8,7 +8,7 @@ import Link from "next/link"
 const founders = [
   {
     name: "Tala Swaidan",
-    role: "Secretary-General",
+    role: "Founder & Secretary-General",
     image: "/founders/TalaSwaidan_SG.png",
   },
   {
@@ -18,7 +18,7 @@ const founders = [
   },
   {
     name: "Vihaan Shukla",
-    role: "Head of Committees",
+    role: "Founder & Head of Committees",
     image: "/founders/VihaanShukla_Committees.png",
   },
   {
@@ -53,27 +53,27 @@ const founders = [
   },
   {
     name: "Gabrielle Zietsman",
-    role: "Deputy Head of Committees",
+    role: "Deputy of Committees",
     image: "/founders/GabrielleZietsman_Committees.png",
   },
   {
     name: "Reem Ghanayem",
-    role: "Deputy Head of Logistics",
+    role: "Deputy of Logistics",
     image: "/founders/ReemGhanayem_Logistics.png",
   },
   {
     name: "Farah Yu",
-    role: "Deputy Head of Media",
+    role: "Deputy of Media",
     image: "/founders/FarahYu.png",
   },
   {
     name: "Noya Fareed",
-    role: "Deputy Head of Media",
+    role: "Deputy of Media",
     image: "/founders/NoyaFareed_Media.png",
   },
   {
     name: "Noaf Qassem",
-    role: "Deputy Head of Finance",
+    role: "Deputy of Finance",
     image: "/founders/NoafQassem_Finance.png",
   },
 ]
@@ -126,8 +126,8 @@ export function FoundersModal({ isOpen, onClose }: FoundersModalProps) {
 
         {/* Header */}
         <div className="bg-gradient-to-r from-[#B22222] to-[#8B0000] text-white p-6 text-center">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold">Meet Our Founding Team</h2>
-          <p className="text-white/90 mt-2">Dedicated young leaders committed to fostering global dialogue and diplomatic excellence!</p>
+          <h2 className="text-2xl md:text-3xl font-serif font-bold">Meet the Secretariat</h2>
+          <p className="text-white/90 mt-2">Founders, heads, and deputies working together to deliver an exceptional VOFMUN experience.</p>
         </div>
 
         {/* Static Founders Gallery */}
@@ -177,11 +177,11 @@ export function FoundersModal({ isOpen, onClose }: FoundersModalProps) {
         {/* Footer with Link */}
         <div className="bg-gray-50 p-6 text-center border-t">
           <Link
-            href="/founders"
+            href="/secretariat"
             onClick={onClose}
             className="inline-flex items-center space-x-2 bg-[#B22222] hover:bg-[#8B0000] text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 shadow-lg"
           >
-            <span>Meet All Our Founders</span>
+            <span>Explore the Secretariat</span>
             <ExternalLink className="w-4 h-4" />
           </Link>
         </div>

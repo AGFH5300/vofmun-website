@@ -133,12 +133,12 @@ export function EnhancedNavigation() {
               </div>
             </div>
             <Link
-              href="/founders"
+              href="/secretariat"
               className={`font-medium transition-colors hover:text-[#D32F2F] ${
                 isScrolled ? "text-gray-900 hover:text-[#B22222]" : "text-gray-900 hover:text-[#B22222]"
               }`}
             >
-              Founding Members
+              Secretariat
             </Link>
             <Link href="/signup">
               <Button className="bg-[#B22222] text-white hover:bg-[#D32F2F] hover:text-white px-6 py-2 rounded-lg font-medium transition-all hover:scale-105 shadow-lg border border-[#B22222]">
@@ -168,8 +168,8 @@ export function EnhancedNavigation() {
               <Link href="/resources" className="block py-2 text-gray-900 hover:text-[#B22222] font-medium">
                 Conference Resources
               </Link>
-              <Link href="/founders" className="block py-2 text-gray-900 hover:text-[#B22222] font-medium">
-                Founding Members
+              <Link href="/secretariat" className="block py-2 text-gray-900 hover:text-[#B22222] font-medium">
+                Secretariat
               </Link>
               <Link href="/signup" className="block">
                 <Button className="w-full bg-[#B22222] hover:bg-[#D32F2F] text-white py-3 rounded-lg font-medium">

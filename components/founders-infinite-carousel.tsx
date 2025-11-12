@@ -8,7 +8,7 @@ import Image from "next/image"
 const founders = [
   {
     name: "Tala Swaidan",
-    role: "Secretary-General",
+    role: "Founder & Secretary-General",
     image: "/founders/TalaSwaidan_SG.png",
   },
   {
@@ -18,7 +18,7 @@ const founders = [
   },
   {
     name: "Vihaan Shukla",
-    role: "Head of Committees",
+    role: "Founder & Head of Committees",
     image: "/founders/VihaanShukla_Committees-full.png",
   },
   {
@@ -53,27 +53,27 @@ const founders = [
   },
   {
     name: "Gabrielle Zietsman",
-    role: "Deputy Head of Committees",
+    role: "Deputy of Committees",
     image: "/founders/GabrielleZietsman_Committees.png",
   },
   {
     name: "Reem Ghanayem",
-    role: "Deputy Head of Logistics",
+    role: "Deputy of Logistics",
     image: "/founders/ReemGhanayem_Logistics.png",
   },
   {
     name: "Farah Yu",
-    role: "Deputy Head of Media",
+    role: "Deputy of Media",
     image: "/founders/FarahYu.png",
   },
   {
     name: "Noya Fareed",
-    role: "Deputy Head of Media",
+    role: "Deputy of Media",
     image: "/founders/NoyaFareed_Media.png",
   },
   {
     name: "Noaf Qassem",
-    role: "Deputy Head of Finance",
+    role: "Deputy of Finance",
     image: "/founders/NoafQassem_Finance.png",
   },
 ]
@@ -175,7 +175,7 @@ export function FoundersInfiniteCarousel() {
               }}
             >
               <Link
-                href="/founders"
+                href="/secretariat"
                 className="block group"
               >
                 <div className={`relative bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 w-64 h-80 ${

@@ -23,9 +23,9 @@ const searchResults = [
     category: "Resources",
   },
   {
-    title: "Founding Members",
-    description: "Meet the VOFMUN founding team",
-    href: "/founders",
+    title: "Secretariat",
+    description: "Meet the founders, heads, and deputies",
+    href: "/secretariat",
     icon: Users,
     category: "About",
   },

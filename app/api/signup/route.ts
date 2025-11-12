@@ -121,6 +121,7 @@ export async function POST(request: NextRequest) {
 
     // Process role-specific data
     let roleData = {}
+    let delegateReferralCodes: string[] | null = null
     if (body.selectedRole === 'delegate') {
       const delegateDataParsed = delegateDataSchema.parse(body.delegateData)
       
@@ -140,6 +141,7 @@ export async function POST(request: NextRequest) {
       }
       
       roleData = delegateDataParsed
+      delegateReferralCodes = delegateDataParsed.referralCodes ?? null
     } else if (body.selectedRole === 'chair') {
       roleData = chairDataSchema.parse(body.chairData)
     } else if (body.selectedRole === 'admin') {
@@ -168,6 +170,7 @@ export async function POST(request: NextRequest) {
       delegate_data: body.selectedRole === 'delegate' ? roleData : null,
       chair_data: body.selectedRole === 'chair' ? roleData : null,
       admin_data: body.selectedRole === 'admin' ? roleData : null,
+      delegate_referral_codes: delegateReferralCodes,
       payment_status: normalizedPaymentStatus,
       payment_proof_url: paymentProofUrl,
       payment_proof_storage_path: paymentProofStoragePath,
