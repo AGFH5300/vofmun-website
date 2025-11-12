@@ -59,6 +59,14 @@ export async function POST(request: NextRequest) {
         })
 
       if (uploadError) {
+        const normalizedMessage = uploadError.message?.toLowerCase() ?? ''
+        if (normalizedMessage.includes('bucket not found')) {
+          throw new Error(
+            `Failed to upload payment proof: Supabase storage bucket "${paymentProofBucket}" was not found.` +
+              ' Please create the bucket in your Supabase project or configure SUPABASE_PAYMENT_PROOF(S)_BUCKET.'
+          )
+        }
+
         throw new Error('Failed to upload payment proof: ' + uploadError.message)
       }
 
