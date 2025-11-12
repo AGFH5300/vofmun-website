@@ -19,6 +19,7 @@ export const users = pgTable('users', {
   delegateData: jsonb('delegate_data'), // For delegate-specific fields
   chairData: jsonb('chair_data'), // For chair-specific fields including experiences
   adminData: jsonb('admin_data'), // For admin-specific fields
+  delegateReferralCodes: jsonb('delegate_referral_codes'),
   
   // Common fields
   dietaryType: varchar('dietary_type', { length: 50 }),
@@ -58,6 +59,7 @@ export const insertUserSchema = z.object({
   delegateData: z.any().optional(),
   chairData: z.any().optional(),
   adminData: z.any().optional(),
+  delegateReferralCodes: z.array(z.string()).optional(),
   dietaryType: z.string().min(1, 'Dietary preference is required'),
   dietaryOther: z.string().optional(), 
   hasAllergies: z.string().min(1, 'Please indicate if you have allergies'),
@@ -77,6 +79,7 @@ export const delegateDataSchema = z.object({
   committee1: z.string().optional(),
   committee2: z.string().optional(),
   committee3: z.string().optional(),
+  referralCodes: z.array(z.string().min(1)).optional(),
 })
 
 export const chairDataSchema = z.object({
