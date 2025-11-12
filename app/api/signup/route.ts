@@ -1,13 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { randomUUID } from 'crypto'
+
 import { createClient } from '@/utils/supabase/server'
 import { insertUserSchema, delegateDataSchema, chairDataSchema, adminDataSchema } from '@/lib/db/schema'
 import { z } from 'zod'
+
+export const runtime = 'nodejs'
+
+const paymentConfirmationSchema = z.object({
+  fullName: z.string().min(1, 'Payment confirmation requires the payer\'s name'),
+  role: z.enum(['delegate', 'chair', 'admin']),
+  fileName: z.string().min(1),
+  mimeType: z.string().min(1),
+  dataUrl: z.string().regex(/^data:.*;base64,.+/, 'Invalid payment proof format'),
+})
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const supabase = await createClient()
     
+    const rawPaymentStatus = typeof body.paymentStatus === 'string' ? body.paymentStatus : ''
+    const normalizedPaymentStatus = rawPaymentStatus === 'yes' ? 'paid' : rawPaymentStatus === 'pending' ? 'pending' : 'unpaid'
+
+    let paymentProofUrl: string | null = null
+    let paymentProofStoragePath: string | null = null
+    let paymentProofFileName: string | null = null
+    let paymentProofPayerName: string | null = null
+    let paymentProofRole: 'delegate' | 'chair' | 'admin' | null = null
+    let paymentProofUploadedAt: string | null = null
+
+    if (rawPaymentStatus === 'yes') {
+      const paymentConfirmation = paymentConfirmationSchema.parse(body.paymentConfirmation)
+
+      const [, base64Data] = paymentConfirmation.dataUrl.split(',')
+      if (!base64Data) {
+        throw new Error('Invalid payment proof payload received')
+      }
+
+      const fileBuffer = Buffer.from(base64Data, 'base64')
+
+      const rawFileName = paymentConfirmation.fileName.trim() || 'payment-proof'
+      const sanitizedFileName = rawFileName.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const hasExtension = sanitizedFileName.includes('.')
+      const mimeExtension = paymentConfirmation.mimeType.split('/')[1] || 'png'
+      const fileNameWithExtension = hasExtension ? sanitizedFileName : `${sanitizedFileName}.${mimeExtension}`
+
+      const storagePath = `proof-of-payment/${new Date().toISOString().split('T')[0]}/${randomUUID()}-${fileNameWithExtension}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('payment-proofs')
+        .upload(storagePath, fileBuffer, {
+          contentType: paymentConfirmation.mimeType,
+          upsert: false,
+        })
+
+      if (uploadError) {
+        throw new Error('Failed to upload payment proof: ' + uploadError.message)
+      }
+
+      const { data: publicUrlData } = supabase.storage.from('payment-proofs').getPublicUrl(storagePath)
+
+      paymentProofUrl = publicUrlData?.publicUrl ?? null
+      paymentProofStoragePath = storagePath
+      paymentProofFileName = fileNameWithExtension
+      paymentProofPayerName = paymentConfirmation.fullName.trim()
+      paymentProofRole = paymentConfirmation.role
+      paymentProofUploadedAt = new Date().toISOString()
+    }
+
     // Transform the form data to match the schema
     const transformedData = {
       email: body.formData?.email,
@@ -88,6 +149,13 @@ export async function POST(request: NextRequest) {
       delegate_data: body.selectedRole === 'delegate' ? roleData : null,
       chair_data: body.selectedRole === 'chair' ? roleData : null,
       admin_data: body.selectedRole === 'admin' ? roleData : null,
+      payment_status: normalizedPaymentStatus,
+      payment_proof_url: paymentProofUrl,
+      payment_proof_storage_path: paymentProofStoragePath,
+      payment_proof_file_name: paymentProofFileName,
+      payment_proof_payer_name: paymentProofPayerName,
+      payment_proof_role: paymentProofRole,
+      payment_proof_uploaded_at: paymentProofUploadedAt,
     }
     
     // Insert user data using Supabase
