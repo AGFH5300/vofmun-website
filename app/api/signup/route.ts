@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 
 import { createClient } from '@/utils/supabase/server'
+import { getPaymentProofBucketName } from '@/utils/supabase/storage'
 import { insertUserSchema, delegateDataSchema, chairDataSchema, adminDataSchema } from '@/lib/db/schema'
 import { z } from 'zod'
 
@@ -48,8 +49,10 @@ export async function POST(request: NextRequest) {
 
       const storagePath = `proof-of-payment/${new Date().toISOString().split('T')[0]}/${randomUUID()}-${fileNameWithExtension}`
 
+      const paymentProofBucket = getPaymentProofBucketName()
+
       const { error: uploadError } = await supabase.storage
-        .from('payment-proofs')
+        .from(paymentProofBucket)
         .upload(storagePath, fileBuffer, {
           contentType: paymentConfirmation.mimeType,
           upsert: false,
@@ -59,7 +62,7 @@ export async function POST(request: NextRequest) {
         throw new Error('Failed to upload payment proof: ' + uploadError.message)
       }
 
-      const { data: publicUrlData } = supabase.storage.from('payment-proofs').getPublicUrl(storagePath)
+      const { data: publicUrlData } = supabase.storage.from(paymentProofBucket).getPublicUrl(storagePath)
 
       paymentProofUrl = publicUrlData?.publicUrl ?? null
       paymentProofStoragePath = storagePath
