@@ -20,10 +20,10 @@ import {
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
-const founders = [
+const foundingSecretariat = [
   {
     name: "Tala Swaidan",
-    role: "Secretary-General",
+    role: "<strong>Founder & Secretary-General</strong>",
     department: "Core",
     image: "/founders/TalaSwaidan_SG.png",
     bio: "Leading VOFMUN with a vision for inclusive global dialogue and youth empowerment in international relations.",
@@ -40,8 +40,29 @@ const founders = [
       "My name is Tala Swaidan. I am a Year 10 student at GEMS Metropole School, and I have the great honor and privilege of serving as the Founder and Secretary-General of Voices of the Future Model United Nations (VOFMUN). VOFMUN all began as an abstract idea shared among friends. But with time, dedication, and great effort, it grew into something far more meaningful; a platform for courageous MUN delegates to engage in diplomacy, express their perspectives, and take on global issues with confidence and purpose. Beyond my work with VOFMUN, I am an active member of my school's Student Council and have been deeply involved in Model United Nations for several years. I also pursue my passions in sports, particularly basketball and kickboxing with MVP recognitions, which have both taught me the value of discipline, teamwork, and perseverance. I hope to expand my horizons during the next academic year, along with working on the development of the first VOFMUN conference, taking place in February 2026. Through all my endeavors, I strive to foster positive change, empower others, and lead with integrity. As VOFMUN continues to grow, my hope is that it remains a space where young leaders can find their voice, challenge their thinking, and leave inspired to shape a better world. I'm incredibly proud of how far we've come - and even more excited for what's ahead. See you soon!",
   },
   {
+    name: "Vihaan Shukla",
+    role: "<strong>Founder & Head of Committees</strong>",
+    department: "Committees",
+    image: "/founders/VihaanShukla_Committees.png",
+    bio: "Managing committee structure, topics, and ensuring engaging debates that address pressing global challenges.",
+    linkedin: "https://www.linkedin.com/in/vihaanshukla",
+    email: "vihaanshukla22@gmail.com",
+    instagram: "https://www.instagram.com/vofmun",
+    achievements: [
+      "Committee Innovation",
+      "Debate Excellence",
+      "Topic Research",
+    ],
+    quote: "Great debates shape the future of diplomacy.",
+    writeup:
+      "Hi, I'm Vihaan Shukla, Founder & Head of Committees for VOFMUN 2026! I've participated in 13 MUNs, earning awards such as Best Delegate and Best Research, and have chaired multiple times too, developing strong debate and communication skills. I'm a Year 11 student at Dubai International Academy Emirates Hills, strengthening my leadership, event and am a part of the DIAMUN 2026 Events Team, playing a key role in organising one of the largest conferences in the MENA region. Previously, I've served as Student Council President and on the DIA Debate Society Events Team, organisation, and team management skills. I'm also Founder of YouthPropel, a youth-led initiative expanding access to high-impact academic opportunities. At VOFMUN, I'm in charge of curating committees, topics, and crises while working to enhance your experience! My goal for VOFMUN is to design dynamic, career-focused committees that are engaging to debate in and also relevant to real-world industries. See you there!",
+  },
+];
+
+const leadershipTeam = [
+  {
     name: "Clyde Jared Robis",
-    role: "Deputy Secretary-General",
+    role: "<strong>Deputy Secretary-General</strong>",
     department: "Core",
     image: "/founders/ClydeJaredRobis_DSG.png",
     bio: "Supporting the Secretary-General in strategic planning and ensuring operational excellence across all departments.",
@@ -57,27 +78,6 @@ const founders = [
       "Excellence is never an accident; it is always the result of high intention.",
     writeup:
       "Hello delegates, chairs and dear readers. My name is Jared Robis (the existence of first name 'Clyde' is false), and I am the Deputy Secretary-General of Voices of the Future MUN 2026. I've attended various MUNs such as GFSMUN V and QuixMUN, and I'm definitely planning to attend more conferences in the later years. I'm currently going in Year 11 at GEMS Metropole School, and through this I've honed my skills in fields such as management and leadership, teamwork and communication amongst team members. This ties into what I do in VOFMUN, as Deputy Secretary-General I oversee all the processes that occur within the backstage of our MUN along with assisting in any work that is requested. I hope to meet you all in VOFMUN 2026, stay tuned!",
-  },
-];
-
-const departmentHeads = [
-  {
-    name: "Vihaan Shukla",
-    role: "<strong>Head of Committees</strong>",
-    department: "Committees",
-    image: "/founders/VihaanShukla_Committees.png",
-    bio: "Managing committee structure, topics, and ensuring engaging debates that address pressing global challenges.",
-    linkedin: "https://www.linkedin.com/in/vihaanshukla",
-    email: "vihaanshukla22@gmail.com",
-    instagram: "https://www.instagram.com/vofmun",
-    achievements: [
-      "Committee Innovation",
-      "Debate Excellence",
-      "Topic Research",
-    ],
-    quote: "Great debates shape the future of diplomacy.",
-    writeup:
-      "Hi, I'm Vihaan Shukla, Head of Committees for VOFMUN 2026! I've participated in 13 MUNs, earning awards such as Best Delegate and Best Research, and have chaired multiple times too, developing strong debate and communication skills. I'm a Year 11 student at Dubai International Academy Emirates Hills, rengthening my leadership, event and am a part of the DIAMUN 2026 Events Team, playing a key role in organising one of the largest conferences in the MENA region. Previously, I'veoserved as Student Council President and on the DIA Debate Society Events Team, srganisation, and team management skills. I'm also Founder of YouthPropel, a youth-led initiative expanding access to high-impact academic opportunities. At VOFMUN, I'm in charge of curating committees, topics, and crises while working to enhance your experience! My goal for VOFMUN is to design dynamic, career-focused committees that are engaging to debate in and also relevant to real-world industries. See you there!",
   },
   {
     name: "Ansh Gupta",
@@ -182,10 +182,10 @@ const departmentHeads = [
   },
 ];
 
-const deputyHeads = [
+const deputies = [
   {
     name: "Gabrielle Zietsman",
-    role: "<strong>Deputy Head of Committees</strong>",
+    role: "<strong>Deputy of Committees</strong>",
     department: "Committees",
     image: "/founders/GabrielleZietsman_Committees.png",
     bio: "Supporting committee operations and fostering innovative approaches to Model UN debate formats.",
@@ -199,7 +199,7 @@ const deputyHeads = [
   },
   {
     name: "Reem Ghanayem",
-    role: "<strong>Deputy Head of Logistics</strong>",
+    role: "<strong>Deputy of Logistics</strong>",
     department: "Logistics",
     image: "/founders/ReemGhanayem_Logistics.png",
     bio: "Supporting logistics team in registration processes and delegate services coordination.",
@@ -217,7 +217,7 @@ const deputyHeads = [
   },
   {
     name: "Farah Yu",
-    role: "<strong>Deputy Head of Media</strong>",
+    role: "<strong>Deputy of Media</strong>",
     department: "Media",
     image: "/founders/FarahYu.png",
     bio: "Supporting media operations and developing creative campaigns to promote youth engagement.",
@@ -235,7 +235,7 @@ const deputyHeads = [
   },
   {
     name: "Noya Fareed",
-    role: "<strong>Deputy Head of Media</strong>",
+    role: "<strong>Deputy of Media</strong>",
     department: "Media",
     image: "/founders/NoyaFareed_Media.png",
     bio: "Developing creative campaigns and partnerships to promote youth engagement in international affairs.",
@@ -249,7 +249,7 @@ const deputyHeads = [
   },
   {
     name: "Noaf Qassem",
-    role: "<strong>Deputy Head of Finance</strong>",
+    role: "<strong>Deputy of Finance</strong>",
     department: "Finance",
     image: "/founders/NoafQassem_Finance.png",
     bio: "Supporting financial planning and budget management to ensure conference sustainability and growth.",
@@ -262,6 +262,11 @@ const deputyHeads = [
       "I'm Noaf Qassem, a Year 11 student at SABIS International School of Choueifat Dubai, and I'm incredibly proud to be serving as the Deputy Head of Finance of Voices of the Future 2026! Being part of the VOFMUN leadership has given me the opportunity to contribute to something meaningful while building valuable skills in organization, teamwork, and strategic planning. I've chosen to take IGCSE Business, AP Economics, and AP Statistics - subjects that reflect my deep interest in global systems, economic theory, and data-driven decision-making. My future aspirations lie in either diplomacy or economics, and I believe that understanding the mechanics of both global policy and financial systems will prepare me to make a real impact in those fields. MUN has always been a space where I've been able to grow—not just as a speaker and thinker, but as a global citizen. I love the way it challenges me to think critically, communicate clearly, and collaborate with others to solve complex issues. Outside of academics, I am an ongoing track and field athlete, which helps shape my perspective on core life skills such as discipline, leadership, and respect. Being part of the VOFMUN team and this great journey has been incredibly exciting, and I'm committed to ensuring the financial planning behind the scenes helps make this conference as smooth, impactful, and unforgettable as possible. Can't wait to see what we accomplish together; hope to see you at VOFMUN 2026!",
   },
 ];
+
+type SecretariatMember =
+  | (typeof foundingSecretariat)[number]
+  | (typeof leadershipTeam)[number]
+  | (typeof deputies)[number];
 
 const getDepartmentIcon = (department: string) => {
   switch (department) {
@@ -345,11 +350,10 @@ const getDepartmentColor = (department: string) => {
   }
 };
 
-export default function FoundersPage() {
-  const [selectedFounder, setSelectedFounder] = useState<number | null>(null);
-  const [hoveredFounder, setHoveredFounder] = useState<number | null>(null);
+export default function SecretariatPage() {
+  const [hoveredFounder, setHoveredFounder] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalFounder, setModalFounder] = useState<(typeof founders)[0] | null>(
+  const [modalFounder, setModalFounder] = useState<SecretariatMember | null>(
     null,
   );
 
@@ -372,8 +376,8 @@ export default function FoundersPage() {
     };
   }, [isModalOpen]);
 
-  const openModal = (founder: any) => {
-    setModalFounder(founder);
+  const openModal = (member: SecretariatMember) => {
+    setModalFounder(member);
     setIsModalOpen(true);
   };
 
@@ -382,113 +386,138 @@ export default function FoundersPage() {
     setModalFounder(null);
   };
 
-  const renderFounderCard = (
-    founder: any,
+  const renderMemberCard = (
+    member: SecretariatMember,
     index: number,
-    isDeputy: boolean = false,
+    variant: "founder" | "head" | "deputy" = "head",
   ) => {
-    const IconComponent = getDepartmentIcon(founder.department);
-    const colors = getDepartmentColor(founder.department);
-    const isHovered = hoveredFounder === index;
+    const IconComponent = getDepartmentIcon(member.department);
+    const colors = getDepartmentColor(member.department);
+    const hoverKey = `${variant}-${index}`;
+    const isHovered = hoveredFounder === hoverKey;
+
+    const cardPadding =
+      variant === "founder" ? "p-6 sm:p-8 md:p-10" : variant === "deputy" ? "p-4 sm:p-5" : "p-6";
+    const imageSizeClass =
+      variant === "founder"
+        ? "w-36 h-36 md:w-44 md:h-44"
+        : variant === "deputy"
+        ? "w-24 h-24"
+        : "w-28 h-28";
+    const nameClass =
+      variant === "founder"
+        ? "text-2xl md:text-3xl"
+        : variant === "deputy"
+        ? "text-base"
+        : "text-lg";
+    const roleClass =
+      variant === "founder"
+        ? "text-base md:text-lg"
+        : variant === "deputy"
+        ? "text-xs"
+        : "text-sm";
+    const badgeClass =
+      variant === "founder"
+        ? "inline-block px-5 py-2.5 rounded-full text-sm md:text-base font-medium"
+        : variant === "deputy"
+        ? "inline-block px-3 py-1.5 rounded-full text-xs font-medium"
+        : "inline-block px-4 py-2 rounded-full text-sm font-medium";
+    const socialButtonSize = variant === "deputy" ? "w-9 h-9" : "w-12 h-12";
+    const socialIconSize = variant === "deputy" ? "w-4 h-4" : "w-5 h-5";
 
     return (
       <div
-        key={index}
+        key={hoverKey}
         className={`relative group cursor-pointer transition-all duration-700 ${
           isHovered ? "transform scale-105 z-10" : ""
         }`}
-        onClick={() => openModal(founder)}
-        onMouseEnter={() => setHoveredFounder(index)}
+        onClick={() => openModal(member)}
+        onMouseEnter={() => setHoveredFounder(hoverKey)}
         onMouseLeave={() => setHoveredFounder(null)}
       >
         <div
           className={`bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border-2 ${colors.border}/30 relative overflow-hidden ${
             isHovered ? "shadow-2xl animate-glow" : ""
-          } ${isDeputy ? "p-4 scale-90" : "p-6"}`}
+          } ${cardPadding} ${variant === "founder" ? "max-w-2xl mx-auto" : ""}`}
         >
-          {/* Animated background */}
           <div
             className={`absolute inset-0 ${colors.bg} opacity-5 transition-opacity duration-300 ${
               isHovered ? "opacity-10" : ""
             }`}
           ></div>
 
-          <div className="relative z-10">
-            {/* Department Badge */}
-            <div className="flex justify-center mb-6">
+          <div
+            className={`relative z-10 flex flex-col items-center gap-5 ${
+              variant === "founder" ? "md:gap-6" : ""
+            }`}
+          >
+            <div className="flex justify-center">
               <div className={`p-3 ${colors.bg} rounded-full shadow-lg`}>
                 <IconComponent className="h-6 w-6 text-white" />
               </div>
             </div>
 
-            {/* Profile Image */}
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center">
               <div
-                className={`relative w-28 h-28 rounded-full border-4 ${colors.border} shadow-lg overflow-hidden`}
+                className={`relative ${imageSizeClass} rounded-full border-4 ${colors.border} shadow-lg overflow-hidden`}
               >
                 <Image
-                  src={founder.image}
-                  alt={founder.name}
+                  src={member.image}
+                  alt={member.name}
                   fill
                   className="object-cover"
                 />
               </div>
             </div>
 
-            {/* Name and Role */}
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-2 font-serif">
-                {founder.name}
+            <div className="text-center space-y-3">
+              <h3 className={`${nameClass} font-bold text-gray-900 font-serif`}>
+                {member.name}
               </h3>
               <p
-                className="text-gray-600 text-sm mb-4"
-                dangerouslySetInnerHTML={{ __html: founder.role }}
+                className={`${roleClass} text-gray-600 mb-1`}
+                dangerouslySetInnerHTML={{ __html: member.role }}
               />
-
-              {/* Department Badge */}
-              <span
-                className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${colors.badgeClass}`}
-              >
-                {founder.department}
+              <span className={`${badgeClass} ${colors.badgeClass}`}>
+                {member.department}
               </span>
             </div>
 
-            {/* Social Links */}
             <div className="flex justify-center space-x-4">
-              {founder.linkedin && (
+              {member.linkedin && (
                 <a
-                  href={founder.linkedin}
+                  href={member.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 bg-[#0077B5] rounded-full flex items-center justify-center hover:bg-[#005885] transition-all duration-300 hover:scale-110 shadow-md"
-                  aria-label={`${founder.name} LinkedIn`}
+                  className={`${socialButtonSize} bg-[#0077B5] rounded-full flex items-center justify-center hover:bg-[#005885] transition-all duration-300 hover:scale-110 shadow-md`}
+                  aria-label={`${member.name} LinkedIn`}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Linkedin className="w-5 h-5 text-white" />
+                  <Linkedin className={`${socialIconSize} text-white`} />
                 </a>
               )}
-              {founder.email && (
+              {member.email && (
                 <a
-                  href={`mailto:${founder.email}`}
+                  href={`mailto:${member.email}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 hover:scale-110 shadow-md"
-                  aria-label={`Email ${founder.name}`}
+                  className={`${socialButtonSize} bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 hover:scale-110 shadow-md`}
+                  aria-label={`Email ${member.name}`}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Mail className="w-5 h-5 text-white" />
+                  <Mail className={`${socialIconSize} text-white`} />
                 </a>
               )}
-              {founder.instagram && (
+              {member.instagram && (
                 <a
-                  href={founder.instagram}
+                  href={member.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#dd2a7b] rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-[#e6683c] hover:via-[#dd2a7b] hover:to-[#8134af] transition-all duration-300 hover:scale-110 shadow-md"
-                  aria-label={`${founder.name} Instagram`}
+                  className={`${socialButtonSize} bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#dd2a7b] rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-[#e6683c] hover:via-[#dd2a7b] hover:to-[#8134af] transition-all duration-300 hover:scale-110 shadow-md`}
+                  aria-label={`${member.name} Instagram`}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Instagram className="w-5 h-5 text-white" />
+                  <Instagram className={`${socialIconSize} text-white`} />
                 </a>
               )}
             </div>
@@ -508,46 +537,62 @@ export default function FoundersPage() {
         <section className="py-20 bg-[#ffecdd]">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-[#B22222] mb-6 font-serif">
-              Meet Our Founding Team
+              Meet the Secretariat
             </h1>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-12">
-              Meet the dedicated founding team behind VOFMUN – young leaders
-              committed to fostering global dialogue and diplomatic excellence.
+              The VOFMUN Secretariat is a collective of founders, heads, and deputies dedicated to
+              elevating delegate experiences and advancing youth diplomacy.
             </p>
           </div>
         </section>
 
-        {/* Leadership Team */}
+        {/* Founders */}
         <section className="py-12 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-[#B22222] text-center mb-12 font-serif">
-              Leadership Team
+            <h2 className="text-3xl font-bold text-[#B22222] text-center mb-4 font-serif">
+              Founders
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {[...founders, ...departmentHeads].map((founder, index) =>
-                renderFounderCard(founder, index),
+            <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+              VOFMUN was co-founded by Tala Swaidan and Vihaan Shukla, whose shared vision continues to guide the
+              conference forward.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+              {foundingSecretariat.map((member, index) =>
+                renderMemberCard(member, index, "founder"),
               )}
             </div>
           </div>
         </section>
 
-        {/* Deputy Heads */}
+        {/* Heads */}
+        <section className="py-12 bg-[#fff7f0]">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-[#B22222] text-center mb-4 font-serif">
+              Heads of Departments
+            </h2>
+            <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+              Department heads transform our mission into action across technology, logistics, finance, media, and delegate affairs.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {leadershipTeam.map((member, index) =>
+                renderMemberCard(member, index, "head"),
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Deputies */}
         <section className="py-12 bg-white">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-gray-600 text-center mb-3 font-serif">
-              Deputy Leadership
+              Deputies
             </h2>
             <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-              Supporting our department heads with dedicated expertise and
-              collaborative leadership
+              Our deputies partner with heads to keep every initiative responsive, well-coordinated, and memorable for delegates.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {deputyHeads.map((founder, index) =>
-                renderFounderCard(
-                  founder,
-                  index + founders.length + departmentHeads.length,
-                  true,
-                ),
+              {deputies.map((member, index) =>
+                renderMemberCard(member, index, "deputy"),
               )}
             </div>
           </div>

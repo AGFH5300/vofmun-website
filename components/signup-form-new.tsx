@@ -36,6 +36,14 @@ import { FileText, Shield, AlertCircle } from "lucide-react"
 
 type Role = "delegate" | "chair" | "admin" | null
 
+type DelegateFormState = {
+  experience: string
+  committee1: string
+  committee2: string
+  committee3: string
+  referralCodes: string[]
+}
+
 export function SignupFormNew() {
   const [selectedRole, setSelectedRole] = useState<Role>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -84,11 +92,12 @@ export function SignupFormNew() {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [lastPaymentStatus, setLastPaymentStatus] = useState<"yes" | "no" | null>(null)
 
-  const [delegateData, setDelegateData] = useState({
+  const [delegateData, setDelegateData] = useState<DelegateFormState>({
     experience: "",
     committee1: "",
     committee2: "",
     committee3: "",
+    referralCodes: [""],
   })
 
   const [chairData, setChairData] = useState({
@@ -113,6 +122,12 @@ export function SignupFormNew() {
     previousAdmin: "" as "yes" | "no" | "",
     understandsRole: "" as "yes" | "no" | "",
   })
+
+  const committeeChoices = [
+    { key: "committee1" as const, label: "First Choice", required: true },
+    { key: "committee2" as const, label: "Second Choice", required: false },
+    { key: "committee3" as const, label: "Third Choice", required: false },
+  ]
 
   useEffect(() => {
     const combinedName = [formData.firstName, formData.lastName]
@@ -224,6 +239,28 @@ export function SignupFormNew() {
     if (file) {
       handlePaymentProofSelect(file)
     }
+  }
+
+  const addReferralCode = () => {
+    setDelegateData((prev) => ({
+      ...prev,
+      referralCodes: [...prev.referralCodes, ""],
+    }))
+  }
+
+  const updateReferralCode = (index: number, value: string) => {
+    setDelegateData((prev) => {
+      const nextCodes = [...prev.referralCodes]
+      nextCodes[index] = value
+      return { ...prev, referralCodes: nextCodes }
+    })
+  }
+
+  const removeReferralCode = (index: number) => {
+    setDelegateData((prev) => ({
+      ...prev,
+      referralCodes: prev.referralCodes.filter((_, i) => i !== index),
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -400,10 +437,20 @@ export function SignupFormNew() {
         paymentProofDataUrl = await fileToDataURL(paymentProofFile)
       }
 
+      const sanitizedDelegateData =
+        selectedRole === "delegate"
+          ? {
+              ...delegateData,
+              referralCodes: delegateData.referralCodes
+                .map((code) => code.trim())
+                .filter((code) => code.length > 0),
+            }
+          : null
+
       const submitData = {
         formData,
         selectedRole,
-        delegateData: selectedRole === "delegate" ? delegateData : null,
+        delegateData: sanitizedDelegateData,
         chairData: selectedRole === "chair" ? chairData : null,
         adminData: selectedRole === "admin" ? adminData : null,
         paymentStatus: hasPaid,
@@ -604,11 +651,11 @@ export function SignupFormNew() {
               return (
                 <div
                   key={card.role}
-                  className="relative border-2 border-gray-200 rounded-xl p-4 sm:p-6 cursor-pointer transition-all duration-300 hover:border-[#B22222] hover:shadow-lg hover:scale-105 group"
+                  className="relative border-2 border-gray-200 rounded-xl p-4 sm:p-6 cursor-pointer transition-all duration-300 hover:border-[#B22222] hover:shadow-lg hover:scale-105 group flex flex-col"
                   onClick={() => setSelectedRole(card.role)}
                   data-testid={`select-role-${card.role}`}
                 >
-                  <div className="text-center">
+                  <div className="text-center flex flex-col h-full">
                     <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-[#B22222] rounded-full mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
                       <IconComponent className="h-6 sm:h-8 w-6 sm:w-8 text-white" />
                     </div>
@@ -629,10 +676,10 @@ export function SignupFormNew() {
                       </TooltipProvider>
                     </div>
 
-                    <p className="text-sm text-gray-600 mb-4">{card.description}</p>
+                    <p className="text-sm text-gray-600 mb-4 flex-1">{card.description}</p>
 
                     <Button
-                      className="w-full bg-[#B22222] hover:bg-[#8B0000] text-white text-xs py-2 sm:py-2.5"
+                      className="w-full bg-[#B22222] hover:bg-[#8B0000] text-white text-xs py-2 sm:py-2.5 mt-auto"
                       data-testid={`button-${card.role}`}
                     >
                       Select {card.title}
@@ -821,31 +868,23 @@ export function SignupFormNew() {
               <div className="space-y-3 sm:space-4">
                 <h4 className="text-md sm:text-lg font-semibold text-gray-700">Committee Preferences</h4>
                 <p className="text-sm text-muted-foreground">Please rank your top 3 committee preferences.</p>
-                {[1, 2, 3].map((num) => (
-                  <div key={num} className="space-y-1.5 sm:space-y-2">
+                {committeeChoices.map(({ key, label, required }) => (
+                  <div key={key} className="space-y-1.5 sm:space-y-2">
                     <div>
-                      <Label htmlFor={`committee${num}`} className="text-xs sm:text-sm font-medium text-gray-700">
-                        {num === 1 ? (
-                          <>
-                            First Choice <span className="text-red-500">*</span>
-                          </>
-                        ) : num === 2 ? (
-                          "Second Choice"
-                        ) : (
-                          "Third Choice"
-                        )}
+                      <Label htmlFor={key} className="text-xs sm:text-sm font-medium text-gray-700">
+                        {label}
+                        {required && <span className="text-red-500"> *</span>}
                       </Label>
                       <Select
-                        onValueChange={(value) => setDelegateData((p) => ({ ...p, [`committee${num}`]: value }))}
-                        value={delegateData[`committee${num}` as keyof typeof delegateData] as string}
+                        onValueChange={(value) => setDelegateData((p) => ({ ...p, [key]: value }))}
+                        value={delegateData[key]}
                       >
                         <SelectTrigger
-                          data-testid={`select-committee${num}`}
+                          id={key}
+                          data-testid={`select-${key}`}
                           className="text-xs sm:text-sm h-9 sm:h-10"
                         >
-                          <SelectValue
-                            placeholder={`Select your ${num === 1 ? "first" : num === 2 ? "second" : "third"} choice`}
-                          />
+                          <SelectValue placeholder={`Select your ${label.toLowerCase()}`} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem
@@ -853,7 +892,7 @@ export function SignupFormNew() {
                             disabled={
                               [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
                                 "ga1",
-                              ) && delegateData[`committee${num}` as keyof typeof delegateData] !== "ga1"
+                              ) && delegateData[key] !== "ga1"
                             }
                           >
                             General Assembly (GA1) - Beginner
@@ -863,7 +902,7 @@ export function SignupFormNew() {
                             disabled={
                               [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
                                 "unodc",
-                              ) && delegateData[`committee${num}` as keyof typeof delegateData] !== "unodc"
+                              ) && delegateData[key] !== "unodc"
                             }
                           >
                             UNODC - Intermediate
@@ -873,7 +912,7 @@ export function SignupFormNew() {
                             disabled={
                               [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
                                 "ecosoc",
-                              ) && delegateData[`committee${num}` as keyof typeof delegateData] !== "ecosoc"
+                              ) && delegateData[key] !== "ecosoc"
                             }
                           >
                             ECOSOC - Intermediate
@@ -883,7 +922,7 @@ export function SignupFormNew() {
                             disabled={
                               [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
                                 "who",
-                              ) && delegateData[`committee${num}` as keyof typeof delegateData] !== "who"
+                              ) && delegateData[key] !== "who"
                             }
                           >
                             WHO - Beginner
@@ -893,7 +932,7 @@ export function SignupFormNew() {
                             disabled={
                               [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
                                 "uncstd",
-                              ) && delegateData[`committee${num}` as keyof typeof delegateData] !== "uncstd"
+                              ) && delegateData[key] !== "uncstd"
                             }
                           >
                             UNCSTD - Advanced
@@ -903,7 +942,7 @@ export function SignupFormNew() {
                             disabled={
                               [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
                                 "icj",
-                              ) && delegateData[`committee${num}` as keyof typeof delegateData] !== "icj"
+                              ) && delegateData[key] !== "icj"
                             }
                           >
                             ICJ - Advanced
@@ -913,7 +952,7 @@ export function SignupFormNew() {
                             disabled={
                               [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
                                 "icrcc",
-                              ) && delegateData[`committee${num}` as keyof typeof delegateData] !== "icrcc"
+                              ) && delegateData[key] !== "icrcc"
                             }
                           >
                             ICRCC - Intermediate
@@ -923,6 +962,54 @@ export function SignupFormNew() {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              <div className="space-y-3 sm:space-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <h4 className="text-md sm:text-lg font-semibold text-gray-700">Referral Codes (Optional)</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Enter referral codes shared with you by delegates. Add multiple codes if you have more than one.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addReferralCode}
+                    className="flex items-center gap-2"
+                    data-testid="button-add-referral-code"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Code
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {delegateData.referralCodes.map((code, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Input
+                        value={code}
+                        onChange={(e) => updateReferralCode(index, e.target.value)}
+                        placeholder="Enter referral code"
+                        className="flex-1"
+                        data-testid={`input-referral-code-${index}`}
+                      />
+                      {delegateData.referralCodes.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeReferralCode(index)}
+                          className="h-9 w-9 text-red-500 border-red-200 hover:bg-red-50"
+                          aria-label={`Remove referral code ${index + 1}`}
+                          data-testid={`button-remove-referral-code-${index}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -1823,7 +1910,13 @@ export function SignupFormNew() {
               experience: "",
               institution: "",
             });
-            setDelegateData({ experience: "", committee1: "", committee2: "", committee3: "" });
+            setDelegateData({
+              experience: "",
+              committee1: "",
+              committee2: "",
+              committee3: "",
+              referralCodes: [""],
+            });
             setChairData({
               experiences: [{ conference: "", position: "", year: "", description: "" }],
               committee1: "",
