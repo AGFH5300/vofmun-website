@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 
 import { createClient } from '@/utils/supabase/server'
-import { getPaymentProofBucketName } from '@/utils/supabase/storage'
+import {
+  ensurePaymentProofBucketExists,
+  getManualBucketSetupChecklist,
+  getPaymentProofBucketName,
+  PaymentProofBucketError,
+} from '@/utils/supabase/storage'
 import { insertUserSchema, delegateDataSchema, chairDataSchema, adminDataSchema } from '@/lib/db/schema'
 import { z } from 'zod'
 
@@ -51,6 +56,8 @@ export async function POST(request: NextRequest) {
 
       const paymentProofBucket = getPaymentProofBucketName()
 
+      await ensurePaymentProofBucketExists(paymentProofBucket)
+
       const { error: uploadError } = await supabase.storage
         .from(paymentProofBucket)
         .upload(storagePath, fileBuffer, {
@@ -61,9 +68,10 @@ export async function POST(request: NextRequest) {
       if (uploadError) {
         const normalizedMessage = uploadError.message?.toLowerCase() ?? ''
         if (normalizedMessage.includes('bucket not found')) {
-          throw new Error(
-            `Failed to upload payment proof: Supabase storage bucket "${paymentProofBucket}" was not found.` +
-              ' Please create the bucket in your Supabase project or configure SUPABASE_PAYMENT_PROOF(S)_BUCKET.'
+          const manualSetupMessage = getManualBucketSetupChecklist(paymentProofBucket)
+          throw new PaymentProofBucketError(
+            `Failed to upload payment proof: Supabase storage bucket "${paymentProofBucket}" was not found.\n\n${manualSetupMessage}`,
+            'Payment proof uploads are temporarily unavailable while we finish setting up storage. Please try again later or contact support.'
           )
         }
 
@@ -217,10 +225,22 @@ export async function POST(request: NextRequest) {
       console.error('🔧 Solution: Run the SQL setup script in your Supabase dashboard')
     }
     
+    if (error instanceof PaymentProofBucketError) {
+      console.error('Payment proof bucket misconfiguration:', error.message)
+
+      return NextResponse.json(
+        {
+          message: error.userFacingMessage,
+          status: 'error'
+        },
+        { status: 500 }
+      )
+    }
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
-          message: 'Validation error', 
+        {
+          message: 'Validation error',
           errors: error.errors,
           status: 'error'
         },
