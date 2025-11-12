@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto'
 import { z } from 'zod'
 
 import { createClient } from '@/utils/supabase/server'
+import { getPaymentProofBucketName } from '@/utils/supabase/storage'
 
 export const runtime = 'nodejs'
 
@@ -63,8 +64,10 @@ export async function POST(request: NextRequest) {
 
     const storagePath = `proof-of-payment/${new Date().toISOString().split('T')[0]}/${randomUUID()}-${fileNameWithExtension}`
 
+    const paymentProofBucket = getPaymentProofBucketName()
+
     const { error: uploadError } = await supabase.storage
-      .from('payment-proofs')
+      .from(paymentProofBucket)
       .upload(storagePath, fileBuffer, {
         contentType: payload.paymentProof.mimeType,
         upsert: false,
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to upload payment proof: ' + uploadError.message)
     }
 
-    const { data: publicUrlData } = supabase.storage.from('payment-proofs').getPublicUrl(storagePath)
+    const { data: publicUrlData } = supabase.storage.from(paymentProofBucket).getPublicUrl(storagePath)
 
     const paymentProofUploadedAt = new Date().toISOString()
 
@@ -109,7 +112,7 @@ export async function POST(request: NextRequest) {
     const previousStoragePath = existingUser.payment_proof_storage_path as string | null | undefined
 
     if (previousStoragePath && previousStoragePath !== storagePath) {
-      await supabase.storage.from('payment-proofs').remove([previousStoragePath]).catch((error) => {
+      await supabase.storage.from(paymentProofBucket).remove([previousStoragePath]).catch((error) => {
         console.error('Failed to remove previous payment proof from storage:', error)
       })
     }
