@@ -34,7 +34,16 @@ export async function POST(request: NextRequest) {
     const escapedEmailPattern = normalizedEmail.replace(/([%_\\])/g, '\\$1')
 
     const { data: matchingUsers, error: lookupError } = await supabase
-@@ -41,107 +47,132 @@ export async function POST(request: NextRequest) {
+      .from('users')
+      .select('id, payment_proof_storage_path')
+      .ilike('email', escapedEmailPattern)
+
+    if (lookupError) {
+      throw new Error('Failed to verify registration before uploading proof: ' + lookupError.message)
+    }
+
+    if (!matchingUsers || matchingUsers.length === 0) {
+      return NextResponse.json(
         {
           status: 'not_found',
           message: 'We could not find a registration with that email. Please complete the signup form first.',
