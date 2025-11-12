@@ -118,20 +118,20 @@ export default function HomePage() {
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <h2 className="text-4xl font-bold text-[#B22222] text-center mb-4 font-serif">
-              Meet Our Founding Team
+              Meet the Secretariat
             </h2>
             <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto text-base">
-              Meet the experienced team behind VOFMUN's success!
+              Get to know the founders, heads, and deputies who power VOFMUN.
             </p>
 
             <FoundersInfiniteCarousel />
 
             <div className="text-center mt-8">
               <Link
-                href="/founders"
+                href="/secretariat"
                 className="inline-flex items-center space-x-2 bg-gray-700 hover:bg-gray-800 text-white px-8 py-4 rounded-lg font-medium transition-all duration-300 hover:scale-105 shadow-lg"
               >
-                <span>Meet All Founders</span>
+                <span>Explore the Secretariat</span>
                 <svg
                   className="w-5 h-5"
                   fill="none"

@@ -40,8 +40,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/founders" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                  Our Team
+                <Link href="/secretariat" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
+                  Secretariat
                 </Link>
               </li>
             </ul>
