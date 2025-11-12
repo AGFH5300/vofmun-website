@@ -6,7 +6,6 @@ import { ScrollProgress } from "@/components/scroll-progress";
 import { BackToTop } from "@/components/back-to-top";
 import {
   Linkedin,
-  Mail,
   Users,
   Truck,
   Camera,
@@ -15,258 +14,245 @@ import {
   Workflow,
   Briefcase,
   Cpu,
-  Instagram,
 } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
-const foundingSecretariat = [
+type SecretariatMember = {
+  name: string;
+  role: string;
+  department: string;
+  image: string;
+  bio: string;
+  writeup: string;
+  linkedin?: string;
+  websiteLink?: string;
+};
+
+const foundingSecretariat: SecretariatMember[] = [
   {
     name: "Tala Swaidan",
-    role: "<strong>Founder & Secretary-General</strong>",
+    role: "<strong>Co-Founder & Secretary-General</strong>",
     department: "Core",
     image: "/founders/TalaSwaidan_SG.png",
-    bio: "Leading VOFMUN with a vision for inclusive global dialogue and youth empowerment in international relations.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "",
-    instagram: "https://www.instagram.com/vofmun",
-    achievements: [
-      "Founded VOFMUN",
-      "Youth Diplomat Award",
-      "Global Leadership Certificate",
-    ],
-    quote: "Diplomacy is the art of letting someone else have your way.",
-    writeup:
-      "My name is Tala Swaidan. I am a Year 10 student at GEMS Metropole School, and I have the great honor and privilege of serving as the Founder and Secretary-General of Voices of the Future Model United Nations (VOFMUN). VOFMUN all began as an abstract idea shared among friends. But with time, dedication, and great effort, it grew into something far more meaningful; a platform for courageous MUN delegates to engage in diplomacy, express their perspectives, and take on global issues with confidence and purpose. Beyond my work with VOFMUN, I am an active member of my school's Student Council and have been deeply involved in Model United Nations for several years. I also pursue my passions in sports, particularly basketball and kickboxing with MVP recognitions, which have both taught me the value of discipline, teamwork, and perseverance. I hope to expand my horizons during the next academic year, along with working on the development of the first VOFMUN conference, taking place in February 2026. Through all my endeavors, I strive to foster positive change, empower others, and lead with integrity. As VOFMUN continues to grow, my hope is that it remains a space where young leaders can find their voice, challenge their thinking, and leave inspired to shape a better world. I'm incredibly proud of how far we've come - and even more excited for what's ahead. See you soon!",
+    bio: "Co-founder guiding VOFMUN's vision for inclusive and empowering youth diplomacy.",
+    writeup: `My name is Tala Swaidan. I am a Year 10 student at GEMS Metropole School, and I have the great honor and privilege of serving as the Co-Founder and Secretary-General of Voices of the Future Model United Nations (VOFMUN) - alongside Vihaan, my Co-Founder and the Head of Conference Affairs & Operations.
+
+VOFMUN all began as an abstract idea shared among friends. But with time, dedication, and great effort, it grew into something far more meaningful: a platform for courageous MUN delegates to engage in diplomacy, express their perspectives, and take on global issues with confidence and purpose.
+
+Beyond my work with VOFMUN, I am an active member of my school's Student Council and have been deeply involved in Model United Nations for several years. I also pursue my passions in sports, particularly basketball and kickboxing with MVP recognitions, which have both taught me the value of discipline, teamwork, and perseverance.
+
+I hope to expand my horizons during the next academic year, along with working on the development of the first VOFMUN conference, taking place in January 2026. Through all my endeavors, I strive to foster positive change, empower others, and lead with integrity.
+
+As VOFMUN continues to grow, my hope is that it remains a space where young leaders can find their voice, challenge their thinking, and leave inspired to shape a better world. I'm incredibly proud of how far we've come - and even more excited for what's ahead. See you soon!`,
   },
   {
     name: "Vihaan Shukla",
-    role: "<strong>Founder & Head of Committees</strong>",
-    department: "Committees",
-    image: "/founders/VihaanShukla_Committees.png",
-    bio: "Managing committee structure, topics, and ensuring engaging debates that address pressing global challenges.",
+    role: "<strong>Co-Founder & Head of Conference Affairs & Operations</strong>",
+    department: "Conference Affairs",
+    image: "/founders/VihaanShukla_ConferenceAffairs.png",
+    bio: "Co-founder overseeing conference operations, logistics, and delegate experience design.",
     linkedin: "https://www.linkedin.com/in/vihaanshukla",
-    email: "vihaanshukla22@gmail.com",
-    instagram: "https://www.instagram.com/vofmun",
-    achievements: [
-      "Committee Innovation",
-      "Debate Excellence",
-      "Topic Research",
-    ],
-    quote: "Great debates shape the future of diplomacy.",
-    writeup:
-      "Hi, I'm Vihaan Shukla, Founder & Head of Committees for VOFMUN 2026! I've participated in 13 MUNs, earning awards such as Best Delegate and Best Research, and have chaired multiple times too, developing strong debate and communication skills. I'm a Year 11 student at Dubai International Academy Emirates Hills, strengthening my leadership, event and am a part of the DIAMUN 2026 Events Team, playing a key role in organising one of the largest conferences in the MENA region. Previously, I've served as Student Council President and on the DIA Debate Society Events Team, organisation, and team management skills. I'm also Founder of YouthPropel, a youth-led initiative expanding access to high-impact academic opportunities. At VOFMUN, I'm in charge of curating committees, topics, and crises while working to enhance your experience! My goal for VOFMUN is to design dynamic, career-focused committees that are engaging to debate in and also relevant to real-world industries. See you there!",
+    writeup: `Hi, I’m Vihaan Shukla, Co-Founder and Head of Conference Affairs & Operations at VOFMUN 2026!
+
+I have participated in over 15 MUN conferences, earning more than 10 awards including Best Delegate and Best Research. I’ve also chaired 5 conferences, developing strong skills in debate, diplomacy, and communication.
+
+I am currently a Year 11 student at Dubai International Academy, Emirates Hills, and a member of the DIAMUN 2026 Events Team, contributing to the organisation of one of the largest MUN conferences in the MENA region.
+
+Beyond VOFMUN, I am the Founder of YouthPropel, a youth-led initiative dedicated to expanding access to high-impact academic and leadership opportunities for students across schools and regions. Through YouthPropel, I lead seminars, partnerships, and outreach projects that aim to make platforms like MUN, debate, and public speaking more inclusive and accessible to under-represented communities.
+
+At VOFMUN, I oversee conference operations, logistics, and committee affairs, ensuring a seamless and engaging delegate experience. My goal is to design a dynamic, career-focused conference that bridges global relevance with meaningful academic enrichment for all participants.`,
   },
 ];
 
-const leadershipTeam = [
-  {
-    name: "Clyde Jared Robis",
-    role: "<strong>Deputy Secretary-General</strong>",
-    department: "Core",
-    image: "/founders/ClydeJaredRobis_DSG.png",
-    bio: "Supporting the Secretary-General in strategic planning and ensuring operational excellence across all departments.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "clydejared@gmail.com",
-    instagram: "https://www.instagram.com/maybe_jareddd",
-    achievements: [
-      "Strategic Planning Expert",
-      "Operations Excellence",
-      "Team Leadership",
-    ],
-    quote:
-      "Excellence is never an accident; it is always the result of high intention.",
-    writeup:
-      "Hello delegates, chairs and dear readers. My name is Jared Robis (the existence of first name 'Clyde' is false), and I am the Deputy Secretary-General of Voices of the Future MUN 2026. I've attended various MUNs such as GFSMUN V and QuixMUN, and I'm definitely planning to attend more conferences in the later years. I'm currently going in Year 11 at GEMS Metropole School, and through this I've honed my skills in fields such as management and leadership, teamwork and communication amongst team members. This ties into what I do in VOFMUN, as Deputy Secretary-General I oversee all the processes that occur within the backstage of our MUN along with assisting in any work that is requested. I hope to meet you all in VOFMUN 2026, stay tuned!",
-  },
+const leadershipTeam: SecretariatMember[] = [
   {
     name: "Ansh Gupta",
     role: "<strong>Head of Technology</strong>",
     department: "Technology",
     image: "/founders/AnshGupta_Tech.png",
-    bio: "Overseeing all technological infrastructure and digital platforms to enhance the conference experience.",
+    bio: "Building and maintaining the digital platforms that power every VOFMUN experience.",
     linkedin: "https://www.linkedin.com/in/anshvg",
-    email: "dxb.avg@gmail.com",
-    instagram: "https://www.instagram.com/vofmun",
-    achievements: [
-      "Digital Innovation",
-      "Platform Development",
-      "Tech Leadership",
-    ],
-    quote: "Technology bridges the gap between ideas and reality.",
-    writeup:
-      "Hi, I'm Ansh Gupta, Head of Technology for VOFMUN 2026 and a Year 11 student at Dubai International Academy Emirates Hills. I'm in charge of all tech operations and some of my work includes building the conference website VOFMUN One webapp. I also serve as Deputy Head of Technology for DIAMUN and Head of Technology for EconMinds xChange, where I build and maintain event websites and tools. Prominent achievements and highlights of mine include 1st place at DIA Game Jam 2025 after rebuilding our game in React in the final week, Best Product and 1st Place at DIATECH 2025, projects at InnovAIte Hackathon, and a Python data tool for ASCC 2025. I co-lead SyntaxEngine as President and stay active in Maths and Debating with DIAMathletes 1st place, World Scholars Cup awards, and recognition in EISJMUN 2025. See more on my website:",
-    websiteLink: "https://anshgupta.site",
+    writeup: `Hi, I’m Ansh Gupta, a Year 11 student at Dubai International Academy Emirates Hills and a self-taught web developer who loves turning ideas into clean, useful digital products. I work across the stack with HTML, CSS, JavaScript, React, TypeScript, and PHP, and I’m always experimenting with new tools to improve performance, reliability, and user experience.
+
+Beyond coding, I enjoy leading tech initiatives across school clubs and events, mentoring peers, and collaborating on projects that blend design, data, and problem-solving. I’m multilingual (English, Hindi, and Chinese with HSK certifications) and actively involved in academic and tech competitions, which has shaped my approach to teamwork, communication, and creative thinking.
+
+For VOFMUN, I serve as Head of Technology, where I keep things running smoothly behind the scenes and create the conference’s digital platforms, including the VOFMUN One web app and the site on which you are reading this.
+
+See more on my website: www.anshgupta.site`,
+    websiteLink: "https://www.anshgupta.site",
   },
   {
     name: "Aryan Shah",
-    role: "<strong>Head of Delegate Affairs</strong>",
-    department: "Delegate Affairs",
-    image: "/founders/AryanShah_DelegateAffairs.png",
-    bio: "Ensuring exceptional delegate experience through comprehensive support and engagement initiatives.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "aryan.p.shah@gmail.com",
-    instagram: "https://www.instagram.com/swollen_arch",
-    achievements: [
-      "Delegate Satisfaction",
-      "Experience Design",
-      "Community Building",
-    ],
-    quote: "Every delegate's journey matters in shaping global perspectives.",
-    writeup:
-      "Hi I'm Aryan Shah, Head of Delegate Affairs for VOFMUN 2026! I have previously participated in 4 MUN conferences, and have recieved an honorable mention in one of them. I am currently a Year 11 student at Dubai International Academy. I am also Vice-President of my school's Cubing and AI clubs. Outside of school I have organised and hosted multiple interntaionally recognized and licensed Rubiks Cube Competitions that have attracted the attention of some of the best cubers in the MENA reigon. At VOFMUN my goal is to ensure that all the deleagtes have an amazing experience at VOFMUN by handling all delegate-related matters that range from registration to country allocation and communication and support to all delegates.",
+    role: "<strong>Head of Committees</strong>",
+    department: "Committees",
+    image: "/founders/AryanShah_Committees.png",
+    bio: "Leading committee curation, topic development, and delegate support for VOFMUN 2026.",
+    writeup: `Hi I'm Aryan Shah, Head of Committees for VOFMUN 2026! I have previously participated in 4 MUN conferences, and have received an honorable mention in one of them. I am currently a Year 11 student at Dubai International Academy. I am also Vice-President of my school's Cubing and AI clubs. Outside of school I have organised and hosted multiple internationally recognized and licensed Rubik's Cube Competitions that have attracted the attention of some of the best cubers in the MENA region. At VOFMUN my goal is to ensure that all the delegates have an amazing experience at VOFMUN by handling all committee-related matters that range from finalising topics to country allocation and communication with all delegates.`,
+  },
+  {
+    name: "Clyde Jared Robis",
+    role: "<strong>Co-Head of Logistics</strong>",
+    department: "Logistics",
+    image: "/founders/ClydeJaredRobis_Logistics.png",
+    bio: "Coordinating large-scale logistics and operational readiness for the conference.",
+    writeup: `Hello delegates, chairs, and dear readers. My name is Jared Robis (the existence of the first name ‘Clyde’ is false), and I am the Co-Head of Logistics at Voices of the Future MUN 2026. I’ve attended various MUNs such as GFSMUN V and QuixMUN, and I plan to participate in many more in the coming years. I’m currently in Year 11 at GEMS Metropole School, where I’ve developed key skills in management, leadership, teamwork, and effective communication.
+
+These skills directly support my role at VOFMUN, where I help coordinate the logistical operations that ensure the smooth functioning of the conference. I look forward to seeing you all at VOFMUN 2026 - stay tuned!`,
   },
   {
     name: "Elinore Sweiss",
     role: "<strong>Co-Head of Logistics</strong>",
     department: "Logistics",
     image: "/founders/ElinoreSweiss_Logistics.png",
-    bio: "Coordinating all logistical operations to ensure seamless conference execution and delegate comfort.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "",
-    instagram: "https://www.instagram.com/elinore_sweiss",
-    achievements: [
-      "Operations Excellence",
-      "Event Coordination",
-      "Process Optimization",
-    ],
-    quote: "Perfect execution starts with meticulous planning.",
-    writeup:
-      "Hi, I’m Elinore Sweiss, Co-Head of Logistics for VOFMUN 2026! I’ve participated in several MUNs, gaining awards such as Best Research, which have helped me build confidence in public speaking, leadership, and diplomacy. Beyond MUN, I’ve excelled in academics, music, sports, and art, achieving a Distinction in ABRSM Grade 5 Piano and am currently working on Piano Grade 6. I also train in rhythmic gymnastics, winning 2nd overall and 3rd overall at separate competitions, and a Grade 8 at my End of Year art exam. These experiences have sharpened my discipline, problem-solving, and organizational skills. At VOFMUN 2026, I am excited to use these strengths as Co-Head of Logistics, ensuring everything runs seamlessly.",
+    bio: "Ensuring every logistical detail contributes to a seamless delegate experience.",
+    writeup: `Hi, I’m Elinore Sweiss, Co-Head of Logistics for VOFMUN 2026! I’ve participated in several MUNs, gaining awards such as Best Research, which have helped me build confidence in public speaking, leadership, and diplomacy. Beyond MUN, I’ve excelled in academics, music, sports, and art, achieving a Distinction in ABRSM Grade 5 Piano and am currently working on Piano Grade 6. I also train in rhythmic gymnastics, winning 2nd overall and 3rd overall at separate competitions, and a Grade 8 at my End of Year art exam.
+
+These experiences have sharpened my discipline, problem-solving, and organizational skills. At VOFMUN 2026, I am excited to use these strengths as Co-Head of Logistics, ensuring everything runs seamlessly.`,
   },
   {
-    name: "Muhammad Talha Sohail",
-    role: "<strong>Co-Head of Logistics</strong>",
-    department: "Logistics",
-    image: "/founders/MuhammadTalhaSohail_Logistics.png",
-    bio: "Co-leading logistical coordination and venue management for optimal conference operations.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "conectmts@gmail.com",
-    instagram: "https://www.instagram.com/vofmun",
-    achievements: ["Venue Management", "Coordination", "Operations"],
-    quote: "Seamless logistics create memorable experiences.",
-    writeup:
-      "Hi I'm Muhammad Talha, deputy head of committees for VOFMUN 2026! I have previously participated in 8 MUN conferences, and received one Best Delegate and Best Research awards. I am currently a Year 11 student at GEMS Metropole School. I am also part of Global Innovation and the Maker & Coders clubs at my school while out of school I am a part of the Waterloo Computer Science tournament and Dubai Sci fair. At VOFMUN my goal is to ensure all committees are well established and functional to the MUN.",
-  },
-  {
-    name: "Ammiel Lupian",
-    role: "<strong>Head of Media</strong>",
+    name: "Vaibhav K. Mundanat",
+    role: "<strong>Co-Head of Media</strong>",
     department: "Media",
-    image: "/founders/AmmielLupian_Media.png",
-    bio: "Creating engaging content and managing social media presence to connect with the global MUN community.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "",
-    instagram: "https://www.instagram.com/vofmun",
-    achievements: ["Content Creation", "Social Media", "Community Engagement"],
-    quote: "Authentic stories connect hearts across borders.",
-    writeup:
-      "Hey, it's Ammiel Lupian, Head of Media & Marketing for VOFMUN 2026. I'm a Year 11 student at GEMS Metropole School. If you're looking for information regarding sociology I am the right person to look for. My goal in VOFMUN is to shape a compelling image through the creativity and data-driven minds of me and my team to engage delegates to participate in our conferences.",
+    image: "/founders/VaibhavMundanat_Media.png",
+    bio: "Crafting storytelling and coverage that bring the VOFMUN journey to life.",
+    linkedin: "https://www.linkedin.com/in/vaibhav-mundanat-7045b3379",
+    writeup: `Hi, my name is Vaibhav Mundanat (aka “V”) and I am in Year 11 at Dubai International Academy Emirates Hills. I have had 8+ MUN Conferences as a Delegate, 2 experiences as a Chair, and am Deputy Head of Admin for DIAMUN’26. I am currently part of the Media & Marketing Team. I enjoy playing the piano, baking, discussing socio-economic factors, and anything medicine/biology related. I cannot wait to see you at VOFMUN I 2026.`,
   },
   {
-    name: "Tamara Moshawrab",
+    name: "Gibran Malaeb",
+    role: "<strong>Co-Head of Media</strong>",
+    department: "Media",
+    image: "/founders/GibranMalaeb_Media.png",
+    bio: "Leading media initiatives that highlight VOFMUN’s community and impact.",
+    linkedin: "https://www.linkedin.com/in/gibran-m-a99153298",
+    writeup: `Hello everyone! My name is Gibran and I am a Year 10 student at GEMS Metropole School Motor City, passionate about STEM, especially mathematics and computer science. As Co-Head of Media at Voices of the Future MUN, I keep the Media team organized and focused, helping maintain a strong media presence. I am enthusiastic about Model UN and look forward to taking on more active roles in future conferences.
+
+Beyond academics and MUN, I serve as house captain and student council member, contribute to my school's robotics club, and participate in debate, public speaking, and cross country. Music is essential to me; I play the violin, saxophone, and piano. I am fluent in French, Arabic, and English, and hold beginner to intermediate proficiency in German and Spanish. Inspired by Maya Angelou’s words, “I rise,” I am motivated to persevere and support my team at VOFMUN and beyond.`,
+  },
+  {
+    name: "Armaghan Siddiqui",
     role: "<strong>Head of Finance</strong>",
     department: "Finance",
-    image: "/founders/TamaraMoshawrab_Finance.png",
-    bio: "Managing financial operations and ensuring sustainable growth for VOFMUN's future initiatives.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "",
-    instagram: "https://www.instagram.com/vofmun",
-    achievements: [
-      "Financial Planning",
-      "Budget Management",
-      "Growth Strategy",
-    ],
-    quote: "Financial wisdom enables diplomatic dreams.",
-    writeup:
-      "Hello! My name is Tamara Moshawrab, and I'm currently a Year 11 student at SABIS International School of Choueifat Dubai. I'm honored to be a part of the Secretariat of Voices of the Future Model UN, serving as the Head of Finance! Taking on this role has allowed me to combine two things I genuinely enjoy: being part of an ambitious team and applying practical financial thinking to real-world scenarios. Academically, I've chosen to study IGCSE Business and AP Economics because I'm deeply interested in understanding how global markets operate and how economic policy can shape the world we live in. These subjects also support my long-term goal of becoming a lawyer, as I believe a strong foundation in business and economics will help me approach legal challenges with a more well-rounded perspective. Outside of class, I'm passionate about debate and MUN—there's something about public speaking, critical thinking, and global problem-solving that pushes me to grow every time I participate. I'm also a tennis player, which keeps me grounded and helps me stay focused and disciplined. Being part of the journey of VOFMUN has already been such a wonderful and positive experience, and I'm excited to help manage our resources to ensure this year's conference is not just successful and memorable, but unforgettable. We hope to see you there!",
+    image: "/founders/ArmaghanSiddiqui_Finance.png",
+    bio: "Overseeing budgeting, partnerships, and sustainable growth for the conference.",
+    linkedin: "https://www.linkedin.com/in/armaghan-siddiqui-000309345",
+    writeup: `Hi, my name is Armaghan Siddiqui and I’m excited to be part of the Finance Team for VOFMUN this year. I’ve always been passionate about taking on challenges that push me to think creatively, lead with purpose, and work collaboratively with others. Over the years, I’ve participated in a range of MUNs, debate competitions, and student-led initiatives that have helped me develop my skills in communication, organization, and leadership.
+
+These experiences have also deepened my interest in how teamwork and careful planning come together to create successful events. I’m especially drawn to the finance aspect of VOFMUN because it allows me to combine analytical thinking with creativity to help ensure everything runs seamlessly behind the scenes. Above all, I’m looking forward to working alongside an incredible team to make this conference a truly impactful and memorable experience for everyone involved.`,
   },
 ];
 
-const deputies = [
+const deputies: SecretariatMember[] = [
   {
-    name: "Gabrielle Zietsman",
+    name: "Muhammad Talha Solail",
     role: "<strong>Deputy of Committees</strong>",
     department: "Committees",
-    image: "/founders/GabrielleZietsman_Committees.png",
-    bio: "Supporting committee operations and fostering innovative approaches to Model UN debate formats.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "Gabrielle.zietsman@icloud.com",
-    instagram: "https://www.instagram.com/ather.is.alive/",
-    achievements: ["Committee Support", "Innovation", "Debate Formats"],
-    quote: "Innovation in debate creates lasting diplomatic impact.",
-    writeup:
-      "My name is Gabrielle Zietsman, but you can call me Gaby, and I am the Deputy Head of Committees for 'Voices of the Future' MUN coming this 2026. I'm currently going into Year 11 at GEMS Metropole School, and have held numerous leadership positons in school, such as a Wellbeing Leader and House Captain. If you go to my school, you might have also heard me on the radio on Fridays. These past experiences all help me with what I do in VOFMUN, as the Deputy Head of Committees, who supports the Head of Logistics by aiding with making topics and committee affairs. I hope to see you all in VOFMUN 2026, have a good day!",
+    image: "/founders/MuhammadTalhaSolail_Committees.png",
+    bio: "Supporting committee preparation, research, and delegate engagement initiatives.",
+    writeup: `Hi I'm Muhammad Talha, Deputy of Committees for VOFMUN 2026! I have previously participated in 8 MUN conferences, and received one Best Delegate and Best Research awards. I am currently a Year 11 student at GEMS Metropole School. I am also part of Global Innovation and the Maker & Coders clubs at my school while out of school I am a part of the Waterloo Computer Science tournament and Dubai Science Fair. At VOFMUN my goal is to assist in ensuring all committees are well established and functional to the MUN.`,
   },
   {
     name: "Reem Ghanayem",
     role: "<strong>Deputy of Logistics</strong>",
     department: "Logistics",
     image: "/founders/ReemGhanayem_Logistics.png",
-    bio: "Supporting logistics team in registration processes and delegate services coordination.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "reemomarghanayem511@gmail.com",
-    instagram: "https://www.instagram.com/r33m.0g",
-    achievements: [
-      "Registration Systems",
-      "Delegate Services",
-      "Process Design",
-    ],
-    quote: "Every detail matters in creating excellence.",
-    writeup:
-      "Hello I'm Reem Ghanayem Deputy Head of Logistics for VOFMUN 2026! I have previously participated Emirates Literature Festival, I have participated in Dance exams, play a bit of piano, worked in marketing and enjoy public speaking, and I speak Arabic and English. I am currently a Year 11 student at GEMS Metropole School, motor city. I am also part of the theater program at my school. At VOFMUN my goal is to ensure the MUN goes smoothly and to essentially help plan the logistics aspects of the MUN behind the scenes including, venue , crisis ideas and more. I will try my best to make this MUN fun and informational for anyone who would like to join!",
+    bio: "Helping deliver logistics planning, venue coordination, and delegate services.",
+    writeup: `Hello I'm Reem Ghanayem - one of the Deputies of Logistics for VOFMUN 2026! I have previously participated in the Emirates Literature Festival. I also am passionate about dance, play piano, have worked in marketing before, and enjoy public speaking. I speak Arabic and English.
+
+I am currently a Year 11 student at GEMS Metropole School, Motor City. I am also part of the Theatre program at my school. At VOFMUN my goal is to ensure the MUN goes smoothly and to essentially help plan the logistics aspects of the MUN behind the scenes including, venue, scheduling, and more! Looking forward to seeing you all join VOFMUN`,
   },
   {
-    name: "Farah Yu",
+    name: "Gabrielle Zietsman",
+    role: "<strong>Deputy of Logistics</strong>",
+    department: "Logistics",
+    image: "/founders/GabrielleZietsman_Logistics.png",
+    bio: "Coordinating operational details and supporting the logistics leadership team.",
+    writeup: `My name is Gabrielle Zietsman, but you can call me Gaby, and I am the Deputy of Logistics for Voices of the Future MUN 2026. I’m currently going into Year 11 at GEMS Metropole School, where I’ve taken on several leadership roles, including Wellbeing Leader and House Captain. You may also recognise me from the school radio on Fridays!
+
+These experiences have strengthened my organisation, teamwork, and communication skills, all of which I apply to my role at VOFMUN, where I support the Head of Logistics in coordinating and managing the operational aspects of the conference. I look forward to seeing you all at VOFMUN 2026!`,
+  },
+  {
+    name: "Ayaan Agrawal",
     role: "<strong>Deputy of Media</strong>",
     department: "Media",
-    image: "/founders/FarahYu.png",
-    bio: "Supporting media operations and developing creative campaigns to promote youth engagement.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "farahyu1598@gmail.com",
-    instagram: "https://www.instagram.com/vofmun",
-    achievements: [
-      "Content Creation",
-      "Creative Campaigns",
-      "Community Engagement",
-    ],
-    quote: "Authentic stories connect hearts across borders.",
-    writeup:
-      "Hi, my name is Hanxiao Yu, but you can also call me Farah. I can speak 3 languages - Arabic, English and Mandarin, and so if anyone is struggling with languages you can come find me! I'm the Deputy Head of Media & Marketing for VOFMUN 2026. I've taken part in the World Scholar's Cup before, so I already have some experience with debating. I'm also a Year 11 student at GEMS Metropole School. At VOFMUN, my goal is to promote and represent the conference, while inspiring others and making sure our media and marketing highlight the vision of the event.",
+    image: "/founders/AyaanAgrawal_Media.png",
+    bio: "Producing engaging multimedia content to showcase VOFMUN's story.",
+    writeup: `Hi! I’m Ayaan, and I’m a 15 year old student at DIAEH, currently in Year 11. I have a strong passion for content creation, particularly when it comes to video editing. I enjoy working on creative projects and finding new ways to make videos engaging to the audience and impactful. Content creation has always been something I love because it lets me express ideas visually and tell stories in unique ways. I’m super excited to be part of the VOFMUN team and I look forward to contributing my knowledge, and learning from everyone I work with!`,
+  },
+  {
+    name: "Hanxiao Yu",
+    role: "<strong>Deputy of Media</strong>",
+    department: "Media",
+    image: "/founders/HanxiaoYu_Media.png",
+    bio: "Amplifying VOFMUN's mission through multilingual media and outreach efforts.",
+    writeup: `Hi, my name is Hanxiao Yu, but you can also call me Farah. I can speak 3 languages - Arabic, English and Mandarin, and so if anyone is struggling with languages you can come find me! I'm the Deputy of Media & Marketing for VOFMUN 2026.
+
+I've taken part in the World Scholar's Cup before, so I already have some experience with debating. I'm also a Year 11 student at GEMS Metropole School. At VOFMUN, my goal is to promote and represent the conference, while inspiring others and making sure our media and marketing highlight the vision of the event.`,
+  },
+  {
+    name: "Jaden Shibu",
+    role: "<strong>Deputy of Media</strong>",
+    department: "Media",
+    image: "/founders/JadenShibu_Media.png",
+    bio: "Combining marketing experience and design to capture the energy of VOFMUN.",
+    linkedin: "https://www.linkedin.com/in/jaden-shibu-51316637a",
+    writeup: `I’m Jaden, a Year 12 student at Cambridge International School (CIS) and a member of the Media Team for VOFMUN. I’ve gained prior experience in marketing and event activations through internships and have participated in numerous MUNs as both a delegate and a chair, over time, I've developed a strong passion for diplomacy, communication, and design. Alongside my MUN involvement, I also hold leadership roles at school that have strengthened my teamwork, organization, and leadership skills. I’m excited to contribute to VOFMUN this year and capture the energy and collaboration that make the conference special.`,
+  },
+  {
+    name: "Tamara Moshawrab",
+    role: "<strong>Deputy of Media</strong>",
+    department: "Media",
+    image: "/founders/TamaraMoshawrab_Media.png",
+    bio: "Supporting media strategy with business insight and a passion for storytelling.",
+    writeup: `Hello! My name is Tamara Moshawrab, and I’m a Year 11 student at SABIS International School of Choueifat Dubai. I’m thrilled to serve as Deputy of Media for Voices of the Future MUN 2026, where I help manage communications and create engaging content to connect with delegates and showcase the conference experience.
+
+Academically, I study IGCSE Business and AP Economics, which have strengthened my analytical and organisational skills - skills I bring into planning and managing media for VOFMUN. Outside of school, I’m passionate about debate, MUN, and tennis, all of which help me develop focus, creativity, and teamwork. I’m excited to contribute to making VOFMUN 2026 a memorable and inspiring conference for all!`,
   },
   {
     name: "Noya Fareed",
     role: "<strong>Deputy of Media</strong>",
     department: "Media",
     image: "/founders/NoyaFareed_Media.png",
-    bio: "Developing creative campaigns and partnerships to promote youth engagement in international affairs.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "noyafareed@gmail.com",
-    instagram: "https://www.instagram.com/noya.fareed",
-    achievements: ["Creative Campaigns", "Partnerships", "Youth Engagement"],
-    quote: "Creativity amplifies the voice of youth diplomacy.",
-    writeup:
-      "Hi, my name is Noya Fareed, Deputy Head of Media and Marketing for VOFMUN 2026! I have previously participated 2 MUN conferences, receiving Best Delegate in my first conference ever! I am currently a year 11 student at Gems Metropole Motor City. I take part in musical theatre and play drums, and cook/ bake, play cricket, dance and am part of girl up social media team ! my goal is to make people as enthusiastic for this mun to happen, just like we are!",
+    bio: "Driving creative media projects that celebrate the VOFMUN community.",
+    writeup: `Hello everyone, my name is Noya Fareed, I’m 15 years old and I’m from India and Pakistan. I currently go to MTS, and I’m so excited to be part of this project as one of the Deputies of Media. I’ve had three MUN experiences, where I’ve learned so much about leadership, diplomacy, and public speaking. Along with that, I’ve also taken on media roles for different projects, working on content creation, event coverage, and promotion - which helped me grow creatively and work well in a team. I’m really looking forward to bringing that same energy and enthusiasm here, and I can’t wait to collaborate with everyone to make this project a success.`,
+  },
+  {
+    name: "Pranav Verma",
+    role: "<strong>Deputy of Finance</strong>",
+    department: "Finance",
+    image: "/founders/PranavVerma_Finance.png",
+    bio: "Managing sponsorships, partnerships, and budgeting for a resilient conference.",
+    linkedin: "https://www.linkedin.com/in/pranav-verma-136309371",
+    writeup: `Hi, I’m Pranav Verma, a member of the Finance Team at VOFMUN 2026, where I help manage budgeting, sponsorship, and partnerships to ensure the smooth execution and financial sustainability of the conference.
+
+Over the years, I’ve been deeply involved in student leadership and event management, including co-organizing my school’s QuizBowl competition, which drew participation across year levels and required detailed budgeting, scheduling, and logistics planning. I also played a key role in helping plan a large-scale community Holi event, where I coordinated vendors, managed costs, and handled outreach to sponsors - an experience that strengthened my financial and organizational skills.
+
+Beyond event management, I’m passionate about sustainability and innovation. My Personal Project focused on creating eco-friendly fast food packaging, and my Community Project involved building a mini hydroponic farm at school. These initiatives reflect my interest in using creativity and problem-solving to drive real impact.
+
+At VOFMUN, I aim to bring that same precision and initiative - ensuring every financial decision contributes to a conference that’s not only professional and impactful, but also forward-thinking and inclusive.`,
   },
   {
     name: "Noaf Qassem",
     role: "<strong>Deputy of Finance</strong>",
     department: "Finance",
     image: "/founders/NoafQassem_Finance.png",
-    bio: "Supporting financial planning and budget management to ensure conference sustainability and growth.",
-    linkedin: "https://www.linkedin.com/company/vofmun",
-    email: "noafbintamerqassem@gmail.com",
-    instagram: "https://www.instagram.com/vofmun",
-    achievements: ["Financial Analysis", "Budget Planning", "Sustainability"],
-    quote: "Smart financial decisions build lasting legacies.",
-    writeup:
-      "I'm Noaf Qassem, a Year 11 student at SABIS International School of Choueifat Dubai, and I'm incredibly proud to be serving as the Deputy Head of Finance of Voices of the Future 2026! Being part of the VOFMUN leadership has given me the opportunity to contribute to something meaningful while building valuable skills in organization, teamwork, and strategic planning. I've chosen to take IGCSE Business, AP Economics, and AP Statistics - subjects that reflect my deep interest in global systems, economic theory, and data-driven decision-making. My future aspirations lie in either diplomacy or economics, and I believe that understanding the mechanics of both global policy and financial systems will prepare me to make a real impact in those fields. MUN has always been a space where I've been able to grow—not just as a speaker and thinker, but as a global citizen. I love the way it challenges me to think critically, communicate clearly, and collaborate with others to solve complex issues. Outside of academics, I am an ongoing track and field athlete, which helps shape my perspective on core life skills such as discipline, leadership, and respect. Being part of the VOFMUN team and this great journey has been incredibly exciting, and I'm committed to ensuring the financial planning behind the scenes helps make this conference as smooth, impactful, and unforgettable as possible. Can't wait to see what we accomplish together; hope to see you at VOFMUN 2026!",
+    bio: "Supporting strategic planning and financial stewardship for VOFMUN.",
+    writeup: `I'm Noaf Qassem, a Year 11 student at SABIS International School of Choueifat Dubai, and I'm incredibly proud to be serving as the Deputy of Finance of Voices of the Future 2026! Being part of the VOFMUN leadership has given me the opportunity to contribute to something meaningful while building valuable skills in organization, teamwork, and strategic planning. I've chosen to take IGCSE Business, AP Economics, and AP Statistics - subjects that reflect my deep interest in global systems, economic theory, and data-driven decision-making.
+
+My future aspirations lie in either diplomacy or economics, and I believe that understanding the mechanics of both global policy and financial systems will prepare me to make a real impact in those fields. MUN has always been a space where I've been able to grow - not just as a speaker and thinker, but as a global citizen. I love the way it challenges me to think critically, communicate clearly, and collaborate with others to solve complex issues. Outside of academics, I am an ongoing track and field athlete, which helps shape my perspective on core life skills such as discipline, leadership, and respect.
+
+Being part of the VOFMUN team and this great journey has been incredibly exciting, and I'm committed to ensuring the financial planning behind the scenes helps make this conference as smooth, impactful, and unforgettable as possible. Can't wait to see what we accomplish together; hope to see you at VOFMUN 2026!`,
+  },
+  {
+    name: "Caelyn Harding",
+    role: "<strong>Deputy of Finance</strong>",
+    department: "Finance",
+    image: "/founders/CaelynHarding_Finance.png",
+    bio: "Championing resource planning that elevates every delegate experience.",
+    writeup: `Hey! My name is Caelyn. I go to GEMS Metropole School in Motor City, and I’m in Year 11. I’m currently enrolled in my school’s MUN and will be attending the next conference as a delegate. I’m also part of VOFMUN’s Finance Team! I love to debate, draw, and play the piano, but most importantly, I love helping people. I joined the Finance Team to improve everyone’s experience at VOFMUN while also considering the financial and organizational aspects. I hope to use my skills to benefit the team and make VOFMUN as memorable as possible!`,
   },
 ];
-
-type SecretariatMember =
-  | (typeof foundingSecretariat)[number]
-  | (typeof leadershipTeam)[number]
-  | (typeof deputies)[number];
 
 const getDepartmentIcon = (department: string) => {
   switch (department) {
@@ -276,6 +262,8 @@ const getDepartmentIcon = (department: string) => {
       return Users;
     case "Technology":
       return Cpu;
+    case "Conference Affairs":
+      return Workflow;
     case "Delegate Affairs":
       return Workflow;
     case "Logistics":
@@ -311,6 +299,13 @@ const getDepartmentColor = (department: string) => {
         text: "text-white",
         border: "border-green-500",
         badgeClass: "bg-green-600 text-white border-0",
+      };
+    case "Conference Affairs":
+      return {
+        bg: "bg-gradient-to-br from-teal-500 to-teal-700",
+        text: "text-white",
+        border: "border-teal-500",
+        badgeClass: "bg-teal-600 text-white border-0",
       };
     case "Delegate Affairs":
       return {
@@ -483,8 +478,8 @@ export default function SecretariatPage() {
               </span>
             </div>
 
-            <div className="flex justify-center space-x-4">
-              {member.linkedin && (
+            {member.linkedin && (
+              <div className="flex justify-center">
                 <a
                   href={member.linkedin}
                   target="_blank"
@@ -495,32 +490,8 @@ export default function SecretariatPage() {
                 >
                   <Linkedin className={`${socialIconSize} text-white`} />
                 </a>
-              )}
-              {member.email && (
-                <a
-                  href={`mailto:${member.email}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${socialButtonSize} bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 hover:scale-110 shadow-md`}
-                  aria-label={`Email ${member.name}`}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Mail className={`${socialIconSize} text-white`} />
-                </a>
-              )}
-              {member.instagram && (
-                <a
-                  href={member.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${socialButtonSize} bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#dd2a7b] rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-[#e6683c] hover:via-[#dd2a7b] hover:to-[#8134af] transition-all duration-300 hover:scale-110 shadow-md`}
-                  aria-label={`${member.name} Instagram`}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Instagram className={`${socialIconSize} text-white`} />
-                </a>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -571,7 +542,7 @@ export default function SecretariatPage() {
               Heads of Departments
             </h2>
             <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-              Department heads transform our mission into action across technology, logistics, finance, media, and delegate affairs.
+              Department heads transform our mission into action across technology, committees, logistics, media, and finance.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {leadershipTeam.map((member, index) =>
@@ -649,42 +620,16 @@ export default function SecretariatPage() {
                     </a>
                   )}
                 </p>
-                {(modalFounder.linkedin ||
-                  modalFounder.email ||
-                  modalFounder.instagram) && (
-                  <div className="flex space-x-4 pt-6 border-t mt-6">
-                    {modalFounder.linkedin && modalFounder.linkedin.trim() && (
-                      <a
-                        href={modalFounder.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition hover:scale-105"
-                      >
-                        <Linkedin className="w-5 h-5" /> <span>LinkedIn</span>
-                      </a>
-                    )}
-                    {modalFounder.email && modalFounder.email.trim() && (
-                      <a
-                        href={`mailto:${modalFounder.email}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg shadow-lg transition hover:scale-105"
-                      >
-                        <Mail className="w-5 h-5" /> <span>Email</span>
-                      </a>
-                    )}
-                    {modalFounder.instagram &&
-                      modalFounder.instagram.trim() && (
-                        <a
-                          href={modalFounder.instagram}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-lg shadow-lg transition hover:scale-105"
-                        >
-                          <Instagram className="w-5 h-5" />{" "}
-                          <span>Instagram</span>
-                        </a>
-                      )}
+                {modalFounder.linkedin && modalFounder.linkedin.trim() && (
+                  <div className="flex pt-6 border-t mt-6">
+                    <a
+                      href={modalFounder.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition hover:scale-105"
+                    >
+                      <Linkedin className="w-5 h-5" /> <span>LinkedIn</span>
+                    </a>
                   </div>
                 )}
               </div>
