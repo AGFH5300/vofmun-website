@@ -229,7 +229,7 @@ export function ProofOfPaymentForm() {
                       setFullName(event.target.value)
                       clearError("fullName")
                     }}
-                    placeholder="Enter the payer's full name"
+                    placeholder="Enter full name"
                     className={errors.fullName ? "border-red-500" : ""}
                   />
                   {errors.fullName && <p className="text-sm text-red-500">{errors.fullName}</p>}
