@@ -3,7 +3,12 @@ import { randomUUID } from 'crypto'
 import { z } from 'zod'
 
 import { createClient } from '@/utils/supabase/server'
-import { getPaymentProofBucketName } from '@/utils/supabase/storage'
+import {
+  ensurePaymentProofBucketExists,
+  getManualBucketSetupChecklist,
+  getPaymentProofBucketName,
+  PaymentProofBucketError,
+} from '@/utils/supabase/storage'
 
 export const runtime = 'nodejs'
 
@@ -29,16 +34,7 @@ export async function POST(request: NextRequest) {
     const escapedEmailPattern = normalizedEmail.replace(/([%_\\])/g, '\\$1')
 
     const { data: matchingUsers, error: lookupError } = await supabase
-      .from('users')
-      .select('id, payment_proof_storage_path')
-      .ilike('email', escapedEmailPattern)
-
-    if (lookupError) {
-      throw new Error('Failed to verify registration before uploading proof: ' + lookupError.message)
-    }
-
-    if (!matchingUsers || matchingUsers.length === 0) {
-      return NextResponse.json(
+@@ -41,107 +47,132 @@ export async function POST(request: NextRequest) {
         {
           status: 'not_found',
           message: 'We could not find a registration with that email. Please complete the signup form first.',
@@ -66,6 +62,8 @@ export async function POST(request: NextRequest) {
 
     const paymentProofBucket = getPaymentProofBucketName()
 
+    await ensurePaymentProofBucketExists(paymentProofBucket)
+
     const { error: uploadError } = await supabase.storage
       .from(paymentProofBucket)
       .upload(storagePath, fileBuffer, {
@@ -76,9 +74,10 @@ export async function POST(request: NextRequest) {
     if (uploadError) {
       const normalizedMessage = uploadError.message?.toLowerCase() ?? ''
       if (normalizedMessage.includes('bucket not found')) {
-        throw new Error(
-          `Failed to upload payment proof: Supabase storage bucket "${paymentProofBucket}" was not found.` +
-            ' Please create the bucket in your Supabase project or configure SUPABASE_PAYMENT_PROOF(S)_BUCKET.'
+        const manualSetupMessage = getManualBucketSetupChecklist(paymentProofBucket)
+        throw new PaymentProofBucketError(
+          `Failed to upload payment proof: Supabase storage bucket "${paymentProofBucket}" was not found.\n\n${manualSetupMessage}`,
+          'Payment proof uploads are temporarily unavailable while we finish setting up storage. Please try again later or contact support.'
         )
       }
 
@@ -134,6 +133,18 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     )
   } catch (error) {
+    if (error instanceof PaymentProofBucketError) {
+      console.error('Payment proof bucket misconfiguration:', error.message)
+
+      return NextResponse.json(
+        {
+          status: 'error',
+          message: error.userFacingMessage,
+        },
+        { status: 500 }
+      )
+    }
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
