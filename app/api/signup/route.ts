@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 
 import { createClient } from '@/utils/supabase/server'
+import {
+  ensurePaymentProofBucketExists,
+  getManualBucketPolicyChecklist,
+  getManualBucketSetupChecklist,
+  getPaymentProofBucketName,
+  PaymentProofBucketError,
+} from '@/utils/supabase/storage'
 import { insertUserSchema, delegateDataSchema, chairDataSchema, adminDataSchema } from '@/lib/db/schema'
 import { z } from 'zod'
 
@@ -48,18 +55,39 @@ export async function POST(request: NextRequest) {
 
       const storagePath = `proof-of-payment/${new Date().toISOString().split('T')[0]}/${randomUUID()}-${fileNameWithExtension}`
 
+      const paymentProofBucket = getPaymentProofBucketName()
+
+      await ensurePaymentProofBucketExists(paymentProofBucket)
+
       const { error: uploadError } = await supabase.storage
-        .from('payment-proofs')
+        .from(paymentProofBucket)
         .upload(storagePath, fileBuffer, {
           contentType: paymentConfirmation.mimeType,
           upsert: false,
         })
 
       if (uploadError) {
+        const normalizedMessage = uploadError.message?.toLowerCase() ?? ''
+        if (normalizedMessage.includes('bucket not found')) {
+          const manualSetupMessage = getManualBucketSetupChecklist(paymentProofBucket)
+          throw new PaymentProofBucketError(
+            `Failed to upload payment proof: Supabase storage bucket "${paymentProofBucket}" was not found.\n\n${manualSetupMessage}`,
+            'Payment proof uploads are temporarily unavailable while we finish setting up storage. Please try again later or contact support.'
+          )
+        }
+
+        if (normalizedMessage.includes('row-level security')) {
+          const manualPolicyMessage = getManualBucketPolicyChecklist(paymentProofBucket)
+          throw new PaymentProofBucketError(
+            `Failed to upload payment proof: Supabase rejected the write because of a storage policy.\n\n${manualPolicyMessage}`,
+            'Payment proof uploads are temporarily unavailable while we finish setting up storage. Please try again later or contact support.'
+          )
+        }
+
         throw new Error('Failed to upload payment proof: ' + uploadError.message)
       }
 
-      const { data: publicUrlData } = supabase.storage.from('payment-proofs').getPublicUrl(storagePath)
+      const { data: publicUrlData } = supabase.storage.from(paymentProofBucket).getPublicUrl(storagePath)
 
       paymentProofUrl = publicUrlData?.publicUrl ?? null
       paymentProofStoragePath = storagePath
@@ -206,10 +234,22 @@ export async function POST(request: NextRequest) {
       console.error('🔧 Solution: Run the SQL setup script in your Supabase dashboard')
     }
     
+    if (error instanceof PaymentProofBucketError) {
+      console.error('Payment proof bucket misconfiguration:', error.message)
+
+      return NextResponse.json(
+        {
+          message: error.userFacingMessage,
+          status: 'error'
+        },
+        { status: 500 }
+      )
+    }
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
-          message: 'Validation error', 
+        {
+          message: 'Validation error',
           errors: error.errors,
           status: 'error'
         },
