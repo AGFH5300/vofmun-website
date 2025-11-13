@@ -47,6 +47,27 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at').defaultNow(),
 })
 
+export const schoolDelegations = pgTable('school_delegations', {
+  id: serial('id').primaryKey(),
+  schoolName: varchar('school_name', { length: 255 }).notNull(),
+  schoolAddress: text('school_address').notNull(),
+  schoolEmail: varchar('school_email', { length: 255 }).notNull(),
+  schoolCountry: varchar('school_country', { length: 100 }).notNull(),
+  directorName: varchar('director_name', { length: 255 }).notNull(),
+  directorEmail: varchar('director_email', { length: 255 }).notNull(),
+  directorPhone: varchar('director_phone', { length: 50 }).notNull(),
+  numFaculty: integer('num_faculty').notNull(),
+  numDelegates: integer('num_delegates').notNull(),
+  additionalRequests: text('additional_requests'),
+  heardAbout: text('heard_about'),
+  termsAccepted: boolean('terms_accepted').notNull().default(false),
+  spreadsheetFileName: text('spreadsheet_file_name').notNull(),
+  spreadsheetStoragePath: text('spreadsheet_storage_path').notNull(),
+  spreadsheetMimeType: varchar('spreadsheet_mime_type', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
 // Zod schemas for validation (manual definition to fix drizzle-zod compatibility)
 export const insertUserSchema = z.object({
   email: z.string().email(),
@@ -72,6 +93,24 @@ export const insertUserSchema = z.object({
 })
 
 export const selectUserSchema = createSelectSchema(users)
+
+export const insertSchoolDelegationSchema = z.object({
+  schoolName: z.string().min(1, 'School name is required'),
+  schoolAddress: z.string().min(1, 'School address is required'),
+  schoolEmail: z.string().email('Enter a valid school email address'),
+  schoolCountry: z.string().min(1, 'School country is required'),
+  directorName: z.string().min(1, 'Director name is required'),
+  directorEmail: z.string().email('Enter a valid director email address'),
+  directorPhone: z.string().min(1, 'Director phone number is required'),
+  numFaculty: z.number().int().min(0, 'Number of faculty must be zero or higher'),
+  numDelegates: z.number().int().min(0, 'Number of delegates must be zero or higher'),
+  additionalRequests: z.string().optional().nullable(),
+  heardAbout: z.string().optional().nullable(),
+  termsAccepted: z.boolean().refine((value) => value === true, 'Terms and conditions must be accepted'),
+  spreadsheetFileName: z.string().min(1, 'Spreadsheet file name is required'),
+  spreadsheetStoragePath: z.string().min(1, 'Spreadsheet storage path is required'),
+  spreadsheetMimeType: z.string().min(1, 'Spreadsheet MIME type is required'),
+})
 
 // Role-specific data schemas
 export const delegateDataSchema = z.object({
@@ -120,3 +159,5 @@ export type InsertUser = z.infer<typeof insertUserSchema>
 export type DelegateData = z.infer<typeof delegateDataSchema>
 export type ChairData = z.infer<typeof chairDataSchema>
 export type AdminData = z.infer<typeof adminDataSchema>
+export type SchoolDelegation = typeof schoolDelegations.$inferSelect
+export type InsertSchoolDelegation = z.infer<typeof insertSchoolDelegationSchema>
