@@ -24,6 +24,7 @@ import {
   Sparkles,
   UploadCloud,
   X,
+  Building2,
 } from "lucide-react"
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -33,6 +34,7 @@ import { PhoneInput } from "@/components/phone-input"
 import { SchoolSelect } from "@/components/school-select"
 import { AIExperienceModal } from "@/components/ai-experience-modal"
 import { FileText, Shield, AlertCircle } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 type Role = "delegate" | "chair" | "admin" | null
 
@@ -640,6 +642,23 @@ export function SignupFormNew() {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
+          <Alert className="mb-6 bg-blue-50 border-blue-200 text-blue-900">
+            <Building2 className="h-5 w-5" />
+            <AlertTitle>Registering a school delegation?</AlertTitle>
+            <AlertDescription className="text-blue-800 space-y-2">
+              <p>
+                Schools can submit a consolidated delegation application with spreadsheet uploads via our dedicated signup form.
+              </p>
+              <Button
+                asChild
+                size="sm"
+                variant="outline"
+                className="border-blue-300 text-blue-800 hover:bg-blue-100"
+              >
+                <Link href="/signup/school">Go to School Delegation Signup</Link>
+              </Button>
+            </AlertDescription>
+          </Alert>
           <div className="text-center mb-4 sm:mb-8">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Choose Your Role</h2>
             <p className="text-gray-600 text-sm sm:text-base">Select the role you'd like to apply for at VOFMUN 2026</p>
