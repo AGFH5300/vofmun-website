@@ -46,7 +46,76 @@ const sanitizeFileName = (fileName: string) => {
   return { safeName, hasExtension }
 }
 
+const inferSpreadsheetExtension = (mimeType: string) => {
+  const normalized = mimeType.toLowerCase().split(';')[0]?.trim() ?? ''
+
+  const knownExtensions: Record<string, string> = {
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+    'application/vnd.ms-excel': 'xls',
+    'application/vnd.ms-excel.sheet.macroenabled.12': 'xlsm',
+    'application/vnd.oasis.opendocument.spreadsheet': 'ods',
+    'text/csv': 'csv',
+    'application/csv': 'csv',
+    'text/tab-separated-values': 'tsv',
+    'application/json': 'json',
+  }
+
+  if (normalized in knownExtensions) {
+    return knownExtensions[normalized]
+  }
+
+  const slashIndex = normalized.lastIndexOf('/')
+  if (slashIndex !== -1 && slashIndex < normalized.length - 1) {
+    return normalized.slice(slashIndex + 1)
+  }
+
+  return 'xlsx'
+}
+
 let ensureSpreadsheetUrlColumnPromise: Promise<boolean> | null = null
+let warnedAboutMissingPublicBase = false
+
+const joinUrlParts = (...parts: string[]) => {
+  if (parts.length === 0) {
+    return ''
+  }
+
+  return parts
+    .map((part, index) => {
+      const trimmed = part.trim()
+      if (trimmed.length === 0) {
+        return ''
+      }
+
+      if (index === 0) {
+        return trimmed.replace(/\/+$/, '')
+      }
+
+      return trimmed.replace(/^\/+/, '').replace(/\/+$/, '')
+    })
+    .filter((part) => part.length > 0)
+    .join('/')
+}
+
+const getStoragePublicBaseUrl = () => {
+  const directBaseCandidates = [
+    process.env.NEXT_PUBLIC_SUPABASE_STORAGE_PUBLIC_URL,
+    process.env.SUPABASE_STORAGE_PUBLIC_URL,
+  ]
+
+  const directBase = directBaseCandidates.find((value) => value && value.trim().length > 0)
+  if (directBase) {
+    return directBase.trim().replace(/\/+$/, '')
+  }
+
+  const supabaseUrlCandidates = [process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_URL]
+  const supabaseUrl = supabaseUrlCandidates.find((value) => value && value.trim().length > 0)
+  if (supabaseUrl) {
+    return `${supabaseUrl.trim().replace(/\/+$/, '')}/storage/v1/object/public`
+  }
+
+  return null
+}
 
 const ensureSpreadsheetUrlColumn = async (): Promise<boolean> => {
   if (ensureSpreadsheetUrlColumnPromise) {
@@ -104,7 +173,7 @@ export async function POST(request: NextRequest) {
 
     const fileBuffer = Buffer.from(base64Data, 'base64')
     const { safeName, hasExtension } = sanitizeFileName(spreadsheet.fileName)
-    const mimeExtension = spreadsheet.mimeType.split('/')[1] || 'xlsx'
+    const mimeExtension = inferSpreadsheetExtension(spreadsheet.mimeType)
     const fileNameWithExtension = hasExtension ? safeName : `${safeName}.${mimeExtension}`
     const storagePath = `school-delegations/${new Date().toISOString().split('T')[0]}/${randomUUID()}-${fileNameWithExtension}`
 
@@ -130,7 +199,19 @@ export async function POST(request: NextRequest) {
     }
 
     const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(storagePath)
-    const spreadsheetPublicUrl = publicUrlData?.publicUrl ?? null
+    let spreadsheetPublicUrl = publicUrlData?.publicUrl ?? null
+
+    if (!spreadsheetPublicUrl) {
+      const baseUrl = getStoragePublicBaseUrl()
+      if (baseUrl) {
+        spreadsheetPublicUrl = joinUrlParts(baseUrl, bucketName, storagePath)
+      } else if (!warnedAboutMissingPublicBase) {
+        console.warn(
+          'Unable to determine Supabase storage public URL base; delegation records will omit spreadsheet_url until configured.'
+        )
+        warnedAboutMissingPublicBase = true
+      }
+    }
 
     const hasSpreadsheetUrlColumn = await ensureSpreadsheetUrlColumn()
     if (!hasSpreadsheetUrlColumn) {
