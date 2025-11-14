@@ -33,7 +33,7 @@ const REQUIRED_COLUMNS = [
   "Delegate Phone Number (with country code)",
   "Delegate Year (Drop down 6-->13)",
   "Delegate MUN Experience (number)",
-  "Dietary Preference (Veg, Non-Veg, or Other - please specify)",
+  "Dietary Preference (Veg, Non-Veg, Other - please specify)",
 ] as const
 
 const TEMPLATE_PATH = "/templates/School Delegate Application Template - VOFMUN I 2026.xlsx"
