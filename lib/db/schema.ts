@@ -64,6 +64,7 @@ export const schoolDelegations = pgTable('school_delegations', {
   spreadsheetFileName: text('spreadsheet_file_name').notNull(),
   spreadsheetStoragePath: text('spreadsheet_storage_path').notNull(),
   spreadsheetMimeType: varchar('spreadsheet_mime_type', { length: 255 }).notNull(),
+  spreadsheetUrl: text('spreadsheet_url').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 })
@@ -110,6 +111,7 @@ export const insertSchoolDelegationSchema = z.object({
   spreadsheetFileName: z.string().min(1, 'Spreadsheet file name is required'),
   spreadsheetStoragePath: z.string().min(1, 'Spreadsheet storage path is required'),
   spreadsheetMimeType: z.string().min(1, 'Spreadsheet MIME type is required'),
+  spreadsheetUrl: z.string().min(1, 'Spreadsheet URL is required'),
 })
 
 // Role-specific data schemas

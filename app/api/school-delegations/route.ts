@@ -85,6 +85,13 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to upload delegation spreadsheet: ' + uploadError.message)
     }
 
+    const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(storagePath)
+    const spreadsheetPublicUrl = publicUrlData?.publicUrl?.trim()
+
+    if (!spreadsheetPublicUrl) {
+      throw new Error('Unable to generate a public URL for the uploaded spreadsheet')
+    }
+
     const normalizedData = insertSchoolDelegationSchema.parse({
       schoolName: rest.schoolName.trim(),
       schoolAddress: rest.schoolAddress.trim(),
@@ -102,6 +109,7 @@ export async function POST(request: NextRequest) {
       spreadsheetStoragePath: storagePath,
       spreadsheetMimeType:
         spreadsheet.mimeType || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      spreadsheetUrl: spreadsheetPublicUrl,
     })
 
     const { error } = await supabase.from('school_delegations').insert([
@@ -121,6 +129,7 @@ export async function POST(request: NextRequest) {
         spreadsheet_file_name: normalizedData.spreadsheetFileName,
         spreadsheet_storage_path: normalizedData.spreadsheetStoragePath,
         spreadsheet_mime_type: normalizedData.spreadsheetMimeType,
+        spreadsheet_url: normalizedData.spreadsheetUrl,
       },
     ])
 
