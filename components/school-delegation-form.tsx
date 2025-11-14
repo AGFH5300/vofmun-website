@@ -31,7 +31,7 @@ const REQUIRED_COLUMNS = [
   "Delegate Email",
   "Delegate Nationality",
   "Delegate Phone Number (with country code)",
-  "Delegate Grade/Year",
+  "Delegate Year (Drop down 6-->13)",
   "Delegate MUN Experience (number)",
   "Dietary Preference (Veg, Non-Veg, or Other - please specify)",
 ] as const
