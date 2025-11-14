@@ -72,7 +72,6 @@ const inferSpreadsheetExtension = (mimeType: string) => {
   return 'xlsx'
 }
 
-let ensureSpreadsheetUrlColumnPromise: Promise<boolean> | null = null
 let warnedAboutMissingPublicBase = false
 
 const joinUrlParts = (...parts: string[]) => {
@@ -117,45 +116,7 @@ const getStoragePublicBaseUrl = () => {
   return null
 }
 
-const ensureSpreadsheetUrlColumn = async (): Promise<boolean> => {
-  if (ensureSpreadsheetUrlColumnPromise) {
-    return ensureSpreadsheetUrlColumnPromise
-  }
-
-  ensureSpreadsheetUrlColumnPromise = (async () => {
-    if (!process.env.DATABASE_URL) {
-      console.warn(
-        'Skipping automatic school_delegations.spreadsheet_url migration because DATABASE_URL is not configured.'
-      )
-      return false
-    }
-
-    try {
-      const result = await db.execute(
-        sql`select 1 from information_schema.columns where table_schema = 'public' and table_name = 'school_delegations' and column_name = 'spreadsheet_url' limit 1`
-      )
-
-      const rows = Array.isArray(result)
-        ? result
-        : 'rows' in result && Array.isArray(result.rows)
-          ? result.rows
-          : []
-
-      if (rows.length > 0) {
-        return true
-      }
-
-      await db.execute(sql`alter table public.school_delegations add column spreadsheet_url text`)
-      console.info('Added missing school_delegations.spreadsheet_url column automatically.')
-      return true
-    } catch (error) {
-      console.error('Failed to ensure school_delegations.spreadsheet_url column exists:', error)
-      return false
-    }
-  })()
-
-  return ensureSpreadsheetUrlColumnPromise
-}
+// Column spreadsheet_url exists in the database schema, no need to check
 
 export async function POST(request: NextRequest) {
   try {
@@ -201,7 +162,8 @@ export async function POST(request: NextRequest) {
     const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(storagePath)
     let spreadsheetPublicUrl = publicUrlData?.publicUrl ?? null
 
-    if (!spreadsheetPublicUrl) {
+    // Always ensure we have a properly formatted URL
+    if (!spreadsheetPublicUrl || spreadsheetPublicUrl.trim().length === 0) {
       const baseUrl = getStoragePublicBaseUrl()
       if (baseUrl) {
         spreadsheetPublicUrl = joinUrlParts(baseUrl, bucketName, storagePath)
@@ -212,12 +174,13 @@ export async function POST(request: NextRequest) {
         warnedAboutMissingPublicBase = true
       }
     }
-
-    const hasSpreadsheetUrlColumn = await ensureSpreadsheetUrlColumn()
-    if (!hasSpreadsheetUrlColumn) {
-      console.warn(
-        'school_delegations.spreadsheet_url column is missing; proceeding without storing the spreadsheet public URL.'
-      )
+    
+    // Ensure the URL is properly formatted (fallback to constructing it manually)
+    if (spreadsheetPublicUrl && !spreadsheetPublicUrl.startsWith('http')) {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+      if (supabaseUrl) {
+        spreadsheetPublicUrl = `${supabaseUrl.trim().replace(/\/+$/, '')}/storage/v1/object/public/${bucketName}/${storagePath}`
+      }
     }
 
     const normalizedData = insertSchoolDelegationSchema.parse({
@@ -256,10 +219,7 @@ export async function POST(request: NextRequest) {
       spreadsheet_file_name: normalizedData.spreadsheetFileName,
       spreadsheet_storage_path: normalizedData.spreadsheetStoragePath,
       spreadsheet_mime_type: normalizedData.spreadsheetMimeType,
-    }
-
-    if (hasSpreadsheetUrlColumn) {
-      insertPayload.spreadsheet_url = normalizedData.spreadsheetUrl
+      spreadsheet_url: normalizedData.spreadsheetUrl,
     }
 
     const { error } = await supabase.from('school_delegations').insert([insertPayload])
