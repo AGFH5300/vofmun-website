@@ -20,7 +20,7 @@ export function SignupInfo() {
             <div className="grid grid-cols-1 gap-2 ml-4">
               <div className="flex items-center justify-between">
                 <span className="text-gray-700">Delegates:</span>
-                <Badge className="bg-[#B22222] text-white border-0">155 AED</Badge>
+                <Badge className="bg-[#B22222] text-white border-0">170 AED</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-700">Chairs:</span>
