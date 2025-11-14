@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 
 import { createClient } from '@/utils/supabase/server'
+import { db } from '@/lib/db'
+import { sql } from 'drizzle-orm'
 import {
   DelegationSpreadsheetBucketError,
   ensureDelegationSpreadsheetBucketExists,
@@ -42,6 +44,48 @@ const sanitizeFileName = (fileName: string) => {
   const safeName = trimmed.length > 0 ? trimmed.replace(/[^a-zA-Z0-9._-]/g, '_') : 'delegation'
   const hasExtension = safeName.includes('.')
   return { safeName, hasExtension }
+}
+
+let ensureSpreadsheetUrlColumnPromise: Promise<boolean> | null = null
+
+const ensureSpreadsheetUrlColumn = async (): Promise<boolean> => {
+  if (ensureSpreadsheetUrlColumnPromise) {
+    return ensureSpreadsheetUrlColumnPromise
+  }
+
+  ensureSpreadsheetUrlColumnPromise = (async () => {
+    if (!process.env.DATABASE_URL) {
+      console.warn(
+        'Skipping automatic school_delegations.spreadsheet_url migration because DATABASE_URL is not configured.'
+      )
+      return false
+    }
+
+    try {
+      const result = await db.execute(
+        sql`select 1 from information_schema.columns where table_schema = 'public' and table_name = 'school_delegations' and column_name = 'spreadsheet_url' limit 1`
+      )
+
+      const rows = Array.isArray(result)
+        ? result
+        : 'rows' in result && Array.isArray(result.rows)
+          ? result.rows
+          : []
+
+      if (rows.length > 0) {
+        return true
+      }
+
+      await db.execute(sql`alter table public.school_delegations add column spreadsheet_url text`)
+      console.info('Added missing school_delegations.spreadsheet_url column automatically.')
+      return true
+    } catch (error) {
+      console.error('Failed to ensure school_delegations.spreadsheet_url column exists:', error)
+      return false
+    }
+  })()
+
+  return ensureSpreadsheetUrlColumnPromise
 }
 
 export async function POST(request: NextRequest) {
@@ -86,10 +130,13 @@ export async function POST(request: NextRequest) {
     }
 
     const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(storagePath)
-    const spreadsheetPublicUrl = publicUrlData?.publicUrl?.trim()
+    const spreadsheetPublicUrl = publicUrlData?.publicUrl ?? null
 
-    if (!spreadsheetPublicUrl) {
-      throw new Error('Unable to generate a public URL for the uploaded spreadsheet')
+    const hasSpreadsheetUrlColumn = await ensureSpreadsheetUrlColumn()
+    if (!hasSpreadsheetUrlColumn) {
+      console.warn(
+        'school_delegations.spreadsheet_url column is missing; proceeding without storing the spreadsheet public URL.'
+      )
     }
 
     const normalizedData = insertSchoolDelegationSchema.parse({
@@ -112,26 +159,29 @@ export async function POST(request: NextRequest) {
       spreadsheetUrl: spreadsheetPublicUrl,
     })
 
-    const { error } = await supabase.from('school_delegations').insert([
-      {
-        school_name: normalizedData.schoolName,
-        school_address: normalizedData.schoolAddress,
-        school_email: normalizedData.schoolEmail,
-        school_country: normalizedData.schoolCountry,
-        director_name: normalizedData.directorName,
-        director_email: normalizedData.directorEmail,
-        director_phone: normalizedData.directorPhone,
-        num_faculty: normalizedData.numFaculty,
-        num_delegates: normalizedData.numDelegates,
-        additional_requests: normalizedData.additionalRequests,
-        heard_about: normalizedData.heardAbout,
-        terms_accepted: normalizedData.termsAccepted,
-        spreadsheet_file_name: normalizedData.spreadsheetFileName,
-        spreadsheet_storage_path: normalizedData.spreadsheetStoragePath,
-        spreadsheet_mime_type: normalizedData.spreadsheetMimeType,
-        spreadsheet_url: normalizedData.spreadsheetUrl,
-      },
-    ])
+    const insertPayload: Record<string, unknown> = {
+      school_name: normalizedData.schoolName,
+      school_address: normalizedData.schoolAddress,
+      school_email: normalizedData.schoolEmail,
+      school_country: normalizedData.schoolCountry,
+      director_name: normalizedData.directorName,
+      director_email: normalizedData.directorEmail,
+      director_phone: normalizedData.directorPhone,
+      num_faculty: normalizedData.numFaculty,
+      num_delegates: normalizedData.numDelegates,
+      additional_requests: normalizedData.additionalRequests,
+      heard_about: normalizedData.heardAbout,
+      terms_accepted: normalizedData.termsAccepted,
+      spreadsheet_file_name: normalizedData.spreadsheetFileName,
+      spreadsheet_storage_path: normalizedData.spreadsheetStoragePath,
+      spreadsheet_mime_type: normalizedData.spreadsheetMimeType,
+    }
+
+    if (hasSpreadsheetUrlColumn) {
+      insertPayload.spreadsheet_url = normalizedData.spreadsheetUrl
+    }
+
+    const { error } = await supabase.from('school_delegations').insert([insertPayload])
 
     if (error) {
       throw new Error(error.message)
