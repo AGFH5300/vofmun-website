@@ -608,7 +608,7 @@ export function SignupFormNew() {
       role: "delegate" as Role,
       title: "Delegate",
       icon: Users,
-      price: "155 AED",
+      price: "170 AED",
       details:
         "Delegates are the main participants who represent countries or organizations in various UN committees. You will research positions, debate issues, and work on resolutions.",
     },
