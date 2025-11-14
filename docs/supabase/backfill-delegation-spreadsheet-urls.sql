@@ -14,6 +14,9 @@ declare
   explicit_storage_public_url text := nullif(current_setting('app.settings.supabase_storage_public_url', true), '');
   supabase_url text := nullif(current_setting('app.settings.supabase_url', true), '');
   next_public_supabase_url text := nullif(current_setting('app.settings.next_public_supabase_url', true), '');
+  supabase_site_url text := nullif(current_setting('app.settings.site_url', true), '');
+  project_ref text := nullif(current_setting('app.settings.supabase_project_ref', true), '');
+  alt_project_ref text := nullif(current_setting('app.settings.project_ref', true), '');
   bucket_name text := nullif(current_setting('app.settings.supabase_delegation_spreadsheets_bucket', true), '');
 begin
   if storage_public_url is null then
@@ -26,7 +29,21 @@ begin
     end if;
 
     if supabase_url is null then
-      raise exception 'Supabase URL could not be determined. Please set NEXT_PUBLIC_SUPABASE_URL.';
+      supabase_url := supabase_site_url;
+    end if;
+
+    if supabase_url is null then
+      if project_ref is null then
+        project_ref := alt_project_ref;
+      end if;
+
+      if project_ref is not null then
+        supabase_url := concat('https://', project_ref, '.supabase.co');
+      end if;
+    end if;
+
+    if supabase_url is null then
+      raise exception 'Supabase URL could not be determined. Please set NEXT_PUBLIC_SUPABASE_URL or app.settings.supabase_project_ref.';
     end if;
 
     storage_public_url := rtrim(supabase_url, '/') || '/storage/v1/object/public';
