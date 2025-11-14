@@ -567,6 +567,32 @@ export function SchoolDelegationForm() {
           </div>
 
           <div className="space-y-3">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-3">
+              <h4 className="font-semibold text-amber-800">Important Documents</h4>
+              <p className="text-sm text-amber-700">
+                Please review the official policies before submitting your delegation application:
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open("/pdfs/T&Cs.pdf", "_blank")}
+                  className="bg-white border-amber-300 hover:bg-amber-50 text-amber-800 hover:cursor-pointer hover:text-amber-900"
+                >
+                  Terms &amp; Conditions
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open("/pdfs/CoConduct.pdf", "_blank")}
+                  className="bg-white border-amber-300 hover:bg-amber-50 text-amber-800 hover:cursor-pointer hover:text-amber-900"
+                >
+                  Code of Conduct
+                </Button>
+              </div>
+            </div>
             <div className="flex items-start gap-2">
               <Checkbox
                 id="termsAccepted"
