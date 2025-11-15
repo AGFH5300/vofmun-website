@@ -5,22 +5,22 @@ import { redirect } from "next/navigation"
 import { PasswordGate, type PasswordFormState } from "./password-gate"
 import { PortalContent } from "./portal-content"
 
-const AUTH_COOKIE_NAME = "solstice_archives_auth"
+const AUTH_COOKIE_NAME = "system_auth"
 
 const hashValue = (value: string) => createHash("sha256").update(value).digest("hex")
 
-export default async function SolsticeArchivesPage() {
+export default async function SystemPage() {
   const requiredPassword = process.env.SIGNUP_PORTAL_PASSWORD
 
   if (!requiredPassword) {
     return (
-      <main className="min-h-screen bg-slate-950 text-slate-100">
+      <main className="min-h-screen bg-[#ffecdd] text-slate-900">
         <div className="container mx-auto px-4 py-16">
-          <div className="mx-auto max-w-xl rounded-xl border border-slate-800 bg-slate-900/60 p-8 text-center shadow-2xl">
-            <h1 className="mb-4 text-2xl font-serif font-semibold">Configuration required</h1>
-            <p className="text-sm text-slate-300">
-              Set the <code className="rounded bg-slate-800 px-2 py-1">SIGNUP_PORTAL_PASSWORD</code> environment variable to enable this
-              page.
+          <div className="mx-auto max-w-xl rounded-xl border border-[#B22222]/30 bg-white p-8 text-center shadow-xl">
+            <h1 className="mb-4 text-2xl font-serif font-semibold text-[#B22222]">Configuration required</h1>
+            <p className="text-sm text-slate-600">
+              Set the <code className="rounded bg-slate-100 px-2 py-1 text-slate-900">SIGNUP_PORTAL_PASSWORD</code> environment
+              variable to enable this page.
             </p>
           </div>
         </div>
@@ -57,7 +57,7 @@ export default async function SolsticeArchivesPage() {
       path: "/",
     })
 
-    redirect("/solstice-archives")
+    redirect("/system")
   }
 
   async function signOutAction() {
@@ -65,11 +65,11 @@ export default async function SolsticeArchivesPage() {
 
     const authCookies = await cookies()
     authCookies.delete(AUTH_COOKIE_NAME)
-    redirect("/solstice-archives")
+    redirect("/system")
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <main className="min-h-screen bg-[#ffecdd] text-slate-900">
       <div className="container mx-auto px-4 py-16">
         {isAuthorized ? (
           <PortalContent onSignOut={signOutAction} />
