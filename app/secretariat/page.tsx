@@ -32,7 +32,7 @@ type SecretariatMember = {
 const foundingSecretariat: SecretariatMember[] = [
   {
     name: "Tala Swaidan",
-    role: "<strong>Co-Founder & Secretary-General</strong>",
+    role: "<strong>Founder & Secretary-General</strong>",
     department: "Core",
     image: "/founders/TalaSwaidan_SG.jpg",
     bio: "Co-founder guiding VOFMUN's vision for inclusive and empowering youth diplomacy.",
