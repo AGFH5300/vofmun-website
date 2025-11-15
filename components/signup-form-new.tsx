@@ -630,7 +630,7 @@ export function SignupFormNew() {
   if (!selectedRole) {
     return (
       <Card className="w-full max-w-2xl mx-auto diplomatic-shadow border-0 bg-white/90">
-        <CardHeader className="space-y-3 sm:space-y-4 p-4 sm:p-6">
+        <CardHeader className="space-y-3 sm:space-y-4 p-4 sm:p-6" style={{ paddingBottom: "0px" }}>
           <CardTitle className="text-xl sm:text-2xl font-serif text-center text-gray-900">
             Register for VOFMUN 2026
           </CardTitle>
@@ -638,7 +638,7 @@ export function SignupFormNew() {
             Join the conversation that shapes tomorrow's world
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6">
+        <CardContent className="p-4 sm:p-6" style={{ paddingTop: "0px" }}>
           <Alert className="mb-6 bg-blue-50 border-blue-200 text-blue-900">
             <Building2 className="h-5 w-5" />
             <AlertTitle>Registering a school delegation?</AlertTitle>
