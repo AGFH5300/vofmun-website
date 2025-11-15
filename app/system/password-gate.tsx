@@ -24,7 +24,11 @@ function SubmitButton() {
   const { pending } = useFormStatus()
 
   return (
-    <Button type="submit" className="w-full" disabled={pending}>
+    <Button
+      type="submit"
+      className="w-full bg-[#B22222] text-white hover:bg-[#8B1A1A]"
+      disabled={pending}
+    >
       {pending ? "Verifying..." : "Unlock"}
     </Button>
   )
@@ -35,23 +39,23 @@ export function PasswordGate({ authenticate }: PasswordGateProps) {
 
   return (
     <div className="mx-auto max-w-md">
-      <Card className="border-slate-800 bg-slate-900/70 text-slate-100 shadow-2xl">
+      <Card className="border-[#B22222]/30 bg-white text-slate-900 shadow-2xl">
         <CardHeader className="px-6 py-6">
-          <div className="mb-2 flex items-center gap-2 text-slate-300">
+          <div className="mb-2 flex items-center gap-2 text-[#B22222]/80">
             <Lock className="h-4 w-4" />
             <span className="text-xs uppercase tracking-[0.2em]">Restricted Access</span>
           </div>
-          <CardTitle className="text-2xl font-serif font-semibold text-slate-50">
-            Solstice Archives
+          <CardTitle className="text-2xl font-serif font-semibold text-[#B22222]">
+            System
           </CardTitle>
-          <CardDescription className="text-slate-400">
-            Enter the access phrase to access page.
+          <CardDescription className="text-slate-600">
+            Enter the access phrase to unlock the portal.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 px-6 pb-6">
           <form action={formAction} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-slate-200">
+              <label htmlFor="password" className="text-sm font-medium text-slate-700">
                 Access phrase
               </label>
               <Input
@@ -59,12 +63,12 @@ export function PasswordGate({ authenticate }: PasswordGateProps) {
                 name="password"
                 type="password"
                 placeholder="Enter password"
-                className="bg-slate-950/40 text-slate-100 placeholder:text-slate-500"
+                className="bg-slate-100 text-slate-900 placeholder:text-slate-500"
                 autoComplete="current-password"
                 required
               />
             </div>
-            {state.error && <p className="text-sm text-red-400">{state.error}</p>}
+            {state.error && <p className="text-sm text-red-500">{state.error}</p>}
             <SubmitButton />
           </form>
         </CardContent>
