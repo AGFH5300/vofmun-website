@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -711,23 +711,25 @@ export function SignupFormNew() {
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto diplomatic-shadow border-0 bg-white/90">
-      <CardHeader className="space-y-3 sm:space-y-4 p-4 sm:p-6">
-        <CardTitle className="text-xl sm:text-2xl font-serif text-center text-gray-900">
+    <Card className="w-full max-w-2xl mx-auto diplomatic-shadow border-0 bg-white/90 py-0 gap-0">
+      <CardHeader className="px-4 sm:px-6 py-4 sm:py-6 border-b border-gray-200 bg-white/95">
+        <CardTitle className="text-xl sm:text-2xl font-serif text-gray-900">
           {roleCards.find((r) => r.role === selectedRole)?.title} Registration
         </CardTitle>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => !showSuccessModal && setSelectedRole(null)}
-          disabled={showSuccessModal}
-          className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 md:static md:ml-auto"
-          data-testid="button-back-to-role-selection"
-        >
-          Change Role
-        </Button>
+        <CardAction>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => !showSuccessModal && setSelectedRole(null)}
+            disabled={showSuccessModal}
+            className="text-gray-600 hover:text-gray-800"
+            data-testid="button-back-to-role-selection"
+          >
+            Change Role
+          </Button>
+        </CardAction>
       </CardHeader>
-      <CardContent className="space-y-4 sm:space-6 p-4 sm:p-6">
+      <CardContent className="space-y-4 sm:space-y-6 py-6 px-4 sm:px-6">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-6">
           {/* Personal Information - Common for all roles */}
           <div className="space-y-3 sm:space-4">
