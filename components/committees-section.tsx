@@ -92,7 +92,7 @@ const committees = [
     topics: [
       "Classified! Keep an eye on our website, Instagram, and LinkedIn for updates and teasers :)",
     ],
-    difficulty: "Special Procedure",
+    difficulty: "Crisis",
     delegates: "20-25",
     href: "/committees/icrcc",
   },
@@ -121,6 +121,8 @@ const getDifficultyColor = (difficulty: string) => {
       return "bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900 transition-colors cursor-pointer"
     case "Expert":
       return "bg-purple-100 text-purple-800 hover:bg-purple-200 hover:text-purple-900 transition-colors cursor-pointer"
+    case "Crisis":
+      return "bg-rose-100 text-rose-800 hover:bg-rose-200 hover:text-rose-900 transition-colors cursor-pointer"
     case "Special Procedure":
       return "bg-blue-100 text-blue-800 hover:bg-blue-200 hover:text-blue-900 transition-colors cursor-pointer"
     default:

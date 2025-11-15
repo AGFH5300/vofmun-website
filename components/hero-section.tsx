@@ -65,7 +65,7 @@ export function HeroSection() {
                 <Users className="h-8 w-8 text-primary" />
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">200+</div>
+                <div className="text-2xl font-bold text-primary">250+</div>
                 <div className="text-sm text-muted-foreground">Expected Delegates</div>
               </div>
             </div>

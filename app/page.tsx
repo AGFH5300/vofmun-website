@@ -71,7 +71,7 @@ export default function HomePage() {
                     id="delegate-counter"
                     style={{fontFamily: 'var(--font-dm-sans), sans-serif'}}
                   >
-                    200+
+                    250+
                   </div>
                   <div className="text-sm text-white/90 drop-shadow" style={{fontFamily: 'var(--font-dm-sans), sans-serif'}}>
                     Expected Delegates
