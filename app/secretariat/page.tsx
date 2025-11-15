@@ -29,26 +29,29 @@ type SecretariatMember = {
   websiteLink?: string;
 };
 
+const DEFAULT_LINKEDIN = "https://www.linkedin.com/company/vofmun";
+
 const foundingSecretariat: SecretariatMember[] = [
   {
     name: "Tala Swaidan",
-    role: "<strong>Founder & Secretary-General</strong>",
+    role: "<strong>Founder &<br/>Secretary-General</strong>",
     department: "Core",
     image: "/founders/TalaSwaidan_SG.jpg",
     bio: "Co-founder guiding VOFMUN's vision for inclusive and empowering youth diplomacy.",
-    writeup: `My name is Tala Swaidan. I am a Year 10 student at GEMS Metropole School, and I have the great honor and privilege of serving as the Co-Founder and Secretary-General of Voices of the Future Model United Nations (VOFMUN) - alongside Vihaan, my Co-Founder and the Head of Conference Affairs & Operations.
+    linkedin: "https://www.linkedin.com/in/tala-swaidan-401547216",
+    writeup: `Hello! My name is Tala Swaidan, and I have the great honor and privilege of serving as the Founder and Secretary-General of Voices of the Future Model United Nations (VOFMUN) alongside my fantastic founding secretariat team. 
 
 VOFMUN all began as an abstract idea shared among friends. But with time, dedication, and great effort, it grew into something far more meaningful: a platform for courageous MUN delegates to engage in diplomacy, express their perspectives, and take on global issues with confidence and purpose.
 
-Beyond my work with VOFMUN, I am an active member of my school's Student Council and have been deeply involved in Model United Nations for several years. I also pursue my passions in sports, particularly basketball and kickboxing with MVP recognitions, which have both taught me the value of discipline, teamwork, and perseverance.
+Beyond my work with VOFMUN, I am an active member of my school's Digital Innovation and Technology team, have been deeply involved in Model United Nations for several years and have participated in over 15 Model United Nations conferences, with an extensive range of various awards. Moreover, I am the founder of my school’s STEM Society, where I lead workshops and projects to inspire students to explore science and innovation beyond the classroom. I also pursue my passions in sports, particularly basketball and kickboxing with MVP recognitions, which have both taught me the value of discipline, teamwork, and perseverance. Furthermore, I am deeply passionate about medicine and aspire to pursue it in the future.
 
-I hope to expand my horizons during the next academic year, along with working on the development of the first VOFMUN conference, taking place in January 2026. Through all my endeavors, I strive to foster positive change, empower others, and lead with integrity.
+I hope to expand my horizons during the next academic year, working on initiatives such as GenAid, a youth-led nonprofit initiative dedicated to promoting dignity, hygiene, and health access in underserved communities, and on the first VOFMUN conference, taking place in February 2026. Through all my endeavors, I strive to foster positive change, empower others, and lead with integrity.
 
-As VOFMUN continues to grow, my hope is that it remains a space where young leaders can find their voice, challenge their thinking, and leave inspired to shape a better world. I'm incredibly proud of how far we've come - and even more excited for what's ahead. See you soon!`,
+As VOFMUN continues to grow, my hope is that it remains a space where young leaders can find their voice, challenge their thinking, and leave inspired to shape a better world. VOFMUN strives to empower young people, cultivate leadership, and amplify every voice; the Voices of the Future. I'm incredibly proud of how far we've come - and even more excited for what's ahead. See you soon at VOFMUN 2026!`,
   },
   {
     name: "Vihaan Shukla",
-    role: "<strong>Co-Founder & Head of Conference Affairs & Operations</strong>",
+    role: "<strong>Co-Founder &<br/>Head of Conference Affairs & Operations</strong>",
     department: "Conference Affairs",
     image: "/founders/VihaanShukla_ConferenceAffairs.png",
     bio: "Co-founder overseeing conference operations, logistics, and delegate experience design.",
@@ -419,6 +422,10 @@ export default function SecretariatPage() {
         : "inline-block px-4 py-2 rounded-full text-sm font-medium";
     const socialButtonSize = variant === "deputy" ? "w-9 h-9" : "w-12 h-12";
     const socialIconSize = variant === "deputy" ? "w-4 h-4" : "w-5 h-5";
+    const linkedinUrl = member.linkedin?.trim() || DEFAULT_LINKEDIN;
+    const linkedinLabel = member.linkedin?.trim()
+      ? `${member.name} LinkedIn`
+      : "VOFMUN LinkedIn";
 
     return (
       <div
@@ -478,20 +485,18 @@ export default function SecretariatPage() {
               </span>
             </div>
 
-            {member.linkedin && (
               <div className="flex justify-center">
                 <a
-                  href={member.linkedin}
+                  href={linkedinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`${socialButtonSize} bg-[#0077B5] rounded-full flex items-center justify-center hover:bg-[#005885] transition-all duration-300 hover:scale-110 shadow-md`}
-                  aria-label={`${member.name} LinkedIn`}
+                  aria-label={linkedinLabel}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Linkedin className={`${socialIconSize} text-white`} />
                 </a>
               </div>
-            )}
           </div>
         </div>
       </div>
@@ -582,27 +587,37 @@ export default function SecretariatPage() {
             <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row">
               {/* Left - Image & Department */}
               <div
-                className={`md:w-1/3 ${getDepartmentColor(modalFounder.department).bg} flex flex-col items-center justify-center p-6`}
+                className={`md:w-1/3 ${getDepartmentColor(modalFounder.department).bg} flex flex-col items-center justify-center gap-4 md:gap-5 p-6 md:p-8 text-center`}
               >
-                <div className="relative w-48 h-60 rounded-xl overflow-hidden shadow-2xl">
+                <div className="relative w-full max-w-[14rem] aspect-[3/4] rounded-2xl overflow-hidden shadow-xl border-4 border-white/10">
                   <Image
                     src={modalFounder.image}
                     alt={modalFounder.name}
-                    width={180}
-                    height={220}
-                    className="object-cover rounded-xl"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 60vw, 224px"
                   />
                 </div>
-                <h2 className="text-white text-2xl font-bold mt-4">
+                <h2 className="text-white text-2xl font-bold">
                   {modalFounder.name}
                 </h2>
                 <p
-                  className="text-white opacity-90"
+                  className="text-white/90"
                   dangerouslySetInnerHTML={{ __html: modalFounder.role }}
                 />
-                <span className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 mt-2 text-sm text-white">
+                <span className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-sm text-white">
                   {modalFounder.department}
                 </span>
+                <a
+                  href={modalFounder.linkedin?.trim() || DEFAULT_LINKEDIN}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={modalFounder.linkedin?.trim() ? `${modalFounder.name} LinkedIn` : "VOFMUN LinkedIn"}
+                  className="inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-[#0077B5] shadow-md transition-all hover:bg-white hover:scale-105"
+                >
+                  <Linkedin className="h-4 w-4" />
+                  <span>LinkedIn</span>
+                </a>
               </div>
 
               {/* Right - Content */}
@@ -620,18 +635,6 @@ export default function SecretariatPage() {
                     </a>
                   )}
                 </p>
-                {modalFounder.linkedin && modalFounder.linkedin.trim() && (
-                  <div className="flex pt-6 border-t mt-6">
-                    <a
-                      href={modalFounder.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition hover:scale-105"
-                    >
-                      <Linkedin className="w-5 h-5" /> <span>LinkedIn</span>
-                    </a>
-                  </div>
-                )}
               </div>
 
               {/* Close Button */}
