@@ -78,7 +78,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     void fetchRecords()
 
     const channel = supabase
-      .channel("solstice-archives-users")
+      .channel("system-users")
       .on("postgres_changes", { event: "*", schema: "public", table: "users" }, () => {
         void fetchRecords()
       })
@@ -97,36 +97,40 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Live Operations</p>
-          <h1 className="mt-2 text-3xl font-serif font-semibold text-white">Solstice Archives</h1>
-          <p className="mt-1 max-w-xl text-sm text-slate-400">
+          <p className="text-xs uppercase tracking-[0.3em] text-[#B22222]/70">Live Operations</p>
+          <h1 className="mt-2 text-3xl font-serif font-semibold text-[#B22222]">System</h1>
+          <p className="mt-1 max-w-xl text-sm text-slate-600">
             Real-time overview of all delegate, chair, and admin registrations submitted through the public signup form.
           </p>
         </div>
         <form action={onSignOut}>
-          <Button type="submit" variant="outline" className="gap-2 border-slate-700 text-slate-200 hover:bg-slate-800">
+          <Button
+            type="submit"
+            variant="outline"
+            className="gap-2 border-[#B22222]/40 text-[#B22222] hover:bg-[#B22222]/10 hover:text-[#B22222]"
+          >
             <LogOut className="h-4 w-4" /> Sign out
           </Button>
         </form>
       </div>
 
-      <Card className="border-slate-800 bg-slate-900/70 text-slate-100 shadow-xl">
-        <CardHeader className="flex flex-col gap-2 border-b border-slate-800 px-6 py-6">
-          <CardTitle className="text-xl font-semibold text-slate-50">Registration Snapshot</CardTitle>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-300">
+      <Card className="border-[#B22222]/30 bg-white text-slate-900 shadow-xl">
+        <CardHeader className="flex flex-col gap-2 border-b border-[#B22222]/20 px-6 py-6">
+          <CardTitle className="text-xl font-semibold text-[#B22222]">Registration Snapshot</CardTitle>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
             <span>
-              Total: <strong className="text-slate-100">{totalRegistrations}</strong>
+              Total: <strong className="text-slate-900">{totalRegistrations}</strong>
             </span>
             <span>
-              Paid: <strong className="text-emerald-300">{paidRegistrations}</strong>
+              Paid: <strong className="text-emerald-600">{paidRegistrations}</strong>
             </span>
             <span>
-              Pending: <strong className="text-amber-300">{pendingRegistrations}</strong>
+              Pending: <strong className="text-amber-500">{pendingRegistrations}</strong>
             </span>
             <button
               type="button"
               onClick={() => void fetchRecords()}
-              className="inline-flex items-center gap-1 rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 transition hover:bg-slate-800"
+              className="inline-flex items-center gap-1 rounded-md border border-[#B22222]/30 px-2 py-1 text-xs text-[#B22222] transition hover:bg-[#B22222]/10"
             >
               <RefreshCw className="h-3.5 w-3.5" /> Refresh
             </button>
@@ -143,20 +147,20 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
               <Loader2 className="h-6 w-6 animate-spin" />
             </div>
           ) : error ? (
-            <div className="px-6 py-10 text-center text-sm text-red-400">{error}</div>
+            <div className="px-6 py-10 text-center text-sm text-red-500">{error}</div>
           ) : records.length === 0 ? (
-            <div className="px-6 py-10 text-center text-sm text-slate-400">No registrations found yet.</div>
+            <div className="px-6 py-10 text-center text-sm text-slate-500">No registrations found yet.</div>
           ) : (
-            <Table className="min-w-full text-slate-100">
+            <Table className="min-w-full text-slate-900">
               <TableHeader>
-                <TableRow className="border-slate-800">
-                  <TableHead className="text-slate-300">Name</TableHead>
-                  <TableHead className="text-slate-300">Email</TableHead>
-                  <TableHead className="text-slate-300">Phone</TableHead>
-                  <TableHead className="text-slate-300">Role</TableHead>
-                  <TableHead className="text-slate-300">Payment</TableHead>
-                  <TableHead className="text-slate-300">Proof</TableHead>
-                  <TableHead className="text-slate-300">Submitted</TableHead>
+                <TableRow className="border-[#B22222]/20">
+                  <TableHead className="text-slate-500">Name</TableHead>
+                  <TableHead className="text-slate-500">Email</TableHead>
+                  <TableHead className="text-slate-500">Phone</TableHead>
+                  <TableHead className="text-slate-500">Role</TableHead>
+                  <TableHead className="text-slate-500">Payment</TableHead>
+                  <TableHead className="text-slate-500">Proof</TableHead>
+                  <TableHead className="text-slate-500">Submitted</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -164,22 +168,22 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                   const proofAvailable = Boolean(record.payment_proof_url)
 
                   return (
-                    <TableRow key={record.id} className="border-slate-800/80">
+                    <TableRow key={record.id} className="border-[#B22222]/10">
                       <TableCell>
-                        <div className="font-medium text-slate-100">
+                        <div className="font-medium text-slate-900">
                           {record.first_name} {record.last_name}
                         </div>
                       </TableCell>
                       <TableCell>
                         <Link
                           href={`mailto:${record.email}`}
-                          className="text-slate-300 underline-offset-2 hover:text-slate-100 hover:underline"
+                          className="text-[#B22222] underline-offset-2 hover:text-[#8B1A1A] hover:underline"
                         >
                           {record.email}
                         </Link>
                       </TableCell>
-                      <TableCell className="text-slate-300">{record.phone}</TableCell>
-                      <TableCell className="capitalize text-slate-200">{record.role}</TableCell>
+                      <TableCell className="text-slate-600">{record.phone}</TableCell>
+                      <TableCell className="capitalize text-slate-700">{record.role}</TableCell>
                       <TableCell>
                         <Badge variant={badgeVariantForStatus(record.payment_status)}>
                           {formatPaymentStatus(record.payment_status)}
@@ -191,15 +195,15 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                             href={record.payment_proof_url ?? "#"}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-emerald-300 underline-offset-2 hover:text-emerald-200 hover:underline"
+                            className="text-emerald-600 underline-offset-2 hover:text-emerald-500 hover:underline"
                           >
                             {record.payment_proof_file_name ?? "View proof"}
                           </Link>
                         ) : (
-                          <span className="text-slate-500">Not provided</span>
+                          <span className="text-slate-400">Not provided</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-slate-300">
+                      <TableCell className="text-slate-500">
                         {new Date(record.created_at).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",
