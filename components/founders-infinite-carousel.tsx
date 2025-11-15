@@ -9,17 +9,12 @@ import Image from "next/image"
 const founders = [
   {
     name: "Tala Swaidan",
-    role: "Founder & Secretary-General",
+    role: "Founder, Secretary-General",
     image: "/founders/TalaSwaidan_SG.jpg",
   },
   {
-    name: "Clyde Jared Robis",
-    role: "Deputy Secretary-General & Head of Logistics",
-    image: "/founders/ClydeJaredRobis_Logistics.jpg",
-  },
-  {
     name: "Vihaan Shukla",
-    role: "Founder & Head of Conference Affairs",
+    role: "Co-Founder, Head of Conference Affairs",
     image: "/founders/VihaanShukla_ConferenceAffairs.png",
   },
   {
@@ -33,29 +28,34 @@ const founders = [
     image: "/founders/AryanShah_Committees.jpg",
   },
   {
+    name: "Clyde Jared Robis",
+    role: "Co-Head of Logistics",
+    image: "/founders/ClydeJaredRobis_Logistics.jpg",
+  },
+  {
     name: "Elinore Sweiss",
-    role: "Deputy of Logistics",
+    role: "Co-Head of Logistics",
     image: "/founders/ElinoreSweiss_Logistics.jpg",
   },
   {
-    name: "Muhammad Talha Sohail",
+    name: "Vaibhav K. Mundanat",
+    role: "Co-Head of Media",
+    image: "/founders/VaibhavMundanat_Media.png",
+  },
+  {
+    name: "Gibran Malaeb",
+    role: "Co-Head of Media",
+    image: "/founders/GibranMalaeb_Media.jpg",
+  },
+  {
+    name: "Armaghan Siddiqui",
+    role: "Head of Finance",
+    image: "/founders/MuhammadArmaghanSiddiqui_Finance.png",
+  },
+  {
+    name: "Muhammad Talha Solail",
     role: "Deputy of Committees",
     image: "/founders/MuhammadTalhaSolail_Committees.png",
-  },
-  {
-    name: "Ammiel Lupian",
-    role: "Head of Media",
-    image: "/founders/AmmielLupian_Media.jpg",
-  },
-  {
-    name: "Tamara Moshawrab",
-    role: "Deputy of Media",
-    image: "/founders/TamaraMoshawrab_Media.png",
-  },
-  {
-    name: "Gabrielle Zietsman",
-    role: "Deputy of Logistics",
-    image: "/founders/GabrielleZietsman_Logistics.png",
   },
   {
     name: "Reem Ghanayem",
@@ -63,29 +63,19 @@ const founders = [
     image: "/founders/ReemGhanayem_Logistics.jpg",
   },
   {
+    name: "Gabrielle Zietsman",
+    role: "Deputy of Logistics",
+    image: "/founders/GabrielleZietsman_Logistics.png",
+  },
+  {
+    name: "Ayaan Agrawal",
+    role: "Deputy of Media",
+    image: "/founders/AyaanAgrawal_Media.png",
+  },
+  {
     name: "Hanxiao Yu",
     role: "Deputy of Media",
     image: "/founders/HanxiaoYu_Media.jpg",
-  },
-  {
-    name: "Noaf Qassem",
-    role: "Head of Finance",
-    image: "/founders/NoafQassem_Finance.png",
-  },
-  {
-    name: "Muhammad Armaghan Siddiqui",
-    role: "Deputy of Finance",
-    image: "/founders/MuhammadArmaghanSiddiqui_Finance.png",
-  },
-  {
-    name: "Caelyn Harding",
-    role: "Deputy of Finance",
-    image: "/founders/CaelynHarding_Finance.png",
-  },
-  {
-    name: "Pranav Verma",
-    role: "Deputy of Finance",
-    image: "/founders/PranavVerma_Finance.jpg",
   },
   {
     name: "Jaden Shibu",
@@ -93,19 +83,29 @@ const founders = [
     image: "/founders/JadenShibu_Media.jpg",
   },
   {
-    name: "Gibran Malaeb",
+    name: "Tamara Moshawrab",
     role: "Deputy of Media",
-    image: "/founders/GibranMalaeb_Media.jpg",
+    image: "/founders/TamaraMoshawrab_Media.png",
   },
   {
-    name: "Vaibhav Mundanat",
+    name: "Noya Fareed",
     role: "Deputy of Media",
-    image: "/founders/VaibhavMundanat_Media.png",
+    image: "/founders/NoyaFareed_Media.png",
   },
   {
-    name: "Ayaan Agrawal",
-    role: "Deputy of Media",
-    image: "/founders/AyaanAgrawal_Media.png",
+    name: "Pranav Verma",
+    role: "Deputy of Finance",
+    image: "/founders/PranavVerma_Finance.jpg",
+  },
+  {
+    name: "Noaf Qassem",
+    role: "Deputy of Finance",
+    image: "/founders/NoafQassem_Finance.png",
+  },
+  {
+    name: "Caelyn Harding",
+    role: "Deputy of Finance",
+    image: "/founders/CaelynHarding_Finance.png",
   },
 ]
 
