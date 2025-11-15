@@ -9,6 +9,11 @@ import {
   PaymentProofBucketError,
 } from '@/utils/supabase/storage'
 import { insertUserSchema, delegateDataSchema, chairDataSchema, adminDataSchema } from '@/lib/db/schema'
+import {
+  findReferralSuggestions,
+  isValidReferralCode,
+  normalizeReferralCode,
+} from '@/lib/referral-codes'
 import { z } from 'zod'
 
 export const runtime = 'nodejs'
@@ -121,7 +126,6 @@ export async function POST(request: NextRequest) {
 
     // Process role-specific data
     let roleData = {}
-    let delegateReferralCodes: string[] | null = null
     if (body.selectedRole === 'delegate') {
       const delegateDataParsed = delegateDataSchema.parse(body.delegateData)
       
@@ -141,12 +145,54 @@ export async function POST(request: NextRequest) {
       }
       
       roleData = delegateDataParsed
-      delegateReferralCodes = delegateDataParsed.referralCodes ?? null
     } else if (body.selectedRole === 'chair') {
       roleData = chairDataSchema.parse(body.chairData)
     } else if (body.selectedRole === 'admin') {
       roleData = adminDataSchema.parse(body.adminData)
     }
+
+    const sanitizedReferralCodes = Array.isArray(body.referralCodes)
+      ? body.referralCodes
+          .map((code: unknown) => (typeof code === 'string' ? normalizeReferralCode(code) : ''))
+          .filter((code): code is string => code.length > 0)
+      : []
+
+    const uniqueReferralCodes = Array.from(new Set(sanitizedReferralCodes))
+    const invalidReferralCodes = uniqueReferralCodes.filter((code) => !isValidReferralCode(code))
+
+    if (invalidReferralCodes.length > 0) {
+      const message = invalidReferralCodes
+        .map((code) => {
+          const suggestions = findReferralSuggestions(code)
+          if (suggestions.length === 0) {
+            return `Referral code "${code}" is not recognized.`
+          }
+
+          const suggestionText = suggestions
+            .map((entry) => `${entry.code} (${entry.owner})`)
+            .join(' or ')
+
+          return `Referral code "${code}" is not recognized. Did you mean ${suggestionText}?`
+        })
+        .join(' ')
+
+      return NextResponse.json(
+        {
+          status: 'invalid_referral_codes',
+          message,
+          suggestions: invalidReferralCodes.map((code) => ({
+            code,
+            suggestions: findReferralSuggestions(code).map((entry) => ({
+              code: entry.code,
+              owner: entry.owner,
+            })),
+          })),
+        },
+        { status: 400 },
+      )
+    }
+
+    const referralCodesToStore = uniqueReferralCodes.length > 0 ? uniqueReferralCodes : null
     
     // Prepare the data for Supabase insertion
     const supabaseData = {
@@ -170,7 +216,7 @@ export async function POST(request: NextRequest) {
       delegate_data: body.selectedRole === 'delegate' ? roleData : null,
       chair_data: body.selectedRole === 'chair' ? roleData : null,
       admin_data: body.selectedRole === 'admin' ? roleData : null,
-      delegate_referral_codes: delegateReferralCodes,
+      referral_codes: referralCodesToStore,
       payment_status: normalizedPaymentStatus,
       payment_proof_url: paymentProofUrl,
       payment_proof_storage_path: paymentProofStoragePath,

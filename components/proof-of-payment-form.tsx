@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { UploadCloud, X, Loader2 } from "lucide-react"
+import { UploadCloud, X, Loader2, FileText } from "lucide-react"
 
 const stripePaymentUrl = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_URL ?? ""
 const hasStripePaymentLink = stripePaymentUrl.trim().length > 0
@@ -61,10 +61,13 @@ export function ProofOfPaymentForm() {
   }
 
   const handlePaymentProofSelect = (file: File) => {
-    if (!file.type.startsWith("image/")) {
+    const isImage = file.type.startsWith("image/")
+    const isPdf = file.type === "application/pdf"
+
+    if (!isImage && !isPdf) {
       setErrors((prev) => ({
         ...prev,
-        paymentProof: "Please upload an image file (PNG, JPG, or HEIC).",
+        paymentProof: "Please upload an image or PDF file (PNG, JPG, HEIC, or PDF).",
       }))
       return
     }
@@ -73,8 +76,9 @@ export function ProofOfPaymentForm() {
       URL.revokeObjectURL(paymentProofPreview)
     }
 
+    const objectUrl = URL.createObjectURL(file)
     setPaymentProofFile(file)
-    setPaymentProofPreview(URL.createObjectURL(file))
+    setPaymentProofPreview(objectUrl)
     clearError("paymentProof")
   }
 
@@ -360,14 +364,14 @@ export function ProofOfPaymentForm() {
                   {isDragActive && (
                     <div className="absolute inset-0 rounded-xl bg-[#B22222]/10 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
                       <UploadCloud className="h-10 w-10 text-[#B22222] animate-bounce" />
-                      <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop image to upload</p>
+                      <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop file to upload</p>
                     </div>
                   )}
 
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,.pdf"
                     className="hidden"
                     onChange={(event) => {
                       const file = event.target.files?.[0]
@@ -380,31 +384,70 @@ export function ProofOfPaymentForm() {
 
                   {paymentProofPreview ? (
                     <div className="w-full flex flex-col items-center space-y-3">
-                      <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={paymentProofPreview} alt="Payment proof preview" className="h-48 w-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            resetPaymentProof()
-                          }}
-                          className="absolute top-2 right-2 inline-flex items-center space-x-1 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white shadow"
-                        >
-                          <X className="h-3 w-3" />
-                          <span>Remove</span>
-                        </button>
-                      </div>
-                      <p className="text-sm font-medium text-gray-700">{paymentProofFile?.name}</p>
-                      <p className="text-xs text-gray-500">Click or drop another file to replace your upload.</p>
+                      {paymentProofFile?.type === "application/pdf" ? (
+                        <div className="w-full max-w-sm rounded-lg border border-green-200 bg-white p-6 text-center shadow-sm space-y-4">
+                          <FileText className="mx-auto h-12 w-12 text-[#B22222]" />
+                          <p className="text-sm font-medium text-gray-700 break-words">{paymentProofFile?.name}</p>
+                          <div className="flex flex-col sm:flex-row justify-center gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                if (paymentProofPreview) {
+                                  window.open(paymentProofPreview, "_blank", "noopener,noreferrer")
+                                }
+                              }}
+                            >
+                              View PDF
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                resetPaymentProof()
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={paymentProofPreview} alt="Payment proof preview" className="h-48 w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              resetPaymentProof()
+                            }}
+                            className="absolute top-2 right-2 inline-flex items-center space-x-1 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white shadow"
+                          >
+                            <X className="h-3 w-3" />
+                            <span>Remove</span>
+                          </button>
+                        </div>
+                      )}
+                      {paymentProofFile?.type !== "application/pdf" && (
+                        <p className="text-sm font-medium text-gray-700">{paymentProofFile?.name}</p>
+                      )}
+                      <p className="text-xs text-gray-500 text-center">
+                        {paymentProofFile?.type === "application/pdf"
+                          ? "Click “View PDF” to confirm the document or drop another file to replace your upload."
+                          : "Click or drop another file to replace your upload."}
+                      </p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center space-y-3">
                       <UploadCloud className="h-10 w-10 text-[#B22222]" />
                       <p className="text-sm text-gray-700">
-                        Drag & drop your payment proof image here, or <span className="font-semibold text-[#B22222]">browse</span>
+                        Drag & drop your payment proof file here, or <span className="font-semibold text-[#B22222]">browse</span>
                       </p>
-                      <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC • Max size 10MB</p>
+                      <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC, PDF • Max size 10MB</p>
                     </div>
                   )}
                 </div>
@@ -417,11 +460,7 @@ export function ProofOfPaymentForm() {
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 space-y-2">
               <p>You indicated you have not paid yet. Please complete the payment before uploading a receipt.</p>
               <p>
-                When you're ready, return to this page or upload your receipt through the{" "}
-                <Link href="/signup" className="font-semibold text-[#B22222] underline-offset-4 hover:underline">
-                  registration form
-                </Link>
-                .
+                Once you have your receipt, return to this page to upload it for verification, or you will not be permitted to attend the conference.
               </p>
             </div>
           )}
