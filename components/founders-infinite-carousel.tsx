@@ -90,7 +90,7 @@ const founders = [
   {
     name: "Noya Fareed",
     role: "Deputy of Media",
-    image: "/founders/NoyaFareed_Media.png",
+    image: "/founders/NoyaFareed_Media.jpeg",
   },
   {
     name: "Pranav Verma",
