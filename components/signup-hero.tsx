@@ -48,7 +48,7 @@ export function SignupHero() {
                 <Users className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
               </div>
               <div className="text-center">
-                <div className="font-semibold text-gray-900 text-sm sm:text-base">200+ Delegates</div>
+                <div className="font-semibold text-gray-900 text-sm sm:text-base">250+ Delegates</div>
                 <div className="text-xs sm:text-sm text-gray-600">Expected Attendance</div>
               </div>
             </div>

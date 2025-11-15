@@ -242,7 +242,7 @@ export function FeaturesSlideshow() {
   }
 
   return (
-    <div className="relative bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 max-w-4xl mx-auto overflow-hidden">
+    <div className="relative bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 max-w-4xl mx-auto overflow-visible sm:overflow-hidden">
       {/* Navigation Arrows */}
       <button
         onClick={goToPrevious}

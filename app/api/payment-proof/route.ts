@@ -16,11 +16,19 @@ const paymentProofSchema = z.object({
   email: z.string().email('Please provide the email you used to register'),
   fullName: z.string().min(1, "Payment confirmation requires the payer's name"),
   role: z.enum(['delegate', 'chair', 'admin']),
-  paymentProof: z.object({
-    fileName: z.string().min(1),
-    mimeType: z.string().min(1),
-    dataUrl: z.string().regex(/^data:.*;base64,.+/, 'Invalid payment proof format'),
-  }),
+  paymentProof: z
+    .object({
+      fileName: z.string().min(1),
+      mimeType: z.string().min(1),
+      dataUrl: z.string().regex(/^data:.*;base64,.+/, 'Invalid payment proof format'),
+    })
+    .refine(
+      (proof) => proof.mimeType.startsWith('image/') || proof.mimeType === 'application/pdf',
+      {
+        message: 'Payment proof must be an image or PDF file.',
+        path: ['mimeType'],
+      },
+    ),
 })
 
 export async function POST(request: NextRequest) {

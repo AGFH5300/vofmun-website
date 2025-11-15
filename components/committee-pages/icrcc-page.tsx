@@ -46,7 +46,7 @@ export function ICRCCPage() {
                   </h1>
                   <p className="text-gray-600">International Cybersecurity Response Crisis Council</p>
                 </div>
-                <Badge className="bg-blue-100 text-blue-800">Special Procedure</Badge>
+                <Badge className="bg-rose-100 text-rose-800">Crisis</Badge>
               </div>
 
               <p className="text-lg text-gray-700 leading-relaxed">
@@ -133,7 +133,7 @@ export function ICRCCPage() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-700">Difficulty Level:</span>
-                      <Badge className="bg-blue-100 text-blue-800">Special Procedure</Badge>
+                      <Badge className="bg-rose-100 text-rose-800">Crisis</Badge>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-700">Expected Delegates:</span>
