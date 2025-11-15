@@ -39,7 +39,7 @@ export function ClientScripts() {
     const delegateCounter = document.getElementById("delegate-counter")
     if (delegateCounter) {
       let count = 0
-      const target = 200
+      const target = 250
       const increment = target / 100
 
       const updateCounter = () => {
@@ -48,7 +48,7 @@ export function ClientScripts() {
           delegateCounter.textContent = Math.floor(count).toString()
           requestAnimationFrame(updateCounter)
         } else {
-          delegateCounter.textContent = "200+"
+          delegateCounter.textContent = "250+"
         }
       }
 

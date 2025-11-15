@@ -137,11 +137,11 @@ export function SignupInfo() {
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <span className="text-sm text-blue-100">Email:</span>
-              <span className="text-sm font-medium text-white">contact@vofmun.org</span>
+              <span className="text-sm font-medium text-white">conference@vofmun.org</span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-blue-100">Response Time:</span>
-              <span className="text-sm font-medium text-white">Within 24 hours</span>
+              <span className="text-sm font-medium text-white">1-5 business days</span>
             </div>
           </div>
         </CardContent>
