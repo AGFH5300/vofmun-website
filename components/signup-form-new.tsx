@@ -85,12 +85,10 @@ export function SignupFormNew() {
 
   const [hasPaid, setHasPaid] = useState<"yes" | "no" | "">("")
   const [paymentFullName, setPaymentFullName] = useState("")
-  const [paymentRole, setPaymentRole] = useState<Role | "">("")
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null)
   const [paymentProofPreview, setPaymentProofPreview] = useState<string | null>(null)
   const [isDragActive, setIsDragActive] = useState(false)
   const [hasEditedFullName, setHasEditedFullName] = useState(false)
-  const [hasEditedPaymentRole, setHasEditedPaymentRole] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [lastPaymentStatus, setLastPaymentStatus] = useState<"yes" | "no" | null>(null)
 
@@ -131,6 +129,13 @@ export function SignupFormNew() {
     { key: "committee3" as const, label: "Third Choice", required: false },
   ]
 
+  const paymentProofIsPdf =
+    !!paymentProofFile &&
+    (paymentProofFile.type === "application/pdf" ||
+      paymentProofFile.name.toLowerCase().endsWith(".pdf"))
+
+  const paymentProofIsImage = !!paymentProofFile && paymentProofFile.type.startsWith("image/")
+
   useEffect(() => {
     const combinedName = [formData.firstName, formData.lastName]
       .filter(Boolean)
@@ -141,12 +146,6 @@ export function SignupFormNew() {
       setPaymentFullName(combinedName)
     }
   }, [formData.firstName, formData.lastName, hasEditedFullName])
-
-  useEffect(() => {
-    if (!hasEditedPaymentRole && selectedRole) {
-      setPaymentRole(selectedRole)
-    }
-  }, [selectedRole, hasEditedPaymentRole])
 
   useEffect(() => {
     return () => {
@@ -166,10 +165,8 @@ export function SignupFormNew() {
       setIsDragActive(false)
       setPaymentFullName("")
       setHasEditedFullName(false)
-      setPaymentRole("")
-      setHasEditedPaymentRole(false)
       setErrors((prev) => {
-        const { paymentFullName, paymentRole, paymentProof, paymentStatus, ...rest } = prev
+        const { paymentFullName, paymentProof, paymentStatus, ...rest } = prev
         return rest
       })
     }
@@ -192,10 +189,14 @@ export function SignupFormNew() {
   }
 
   const handlePaymentProofSelect = (file: File) => {
-    if (!file.type.startsWith("image/")) {
+    const isImage = file.type.startsWith("image/")
+    const isPdf =
+      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+
+    if (!isImage && !isPdf) {
       setErrors((prev) => ({
         ...prev,
-        paymentProof: "Please upload an image file (PNG, JPG, or HEIC).",
+        paymentProof: "Please upload a PNG, JPG, HEIC, or PDF file.",
       }))
       return
     }
@@ -205,7 +206,7 @@ export function SignupFormNew() {
     }
 
     setPaymentProofFile(file)
-    setPaymentProofPreview(URL.createObjectURL(file))
+    setPaymentProofPreview(isImage ? URL.createObjectURL(file) : null)
     clearError("paymentProof")
   }
 
@@ -403,10 +404,6 @@ export function SignupFormNew() {
           newErrors.paymentFullName = "Please enter the payer's full name"
         }
 
-        if (!paymentRole) {
-          newErrors.paymentRole = "Please select the role associated with this payment"
-        }
-
         if (!paymentProofFile) {
           newErrors.paymentProof = "Please upload proof of payment before submitting"
         }
@@ -457,12 +454,12 @@ export function SignupFormNew() {
         adminData: selectedRole === "admin" ? adminData : null,
         paymentStatus: hasPaid,
         paymentConfirmation:
-          hasPaid === "yes" && paymentProofDataUrl && paymentRole
+          hasPaid === "yes" && paymentProofDataUrl && selectedRole
             ? {
                 fullName: paymentFullName.trim(),
-                role: paymentRole,
+                role: selectedRole,
                 fileName: paymentProofFile?.name ?? "payment-proof",
-                mimeType: paymentProofFile?.type ?? "image/png",
+                mimeType: paymentProofFile?.type ?? "application/octet-stream",
                 dataUrl: paymentProofDataUrl,
               }
             : null,
@@ -1689,7 +1686,7 @@ export function SignupFormNew() {
             {hasPaid === "yes" && (
               <>
                 <p className="text-sm text-gray-600">
-                  Please upload a clear image of your payment receipt. This helps us verify registrations quickly.
+                  Please upload a clear image or PDF of your payment receipt. This helps us verify registrations quickly.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-1.5 sm:space-y-2">
@@ -1711,29 +1708,6 @@ export function SignupFormNew() {
                     {errors.paymentFullName && <p className="text-sm text-red-500">{errors.paymentFullName}</p>}
                   </div>
 
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <Label className="text-xs sm:text-sm font-medium text-gray-700">
-                      Role Associated with Payment <span className="text-red-500">*</span>
-                    </Label>
-                    <Select
-                      value={paymentRole || undefined}
-                      onValueChange={(value) => {
-                        setPaymentRole(value as Role)
-                        setHasEditedPaymentRole(true)
-                        clearError("paymentRole")
-                      }}
-                    >
-                      <SelectTrigger className={`text-sm sm:text-base ${errors.paymentRole ? "border-red-500" : ""}`}>
-                        <SelectValue placeholder="Select the role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="delegate">Delegate</SelectItem>
-                        <SelectItem value="chair">Chair</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.paymentRole && <p className="text-sm text-red-500">{errors.paymentRole}</p>}
-                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -1759,14 +1733,14 @@ export function SignupFormNew() {
                     {isDragActive && (
                       <div className="absolute inset-0 rounded-xl bg-[#B22222]/10 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
                         <UploadCloud className="h-10 w-10 text-[#B22222] animate-bounce" />
-                        <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop image to upload</p>
+                        <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop file to upload</p>
                       </div>
                     )}
 
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/*,application/pdf"
                       className="hidden"
                       onChange={(event) => {
                         const file = event.target.files?.[0]
@@ -1777,37 +1751,61 @@ export function SignupFormNew() {
                       }}
                     />
 
-                    {paymentProofPreview ? (
-                      <div className="w-full flex flex-col items-center space-y-3">
-                        <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={paymentProofPreview}
-                            alt="Payment proof preview"
-                            className="h-48 w-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation()
-                              resetPaymentProof()
-                            }}
-                            className="absolute top-2 right-2 inline-flex items-center space-x-1 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white shadow"
-                          >
-                            <X className="h-3 w-3" />
-                            <span>Remove</span>
-                          </button>
+                    {paymentProofFile ? (
+                      paymentProofIsImage && paymentProofPreview ? (
+                        <div className="w-full flex flex-col items-center space-y-3">
+                          <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={paymentProofPreview}
+                              alt="Payment proof preview"
+                              className="h-48 w-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                resetPaymentProof()
+                              }}
+                              className="absolute top-2 right-2 inline-flex items-center space-x-1 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white shadow"
+                            >
+                              <X className="h-3 w-3" />
+                              <span>Remove</span>
+                            </button>
+                          </div>
+                          <p className="text-sm font-medium text-gray-700">{paymentProofFile?.name}</p>
+                          <p className="text-xs text-gray-500">Click or drop another file to replace your upload.</p>
                         </div>
-                        <p className="text-sm font-medium text-gray-700">{paymentProofFile?.name}</p>
-                        <p className="text-xs text-gray-500">Click or drop another file to replace your upload.</p>
-                      </div>
+                      ) : (
+                        <div className="w-full flex flex-col items-center space-y-3">
+                          <div className="relative flex w-full max-w-xs flex-col items-center rounded-lg border border-green-200 bg-white p-6 text-center shadow-sm">
+                            <FileText className="h-12 w-12 text-[#B22222]" />
+                            <p className="mt-3 text-sm font-semibold text-gray-700">
+                              Payment proof {paymentProofIsPdf ? "PDF" : "file"} uploaded
+                            </p>
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                resetPaymentProof()
+                              }}
+                              className="mt-4 inline-flex items-center space-x-1 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white shadow"
+                            >
+                              <X className="h-3 w-3" />
+                              <span>Remove</span>
+                            </button>
+                          </div>
+                          <p className="text-sm font-medium text-gray-700 text-center">{paymentProofFile?.name}</p>
+                          <p className="text-xs text-gray-500 text-center">Click or drop another file to replace your upload.</p>
+                        </div>
+                      )
                     ) : (
                       <div className="flex flex-col items-center space-y-3">
                         <UploadCloud className="h-10 w-10 text-[#B22222]" />
                         <p className="text-sm text-gray-700">
-                          Drag & drop your payment proof image here, or <span className="font-semibold text-[#B22222]">browse</span>
+                          Drag & drop your payment proof file here, or <span className="font-semibold text-[#B22222]">browse</span>
                         </p>
-                        <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC • Max size 10MB</p>
+                        <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC, PDF • Max size 10MB</p>
                       </div>
                     )}
                   </div>
