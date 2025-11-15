@@ -53,6 +53,8 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [updatingId, setUpdatingId] = useState<number | null>(null)
+  const [updateError, setUpdateError] = useState<string | null>(null)
 
   const fetchRecords = useCallback(async () => {
     const { data, error: queryError } = await supabase
@@ -70,6 +72,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
 
     setRecords((data as SignupRecord[]) ?? [])
     setError(null)
+    setUpdateError(null)
     setLastUpdated(new Date())
     setLoading(false)
   }, [supabase])
@@ -92,6 +95,37 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const totalRegistrations = records.length
   const paidRegistrations = records.filter((record) => record.payment_status === "paid").length
   const pendingRegistrations = records.filter((record) => record.payment_status === "pending").length
+
+  const handleMarkAsPaid = useCallback(
+    async (recordId: number) => {
+      setUpdateError(null)
+      setUpdatingId(recordId)
+
+      try {
+        const { error: updateError } = await supabase
+          .from("users")
+          .update({ payment_status: "paid" })
+          .eq("id", recordId)
+
+        if (updateError) {
+          setUpdateError("Unable to update payment status. Please try again.")
+          return
+        }
+
+        setRecords((previous) =>
+          previous.map((record) =>
+            record.id === recordId ? { ...record, payment_status: "paid" } : record,
+          ),
+        )
+      } catch (cause) {
+        console.error("Failed to update payment status", cause)
+        setUpdateError("Unable to update payment status. Please try again.")
+      } finally {
+        setUpdatingId(null)
+      }
+    },
+    [supabase],
+  )
 
   return (
     <div className="space-y-8">
@@ -142,6 +176,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
           </div>
         </CardHeader>
         <CardContent className="px-0 pb-6 pt-0">
+          {updateError && <div className="px-6 pt-4 text-sm text-red-500">{updateError}</div>}
           {loading ? (
             <div className="flex justify-center py-16 text-slate-400">
               <Loader2 className="h-6 w-6 animate-spin" />
@@ -161,6 +196,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                   <TableHead className="text-slate-500">Payment</TableHead>
                   <TableHead className="text-slate-500">Proof</TableHead>
                   <TableHead className="text-slate-500">Submitted</TableHead>
+                  <TableHead className="text-slate-500">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -210,6 +246,28 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
+                      </TableCell>
+                      <TableCell>
+                        {record.payment_status === "pending" ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-[#B22222]/30 text-[#B22222] hover:bg-[#B22222]/10"
+                            disabled={updatingId === record.id}
+                            onClick={() => void handleMarkAsPaid(record.id)}
+                          >
+                            {updatingId === record.id ? (
+                              <span className="inline-flex items-center gap-2">
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                Verifying...
+                              </span>
+                            ) : (
+                              "Mark as paid"
+                            )}
+                          </Button>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
                       </TableCell>
                     </TableRow>
                   )
