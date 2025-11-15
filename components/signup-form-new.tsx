@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -34,11 +34,6 @@ import { PhoneInput } from "@/components/phone-input"
 import { SchoolSelect } from "@/components/school-select"
 import { AIExperienceModal } from "@/components/ai-experience-modal"
 import { FileText, Shield, AlertCircle } from "lucide-react"
-import {
-  findReferralSuggestions,
-  isValidReferralCode,
-  normalizeReferralCode,
-} from "@/lib/referral-codes"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 type Role = "delegate" | "chair" | "admin" | null
@@ -48,6 +43,7 @@ type DelegateFormState = {
   committee1: string
   committee2: string
   committee3: string
+  referralCodes: string[]
 }
 
 export function SignupFormNew() {
@@ -103,8 +99,8 @@ export function SignupFormNew() {
     committee1: "",
     committee2: "",
     committee3: "",
+    referralCodes: [""],
   })
-  const [referralCodes, setReferralCodes] = useState<string[]>([""])
 
   const [chairData, setChairData] = useState({
     experiences: [{ conference: "", position: "", year: "", description: "" }],
@@ -196,13 +192,10 @@ export function SignupFormNew() {
   }
 
   const handlePaymentProofSelect = (file: File) => {
-    const isImage = file.type.startsWith("image/")
-    const isPdf = file.type === "application/pdf"
-
-    if (!isImage && !isPdf) {
+    if (!file.type.startsWith("image/")) {
       setErrors((prev) => ({
         ...prev,
-        paymentProof: "Please upload an image or PDF file (PNG, JPG, HEIC, or PDF).",
+        paymentProof: "Please upload an image file (PNG, JPG, or HEIC).",
       }))
       return
     }
@@ -211,9 +204,8 @@ export function SignupFormNew() {
       URL.revokeObjectURL(paymentProofPreview)
     }
 
-    const objectUrl = URL.createObjectURL(file)
     setPaymentProofFile(file)
-    setPaymentProofPreview(objectUrl)
+    setPaymentProofPreview(URL.createObjectURL(file))
     clearError("paymentProof")
   }
 
@@ -252,22 +244,25 @@ export function SignupFormNew() {
   }
 
   const addReferralCode = () => {
-    setReferralCodes((prev) => [...prev, ""])
-    clearError("referralCodes")
+    setDelegateData((prev) => ({
+      ...prev,
+      referralCodes: [...prev.referralCodes, ""],
+    }))
   }
 
   const updateReferralCode = (index: number, value: string) => {
-    setReferralCodes((prev) => {
-      const nextCodes = [...prev]
-      nextCodes[index] = value.toUpperCase()
-      return nextCodes
+    setDelegateData((prev) => {
+      const nextCodes = [...prev.referralCodes]
+      nextCodes[index] = value
+      return { ...prev, referralCodes: nextCodes }
     })
-    clearError("referralCodes")
   }
 
   const removeReferralCode = (index: number) => {
-    setReferralCodes((prev) => prev.filter((_, i) => i !== index))
-    clearError("referralCodes")
+    setDelegateData((prev) => ({
+      ...prev,
+      referralCodes: prev.referralCodes.filter((_, i) => i !== index),
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -417,32 +412,6 @@ export function SignupFormNew() {
         }
       }
 
-      const sanitizedReferralCodes = referralCodes
-        .map((code) => normalizeReferralCode(code))
-        .filter((code) => code.length > 0)
-
-      const uniqueReferralCodes = Array.from(new Set(sanitizedReferralCodes))
-      const invalidReferralCodes = uniqueReferralCodes.filter((code) => !isValidReferralCode(code))
-
-      if (invalidReferralCodes.length > 0) {
-        const referralErrorMessage = invalidReferralCodes
-          .map((code) => {
-            const suggestions = findReferralSuggestions(code)
-            if (suggestions.length === 0) {
-              return `Referral code "${code}" is not recognized.`
-            }
-
-            const suggestionText = suggestions
-              .map((entry) => `${entry.code} (${entry.owner})`)
-              .join(" or ")
-
-            return `Referral code "${code}" is not recognized. Did you mean ${suggestionText}?`
-          })
-          .join(" ")
-
-        newErrors.referralCodes = referralErrorMessage
-      }
-
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors)
 
@@ -474,6 +443,9 @@ export function SignupFormNew() {
         selectedRole === "delegate"
           ? {
               ...delegateData,
+              referralCodes: delegateData.referralCodes
+                .map((code) => code.trim())
+                .filter((code) => code.length > 0),
             }
           : null
 
@@ -483,7 +455,6 @@ export function SignupFormNew() {
         delegateData: sanitizedDelegateData,
         chairData: selectedRole === "chair" ? chairData : null,
         adminData: selectedRole === "admin" ? adminData : null,
-        referralCodes: uniqueReferralCodes,
         paymentStatus: hasPaid,
         paymentConfirmation:
           hasPaid === "yes" && paymentProofDataUrl && paymentRole
@@ -727,12 +698,7 @@ export function SignupFormNew() {
                     <p className="text-sm text-gray-600 mb-4 flex-1">{card.description}</p>
 
                     <Button
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        setSelectedRole(card.role)
-                      }}
-                      className="w-full vofmun-gradient text-white text-sm font-semibold py-2.5 mt-auto shadow-sm hover:shadow-md transition-all"
+                      className="w-full bg-[#B22222] hover:bg-[#B22222] text-white text-xs py-2 sm:py-2.5 mt-auto"
                       data-testid={`button-${card.role}`}
                     >
                       Select {card.title}
@@ -749,24 +715,22 @@ export function SignupFormNew() {
 
   return (
     <Card className="w-full max-w-2xl mx-auto diplomatic-shadow border-0 bg-white/90">
-      <CardHeader className="p-4 sm:p-6 gap-3 sm:gap-4">
-        <CardTitle className="text-xl sm:text-2xl font-serif text-gray-900 text-center sm:text-left">
+      <CardHeader className="space-y-3 sm:space-y-4 p-4 sm:p-6">
+        <CardTitle className="text-xl sm:text-2xl font-serif text-center text-gray-900">
           {roleCards.find((r) => r.role === selectedRole)?.title} Registration
         </CardTitle>
-        <CardAction>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => !showSuccessModal && setSelectedRole(null)}
-            disabled={showSuccessModal}
-            className="mt-2 sm:mt-0 text-gray-600 hover:text-gray-800"
-            data-testid="button-back-to-role-selection"
-          >
-            Change Role
-          </Button>
-        </CardAction>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => !showSuccessModal && setSelectedRole(null)}
+          disabled={showSuccessModal}
+          className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 md:static md:ml-auto"
+          data-testid="button-back-to-role-selection"
+        >
+          Change Role
+        </Button>
       </CardHeader>
-      <CardContent className="space-y-4 sm:space-5 p-4 sm:p-6">
+      <CardContent className="space-y-4 sm:space-6 p-4 sm:p-6">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-6">
           {/* Personal Information - Common for all roles */}
           <div className="space-y-3 sm:space-4">
@@ -886,60 +850,6 @@ export function SignupFormNew() {
             </div>
           </div>
 
-          {/* Referral Codes - Optional for all roles */}
-          <div id="referralCodes" className="space-y-3 sm:space-4">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div className="space-y-1">
-                <h3 className="text-lg sm:text-xl font-serif font-semibold text-primary">Referral Codes</h3>
-                <p className="text-sm text-muted-foreground">
-                  Enter referral codes shared with you by the VOFMUN Secretariat or ambassadors. Add multiple codes if you have more than one.
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addReferralCode}
-                className="flex items-center gap-2 self-start"
-                data-testid="button-add-referral-code"
-              >
-                <Plus className="h-4 w-4" />
-                Add Code
-              </Button>
-            </div>
-
-            <div className="space-y-2">
-              {referralCodes.map((code, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Input
-                    value={code}
-                    onChange={(event) => updateReferralCode(index, event.target.value)}
-                    placeholder={index === 0 ? "Enter referral code (e.g. AG7KQ)" : "Enter referral code"}
-                    className={`flex-1 ${errors.referralCodes ? "border-red-500" : ""}`}
-                    data-testid={`input-referral-code-${index}`}
-                  />
-                  {referralCodes.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => removeReferralCode(index)}
-                      className="h-9 w-9 text-red-500 border-red-200 hover:bg-red-50"
-                      aria-label={`Remove referral code ${index + 1}`}
-                      data-testid={`button-remove-referral-code-${index}`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-            {errors.referralCodes && <p className="text-sm text-red-500">{errors.referralCodes}</p>}
-            <p className="text-xs text-muted-foreground">
-              Need assistance? Email <a href="mailto:conference@vofmun.org" className="text-[#B22222] font-medium hover:underline">conference@vofmun.org</a> for support.
-            </p>
-          </div>
-
           {selectedRole === "delegate" && (
             <div className="space-y-4 sm:space-6">
               <h3 className="text-lg sm:text-xl font-serif font-semibold text-primary">Delegate Application</h3>
@@ -1054,7 +964,7 @@ export function SignupFormNew() {
                               ) && delegateData[key] !== "icj"
                             }
                           >
-                            ICJ - Special Procedure
+                            ICJ - Advanced
                           </SelectItem>
                           <SelectItem
                             value="icrcc"
@@ -1064,7 +974,7 @@ export function SignupFormNew() {
                               ) && delegateData[key] !== "icrcc"
                             }
                           >
-                            ICRCC - Crisis
+                            ICRCC - Intermediate
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -1073,6 +983,53 @@ export function SignupFormNew() {
                 ))}
               </div>
 
+              <div className="space-y-3 sm:space-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <h4 className="text-md sm:text-lg font-semibold text-gray-700">Referral Codes (Optional)</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Enter referral codes shared with you by any secretariat members. Add multiple codes if you have more than one.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addReferralCode}
+                    className="flex items-center gap-2"
+                    data-testid="button-add-referral-code"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Code
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {delegateData.referralCodes.map((code, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Input
+                        value={code}
+                        onChange={(e) => updateReferralCode(index, e.target.value)}
+                        placeholder="Enter referral code"
+                        className="flex-1"
+                        data-testid={`input-referral-code-${index}`}
+                      />
+                      {delegateData.referralCodes.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeReferralCode(index)}
+                          className="h-9 w-9 text-red-500 border-red-200 hover:bg-red-50"
+                          aria-label={`Remove referral code ${index + 1}`}
+                          data-testid={`button-remove-referral-code-${index}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
@@ -1252,24 +1209,24 @@ export function SignupFormNew() {
                           >
                             UNCSTD - Advanced
                           </SelectItem>
-                        <SelectItem
-                          value="icj"
-                          disabled={
-                            [chairData.committee1, chairData.committee2, chairData.committee3].includes("icj") &&
-                            chairData[`committee${num}` as keyof typeof chairData] !== "icj"
-                          }
-                        >
-                          ICJ - Special Procedure
-                        </SelectItem>
-                        <SelectItem
-                          value="icrcc"
-                          disabled={
-                            [chairData.committee1, chairData.committee2, chairData.committee3].includes("icrcc") &&
-                            chairData[`committee${num}` as keyof typeof chairData] !== "icrcc"
-                          }
-                        >
-                          ICRCC - Crisis
-                        </SelectItem>
+                          <SelectItem
+                            value="icj"
+                            disabled={
+                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("icj") &&
+                              chairData[`committee${num}` as keyof typeof chairData] !== "icj"
+                            }
+                          >
+                            ICJ - Advanced
+                          </SelectItem>
+                          <SelectItem
+                            value="icrcc"
+                            disabled={
+                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("icrcc") &&
+                              chairData[`committee${num}` as keyof typeof chairData] !== "icrcc"
+                            }
+                          >
+                            ICRCC - Intermediate
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1802,14 +1759,14 @@ export function SignupFormNew() {
                     {isDragActive && (
                       <div className="absolute inset-0 rounded-xl bg-[#B22222]/10 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
                         <UploadCloud className="h-10 w-10 text-[#B22222] animate-bounce" />
-                        <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop file to upload</p>
+                        <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop image to upload</p>
                       </div>
                     )}
 
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*,.pdf"
+                      accept="image/*"
                       className="hidden"
                       onChange={(event) => {
                         const file = event.target.files?.[0]
@@ -1822,98 +1779,52 @@ export function SignupFormNew() {
 
                     {paymentProofPreview ? (
                       <div className="w-full flex flex-col items-center space-y-3">
-                        {paymentProofFile?.type === "application/pdf" ? (
-                          <div className="w-full max-w-sm rounded-lg border border-green-200 bg-white p-6 text-center shadow-sm space-y-4">
-                            <FileText className="mx-auto h-12 w-12 text-[#B22222]" />
-                            <p className="text-sm font-medium text-gray-700 break-words">{paymentProofFile?.name}</p>
-                            <div className="flex flex-col sm:flex-row justify-center gap-2">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  if (paymentProofPreview) {
-                                    window.open(paymentProofPreview, "_blank", "noopener,noreferrer")
-                                  }
-                                }}
-                              >
-                                View PDF
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="sm"
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  resetPaymentProof()
-                                }}
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={paymentProofPreview}
-                              alt="Payment proof preview"
-                              className="h-48 w-full object-cover"
-                            />
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation()
-                                resetPaymentProof()
-                              }}
-                              className="absolute top-2 right-2 inline-flex items-center space-x-1 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white shadow"
-                            >
-                              <X className="h-3 w-3" />
-                              <span>Remove</span>
-                            </button>
-                          </div>
-                        )}
-                        {paymentProofFile?.type !== "application/pdf" && (
-                          <p className="text-sm font-medium text-gray-700">{paymentProofFile?.name}</p>
-                        )}
-                        <p className="text-xs text-gray-500 text-center">
-                          {paymentProofFile?.type === "application/pdf"
-                            ? "Click “View PDF” to confirm the document or drop another file to replace your upload."
-                            : "Click or drop another file to replace your upload."}
-                        </p>
+                        <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={paymentProofPreview}
+                            alt="Payment proof preview"
+                            className="h-48 w-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              resetPaymentProof()
+                            }}
+                            className="absolute top-2 right-2 inline-flex items-center space-x-1 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white shadow"
+                          >
+                            <X className="h-3 w-3" />
+                            <span>Remove</span>
+                          </button>
+                        </div>
+                        <p className="text-sm font-medium text-gray-700">{paymentProofFile?.name}</p>
+                        <p className="text-xs text-gray-500">Click or drop another file to replace your upload.</p>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center space-y-3">
                         <UploadCloud className="h-10 w-10 text-[#B22222]" />
                         <p className="text-sm text-gray-700">
-                          Drag & drop your payment proof file here, or <span className="font-semibold text-[#B22222]">browse</span>
+                          Drag & drop your payment proof image here, or <span className="font-semibold text-[#B22222]">browse</span>
                         </p>
-                        <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC, PDF • Max size 10MB</p>
-                    </div>
-                  )}
+                        <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC • Max size 10MB</p>
+                      </div>
+                    )}
+                  </div>
+                  {errors.paymentProof && <p className="text-sm text-red-500">{errors.paymentProof}</p>}
                 </div>
-                <p className="text-xs text-gray-500">
-                  Need to upload later? Visit the{" "}
-                  <Link href="/proof-of-payment" className="font-semibold text-[#B22222] underline-offset-4 hover:underline">
-                    Proof of Payment page
-                  </Link>
-                  .
-                </p>
-                {errors.paymentProof && <p className="text-sm text-red-500">{errors.paymentProof}</p>}
-              </div>
-            </>
-          )}
+              </>
+            )}
 
             {hasPaid === "no" && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 space-y-2">
-                <p>You indicated you have not paid yet. That's okay—please complete your payment after submitting your application.</p>
+                <p>You indicated you have not paid yet. That's okay but please complete your payment after submitting your application.</p>
                 <p>
                   Once you have your receipt, visit the{" "}
                   <Link href="/proof-of-payment" className="font-semibold text-[#B22222] underline-offset-4 hover:underline">
                     Proof of Payment page
                   </Link>{" "}
-                  to upload it for verification, or you will not be permitted to attend the conference.
+                  to upload it for verification.
                 </p>
               </div>
             )}
@@ -2023,8 +1934,8 @@ export function SignupFormNew() {
               committee1: "",
               committee2: "",
               committee3: "",
+              referralCodes: [""],
             });
-            setReferralCodes([""]);
             setChairData({
               experiences: [{ conference: "", position: "", year: "", description: "" }],
               committee1: "",
