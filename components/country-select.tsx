@@ -15,6 +15,7 @@ interface CountrySelectProps {
   className?: string
   showPhoneCode?: boolean
   error?: string
+  hideErrorMessage?: boolean
 }
 
 function FlagImage({ countryCode, countryName }: { countryCode: string; countryName: string }) {
@@ -40,6 +41,7 @@ export function CountrySelect({
   className,
   showPhoneCode = false,
   error,
+  hideErrorMessage = false,
 }: CountrySelectProps) {
   const [open, setOpen] = useState(false)
 
@@ -98,7 +100,7 @@ export function CountrySelect({
           </Command>
         </PopoverContent>
       </Popover>
-      {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+      {error && !hideErrorMessage && <p className="text-sm text-red-500 mt-1">{error}</p>}
     </div>
   )
 }
