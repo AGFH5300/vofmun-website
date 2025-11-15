@@ -1701,7 +1701,7 @@ export function SignupFormNew() {
                         setHasEditedFullName(true)
                         clearError("paymentFullName")
                       }}
-                      placeholder="Enter the name shown on your payment receipt"
+                      placeholder="Full Name (as used in signup)"
                       data-testid="input-payment-full-name"
                       className={`text-sm sm:text-base py-2 sm:py-2.5 ${errors.paymentFullName ? "border-red-500" : ""}`}
                     />
