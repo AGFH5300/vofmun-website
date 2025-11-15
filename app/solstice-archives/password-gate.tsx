@@ -45,7 +45,7 @@ export function PasswordGate({ authenticate }: PasswordGateProps) {
             Solstice Archives
           </CardTitle>
           <CardDescription className="text-slate-400">
-            Enter the access phrase to review live registration submissions.
+            Enter the access phrase to access page.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 px-6 pb-6">
