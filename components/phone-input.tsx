@@ -82,10 +82,11 @@ export function PhoneInput({
             placeholder="Select country"
             showPhoneCode={true}
             error={error}
+            hideErrorMessage
           />
         </div>
         <div className="flex-1 min-w-0 relative">
-          <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground pointer-events-none z-10 bg-background px-1">
+          <div className="absolute left-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none z-10 bg-background px-1">
             {selectedCountry?.phoneCode}
           </div>
           <Input
@@ -94,6 +95,7 @@ export function PhoneInput({
             onChange={handlePhoneChange}
             placeholder={placeholder}
             className={`${className} ${error ? "border-red-500 focus:border-red-500" : ""}`}
+            aria-invalid={Boolean(error)}
             style={{
               paddingLeft: getPaddingLeft(selectedCountry?.phoneCode),
               paddingTop: "7px",
@@ -101,7 +103,7 @@ export function PhoneInput({
           />
         </div>
       </div>
-      
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   )
 }
