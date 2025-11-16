@@ -152,11 +152,15 @@ export async function POST(request: NextRequest) {
       roleData = adminDataSchema.parse(body.adminData)
     }
 
-    const sanitizedReferralCodes = Array.isArray(body.referralCodes)
+    const incomingReferralCodes = Array.isArray(body.referralCodes)
       ? body.referralCodes
-          .map((code: unknown) => (typeof code === 'string' ? normalizeReferralCode(code) : ''))
-          .filter((code): code is string => code.length > 0)
-      : []
+      : Array.isArray(body.delegateData?.referralCodes)
+        ? body.delegateData.referralCodes
+        : []
+
+    const sanitizedReferralCodes = incomingReferralCodes
+      .map((code: unknown) => (typeof code === 'string' ? normalizeReferralCode(code) : ''))
+      .filter((code): code is string => code.length > 0)
 
     const uniqueReferralCodes = Array.from(new Set(sanitizedReferralCodes))
     const invalidReferralCodes = uniqueReferralCodes.filter((code) => !isValidReferralCode(code))
