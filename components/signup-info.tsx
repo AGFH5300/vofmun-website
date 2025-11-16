@@ -33,10 +33,6 @@ export function SignupInfo() {
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-800">Final Deadline:</span>
-            <span className="text-gray-600">February 1, 2026</span>
-          </div>
-          <div className="flex items-center justify-between">
             <span className="text-gray-800">Conference Dates:</span>
             <span className="text-gray-600">February 14-15, 2026</span>
           </div>
