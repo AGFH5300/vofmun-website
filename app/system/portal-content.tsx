@@ -30,10 +30,18 @@ type PortalContentProps = {
   onSignOut: () => Promise<void>
 }
 
-type PaymentStatusValue = "unpaid" | "pending" | "paid" | "flagged" | "need_more_info" | "fake"
+type PaymentStatusValue =
+  | "unpaid"
+  | "pending"
+  | "paid"
+  | "flagged"
+  | "need_more_info"
+  | "fake"
+  | "refunded"
 
 const statusOptions: { value: PaymentStatusValue; label: string }[] = [
   { value: "paid", label: "Confirmed" },
+  { value: "refunded", label: "Refunded" },
   { value: "flagged", label: "Flagged" },
   { value: "need_more_info", label: "Need more info" },
   { value: "fake", label: "Fake" },
@@ -55,6 +63,8 @@ const formatPaymentStatus = (status: PaymentStatusValue | null) => {
       return "Need more info"
     case "fake":
       return "Fake"
+    case "refunded":
+      return "Refunded"
     default:
       return "Unpaid"
   }
@@ -70,6 +80,8 @@ const badgeVariantForStatus = (status: PaymentStatusValue | null) => {
     case "flagged":
     case "fake":
       return "destructive" as const
+    case "refunded":
+      return "secondary" as const
     default:
       return "outline" as const
   }
