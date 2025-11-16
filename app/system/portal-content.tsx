@@ -79,11 +79,21 @@ const badgeVariantForStatus = (status: PaymentStatusValue | null) => {
       return "secondary" as const
     case "flagged":
     case "fake":
-      return "destructive" as const
+      return "outline" as const
     case "refunded":
       return "secondary" as const
     default:
       return "outline" as const
+  }
+}
+
+const badgeClassNameForStatus = (status: PaymentStatusValue | null) => {
+  switch (status) {
+    case "flagged":
+    case "fake":
+      return "border border-[#B22222]/30 bg-white text-[#B22222]"
+    default:
+      return undefined
   }
 }
 
@@ -292,7 +302,10 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                       <TableCell className="text-slate-600">{record.phone}</TableCell>
                       <TableCell className="capitalize text-slate-700">{record.role}</TableCell>
                       <TableCell>
-                        <Badge variant={badgeVariantForStatus(record.payment_status)}>
+                        <Badge
+                          variant={badgeVariantForStatus(record.payment_status)}
+                          className={badgeClassNameForStatus(record.payment_status)}
+                        >
                           {formatPaymentStatus(record.payment_status)}
                         </Badge>
                       </TableCell>
