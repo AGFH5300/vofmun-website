@@ -1,0 +1,73 @@
+import Link from "next/link"
+import { ShieldCheck, UploadCloud, Wallet } from "lucide-react"
+
+import { PAYMENT_DETAILS_ENTRIES, PAYMENT_DETAILS_INTRO, PAYMENT_DETAILS } from "@/lib/payment-details"
+
+export function PaymentDetails() {
+  return (
+    <section className="bg-[#fff8f7] border-y border-[#f7c6c7]/60">
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-11 w-11 rounded-full bg-[#B22222]/10 text-[#B22222] flex items-center justify-center">
+              <Wallet className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-widest text-[#B22222]">How to Pay</p>
+              <h2 className="text-2xl font-semibold text-gray-900">Secure your VOFMUN seat</h2>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-white shadow-lg shadow-[#b22222]/5 border border-[#f4d5d6] overflow-hidden">
+            <div className="grid gap-8 p-8 md:grid-cols-2">
+              <div>
+                <p className="text-gray-700 leading-relaxed">{PAYMENT_DETAILS_INTRO}</p>
+                <dl className="mt-6 space-y-4">
+                  {PAYMENT_DETAILS_ENTRIES.map((entry) => (
+                    <div key={entry.label} className="rounded-xl border border-gray-100 bg-gray-50/60 px-4 py-3">
+                      <dt className="text-sm uppercase tracking-wide text-gray-500">{entry.label}</dt>
+                      <dd className="text-base font-semibold text-gray-900 break-words">{entry.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+              <div className="space-y-5">
+                <div className="rounded-2xl bg-[#B22222] text-white p-6">
+                  <div className="flex items-start gap-3">
+                    <ShieldCheck className="h-6 w-6 flex-shrink-0" />
+                    <div>
+                      <h3 className="text-lg font-semibold">Payment reference</h3>
+                      <p className="text-sm text-white/90 leading-relaxed">
+                        Include your full name with the reference "{PAYMENT_DETAILS.paymentReference}" so we can match your bank transfer quickly.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-dashed border-[#B22222]/40 bg-white/80 p-6">
+                  <div className="flex items-start gap-3">
+                    <UploadCloud className="h-6 w-6 text-[#B22222] flex-shrink-0" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Upload proof after paying</h3>
+                      <p className="text-gray-600 leading-relaxed">{PAYMENT_DETAILS.proofInstructions}</p>
+                      <Link
+                        href="/proof-of-payment"
+                        className="mt-4 inline-flex items-center text-[#B22222] font-semibold hover:underline"
+                      >
+                        Go to the Payment Proof upload page →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  Need help with payments? Email us anytime at {" "}
+                  <a href="mailto:conference@vofmun.org" className="font-semibold text-[#B22222] hover:underline">
+                    conference@vofmun.org
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
