@@ -4,15 +4,15 @@ export type ReferralCodeEntry = {
 }
 
 export const REFERRAL_CODES: ReferralCodeEntry[] = [
-  { code: 'AG7KQ', owner: 'Ansh Gupta' },
-  { code: 'VS9F2', owner: 'Vihaan Shukla' },
-  { code: 'TSX8M', owner: 'Tala Swaidan' },
-  { code: 'VM4ZP', owner: 'Vaibhav Kiran Mundanat' },
-  { code: 'GMQ37', owner: 'Gibran Malaeb' },
-  { code: 'AS2LD', owner: 'Armaghan Siddiqui' },
-  { code: 'ESJ6R', owner: 'Elinore Sweiss' },
-  { code: 'CR8TN', owner: 'Clyde Jared Robis' },
-  { code: 'AS5WD', owner: 'Aryan Shah' },
+  { code: 'AG404', owner: 'Ansh Gupta' },
+  { code: 'VS224', owner: 'Vihaan Shukla' },
+  { code: 'TSW67', owner: 'Tala Swaidan' },
+  { code: 'VM284', owner: 'Vaibhav Kiran Mundanat' },
+  { code: 'GM777', owner: 'Gibran Malaeb' },
+  { code: 'AS198', owner: 'Armaghan Siddiqui' },
+  { code: 'ES395', owner: 'Elinore Sweiss' },
+  { code: 'CR819', owner: 'Clyde Jared Robis' },
+  { code: 'AS198', owner: 'Aryan Shah' },
 ]
 
 const normalizedLookup = new Map(
