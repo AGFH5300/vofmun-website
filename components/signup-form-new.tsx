@@ -35,6 +35,12 @@ import { SchoolSelect } from "@/components/school-select"
 import { AIExperienceModal } from "@/components/ai-experience-modal"
 import { FileText, Shield, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import {
+  findReferralSuggestions,
+  getReferralCodeEntry,
+  isValidReferralCode,
+  normalizeReferralCode,
+} from "@/lib/referral-codes"
 
 type Role = "delegate" | "chair" | "admin" | null
 
@@ -80,6 +86,11 @@ type AdminFormState = {
   relevantExperience: string
   previousAdmin: "yes" | "no" | ""
   understandsRole: "yes" | "no" | ""
+}
+
+type ReferralFeedbackEntry = {
+  type: "success" | "info" | "error"
+  message: string
 }
 
 const createInitialFormData = () => ({
@@ -163,6 +174,8 @@ export function SignupFormNew() {
   const [chairData, setChairData] = useState<ChairFormState>(createInitialChairData)
 
   const [adminData, setAdminData] = useState<AdminFormState>(createInitialAdminData)
+
+  const [referralFeedback, setReferralFeedback] = useState<Record<number, ReferralFeedbackEntry>>({})
 
   const committeeChoices = [
     { key: "committee1" as const, label: "First Choice", required: true },
@@ -271,6 +284,7 @@ export function SignupFormNew() {
     setHasEditedFullName(false)
     resetPaymentProof()
     setErrors({})
+    setReferralFeedback({})
   }
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -298,6 +312,14 @@ export function SignupFormNew() {
     }
   }
 
+  const clearReferralFeedbackForIndex = (index: number) => {
+    setReferralFeedback((prev) => {
+      if (!(index in prev)) return prev
+      const { [index]: _removed, ...rest } = prev
+      return rest
+    })
+  }
+
   const addReferralCode = () => {
     setDelegateData((prev) => ({
       ...prev,
@@ -306,17 +328,97 @@ export function SignupFormNew() {
   }
 
   const updateReferralCode = (index: number, value: string) => {
+    const normalizedValue = value.toUpperCase()
     setDelegateData((prev) => {
       const nextCodes = [...prev.referralCodes]
-      nextCodes[index] = value
+      nextCodes[index] = normalizedValue
       return { ...prev, referralCodes: nextCodes }
     })
+
+    clearReferralFeedbackForIndex(index)
   }
 
   const removeReferralCode = (index: number) => {
-    setDelegateData((prev) => ({
+    setDelegateData((prev) => {
+      const updatedCodes = prev.referralCodes.filter((_, i) => i !== index)
+      setReferralFeedback((current) => {
+        if (Object.keys(current).length === 0) return current
+        const next: Record<number, ReferralFeedbackEntry> = {}
+        updatedCodes.forEach((_, newIndex) => {
+          const sourceIndex = newIndex < index ? newIndex : newIndex + 1
+          if (current[sourceIndex]) {
+            next[newIndex] = current[sourceIndex]
+          }
+        })
+        return next
+      })
+      return {
+        ...prev,
+        referralCodes: updatedCodes,
+      }
+    })
+  }
+
+  const handleReferralBlur = (index: number) => {
+    const rawCode = delegateData.referralCodes[index] ?? ""
+    if (!rawCode.trim()) {
+      clearReferralFeedbackForIndex(index)
+      return
+    }
+
+    const normalizedCode = normalizeReferralCode(rawCode)
+    if (normalizedCode !== rawCode) {
+      updateReferralCode(index, normalizedCode)
+    }
+
+    if (isValidReferralCode(normalizedCode)) {
+      const owner = getReferralCodeEntry(normalizedCode)?.owner
+      setReferralFeedback((prev) => ({
+        ...prev,
+        [index]: {
+          type: "success",
+          message: owner ? `Referral code belongs to ${owner}.` : "Referral code looks good.",
+        },
+      }))
+      return
+    }
+
+    const suggestions = findReferralSuggestions(normalizedCode, 1)
+    if (suggestions.length === 1) {
+      const suggestion = suggestions[0]
+      updateReferralCode(index, suggestion.code)
+      setReferralFeedback((prev) => ({
+        ...prev,
+        [index]: {
+          type: "info",
+          message: `Autocorrected to ${suggestion.code} (${suggestion.owner}).`,
+        },
+      }))
+      toast.info("Referral code autocorrected", {
+        description: `We updated your code to ${suggestion.code} (${suggestion.owner}).`,
+        duration: 3500,
+      })
+      return
+    }
+
+    if (suggestions.length > 1) {
+      const suggestionText = suggestions.map((entry) => `${entry.code} (${entry.owner})`).join(" or ")
+      setReferralFeedback((prev) => ({
+        ...prev,
+        [index]: {
+          type: "info",
+          message: `Did you mean ${suggestionText}?`,
+        },
+      }))
+      return
+    }
+
+    setReferralFeedback((prev) => ({
       ...prev,
-      referralCodes: prev.referralCodes.filter((_, i) => i !== index),
+      [index]: {
+        type: "error",
+        message: "We couldn't find a matching referral code.",
+      },
     }))
   }
 
@@ -506,6 +608,7 @@ export function SignupFormNew() {
         delegateData: sanitizedDelegateData,
         chairData: selectedRole === "chair" ? chairData : null,
         adminData: selectedRole === "admin" ? adminData : null,
+        referralCodes: sanitizedDelegateData?.referralCodes ?? [],
         paymentStatus: hasPaid,
         paymentConfirmation:
           hasPaid === "yes" && paymentProofDataUrl && selectedRole
@@ -556,10 +659,41 @@ export function SignupFormNew() {
             duration: 6000,
           })
         } else if (response.status === 400) {
-          toast.error("Invalid Information", {
-            description: result.message || "Please check your information and try again.",
-            duration: 6000,
-          })
+          if (result?.status === "invalid_referral_codes") {
+            const invalidEntries = Array.isArray(result?.suggestions) ? result.suggestions : []
+
+            setReferralFeedback((prev) => {
+              const next = { ...prev }
+              delegateData.referralCodes.forEach((code, index) => {
+                const normalizedCode = normalizeReferralCode(code)
+                const matchingEntry = invalidEntries.find((entry: any) => entry.code === normalizedCode)
+                if (!matchingEntry) return
+
+                const hasSuggestions = Array.isArray(matchingEntry.suggestions) && matchingEntry.suggestions.length > 0
+                const suggestionText = hasSuggestions
+                  ? `Did you mean ${matchingEntry.suggestions
+                      .map((suggestion: any) => `${suggestion.code} (${suggestion.owner})`)
+                      .join(" or ")}?`
+                  : "We couldn't find that referral code."
+
+                next[index] = {
+                  type: hasSuggestions ? "info" : "error",
+                  message: suggestionText,
+                }
+              })
+              return next
+            })
+
+            toast.error("Referral code not recognized", {
+              description: result?.message || "Please double-check your referral codes before submitting.",
+              duration: 6000,
+            })
+          } else {
+            toast.error("Invalid Information", {
+              description: result?.message || "Please check your information and try again.",
+              duration: 6000,
+            })
+          }
         } else {
           toast.error("Registration Failed", {
             description: result.message || "Something went wrong. Please try again.",
@@ -683,10 +817,86 @@ export function SignupFormNew() {
     },
   ]
 
+  const successModal = (
+    <Dialog
+      open={showSuccessModal}
+      onOpenChange={(open) => {
+        setShowSuccessModal(open)
+        if (!open) {
+          setLastSubmittedRole(null)
+          setLastPaymentStatus(null)
+        }
+      }}
+    >
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-green-600">Registration Successful!</DialogTitle>
+
+          <DialogDescription className="space-y-3 pt-2">
+            <p>
+              Your {roleCards.find((r) => r.role === lastSubmittedRole)?.title.toLowerCase() ?? "application"} application has
+              been submitted successfully.
+            </p>
+
+            <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm">
+              <p className="font-medium text-green-900">Next steps: payment & confirmation</p>
+              <p className="text-green-800">Fee: {roleCards.find((r) => r.role === lastSubmittedRole)?.price ?? "—"}</p>
+              <p className="text-green-800">
+                {lastPaymentStatus === "yes"
+                  ? "Thanks for confirming your payment. Our finance team will verify your receipt within two business days."
+                  : lastPaymentStatus === "no"
+                    ? hasStripePaymentLink
+                      ? "You still need to complete your payment. Use the secure Stripe checkout link below or follow the instructions in your confirmation email."
+                      : "You still need to complete your payment. Follow the instructions in your confirmation email to finalize it."
+                    : hasStripePaymentLink
+                      ? "Use the secure Stripe checkout link below to complete your payment."
+                      : "You'll receive a confirmation email with payment instructions shortly."}
+              </p>
+              <p className="text-green-800">
+                {lastPaymentStatus === "no" ? (
+                  <>
+                    When you have your receipt, upload it on the{" "}
+                    <Link href="/proof-of-payment" className="font-semibold text-[#B22222] underline-offset-4 hover:underline">
+                      Proof of Payment page
+                    </Link>{" "}
+                    so we can verify your registration without delay.
+                  </>
+                ) : (
+                  "Keep a copy of your payment confirmation for your records."
+                )}
+              </p>
+            </div>
+
+            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+              <li>Check your inbox (and spam) for the payment email.</li>
+              <li>
+                Need help? Email <a href="mailto:support@vofmun.org" className="underline">support@vofmun.org</a>.
+              </li>
+            </ul>
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 pt-4">
+          {hasStripePaymentLink && lastPaymentStatus !== "yes" && (
+            <Button asChild className="bg-[#635BFF] hover:bg-[#4B46C2] text-white w-full sm:w-auto">
+              <a href={stripePaymentUrl} target="_blank" rel="noopener noreferrer">
+                Pay via Stripe
+              </a>
+            </Button>
+          )}
+          <Button onClick={() => setShowSuccessModal(false)} className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
+            Got it, thanks!
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+
   if (!selectedRole) {
     return (
-      <Card className="w-full max-w-2xl mx-auto diplomatic-shadow border-0 bg-white/90">
-        <CardHeader className="space-y-3 sm:space-y-4 p-4 sm:p-6" style={{ paddingBottom: "0px" }}>
+      <>
+        <Card className="w-full max-w-2xl mx-auto diplomatic-shadow border-0 bg-white/90">
+          <CardHeader className="space-y-3 sm:space-y-4 p-4 sm:p-6" style={{ paddingBottom: "0px" }}>
           <CardTitle className="text-xl sm:text-2xl font-serif text-center text-gray-900">
             Register for VOFMUN 2026
           </CardTitle>
@@ -763,14 +973,17 @@ export function SignupFormNew() {
           </div>
         </CardContent>
       </Card>
+      {successModal}
+      </>
     )
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto diplomatic-shadow border-0 bg-white/90 py-0 gap-0">
-      <CardHeader className="px-4 sm:px-6 py-4 sm:py-6 border-b border-gray-200 bg-white/95">
-        <CardTitle className="text-xl sm:text-2xl font-serif text-gray-900">
-          {roleCards.find((r) => r.role === selectedRole)?.title} Registration
+    <>
+      <Card className="w-full max-w-2xl mx-auto diplomatic-shadow border-0 bg-white/90 py-0 gap-0">
+        <CardHeader className="px-4 sm:px-6 py-4 sm:py-6 border-b border-gray-200 bg-white/95">
+          <CardTitle className="text-xl sm:text-2xl font-serif text-gray-900">
+            {roleCards.find((r) => r.role === selectedRole)?.title} Registration
         </CardTitle>
         <CardAction>
           <Button
@@ -1059,30 +1272,45 @@ export function SignupFormNew() {
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  {delegateData.referralCodes.map((code, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Input
-                        value={code}
-                        onChange={(e) => updateReferralCode(index, e.target.value)}
-                        placeholder="Enter referral code"
-                        className="flex-1"
-                        data-testid={`input-referral-code-${index}`}
-                      />
-                      {delegateData.referralCodes.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => removeReferralCode(index)}
-                          className="h-9 w-9 text-red-500 border-red-200 hover:bg-red-50"
-                          aria-label={`Remove referral code ${index + 1}`}
-                          data-testid={`button-remove-referral-code-${index}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
+                  {delegateData.referralCodes.map((code, index) => {
+                    const feedback = referralFeedback[index]
+                    const feedbackColor =
+                      feedback?.type === "error"
+                        ? "text-red-600"
+                        : feedback?.type === "success"
+                          ? "text-green-600"
+                          : "text-amber-600"
+                    return (
+                      <div key={index} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+                        <div className="flex-1">
+                          <Input
+                            value={code}
+                            onChange={(e) => updateReferralCode(index, e.target.value)}
+                            onBlur={() => handleReferralBlur(index)}
+                            placeholder="Enter referral code"
+                            className="flex-1"
+                            data-testid={`input-referral-code-${index}`}
+                          />
+                          {feedback && (
+                            <p className={`mt-1 text-xs ${feedbackColor}`}>{feedback.message}</p>
+                          )}
+                        </div>
+                        {delegateData.referralCodes.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => removeReferralCode(index)}
+                            className="h-9 w-9 text-red-500 border-red-200 hover:bg-red-50"
+                            aria-label={`Remove referral code ${index + 1}`}
+                            data-testid={`button-remove-referral-code-${index}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             </div>
@@ -1954,104 +2182,17 @@ export function SignupFormNew() {
           </Button>
         </form>
       </CardContent>
+      </Card>
 
-      {/* Success Modal */}
-      <Dialog
-        open={showSuccessModal}
-        onOpenChange={(open) => {
-          setShowSuccessModal(open)
-          if (!open) {
-            setLastSubmittedRole(null)
-            setLastPaymentStatus(null)
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-green-600">
-              Registration Successful!
-            </DialogTitle>
+      {successModal}
 
-            <DialogDescription className="space-y-3 pt-2">
-              <p>
-                Your {
-                  roleCards.find((r) => r.role === lastSubmittedRole)?.title.toLowerCase() ?? "application"
-                } application has been submitted successfully.
-              </p>
-
-              {/* Payment / fee recap (pulls from your roleCards list) */}
-              <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm">
-                <p className="font-medium text-green-900">Next steps: payment & confirmation</p>
-                <p className="text-green-800">
-                  Fee: {roleCards.find((r) => r.role === lastSubmittedRole)?.price ?? "—"}
-                </p>
-                <p className="text-green-800">
-                  {lastPaymentStatus === "yes"
-                    ? "Thanks for confirming your payment. Our finance team will verify your receipt within two business days."
-                    : lastPaymentStatus === "no"
-                      ? hasStripePaymentLink
-                        ? "You still need to complete your payment. Use the secure Stripe checkout link below or follow the instructions in your confirmation email."
-                        : "You still need to complete your payment. Follow the instructions in your confirmation email to finalize it."
-                      : hasStripePaymentLink
-                        ? "Use the secure Stripe checkout link below to complete your payment."
-                        : "You'll receive a confirmation email with payment instructions shortly."}
-                </p>
-                <p className="text-green-800">
-                  {lastPaymentStatus === "no"
-                    ? (
-                      <>
-                        When you have your receipt, upload it on the{" "}
-                        <Link
-                          href="/proof-of-payment"
-                          className="font-semibold text-[#B22222] underline-offset-4 hover:underline"
-                        >
-                          Proof of Payment page
-                        </Link>{" "}
-                        so we can verify your registration without delay.
-                      </>
-                    )
-                    : "Keep a copy of your payment confirmation for your records."}
-                </p>
-              </div>
-
-              {/* Helpful notes */}
-              <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
-                <li>Check your inbox (and spam) for the payment email.</li>
-                <li>Need help? Email <a href="mailto:support@vofmun.org" className="underline">support@vofmun.org</a>.</li>
-              </ul>
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-3 pt-4">
-            {hasStripePaymentLink && lastPaymentStatus !== "yes" && (
-              <Button
-                asChild
-                className="bg-[#635BFF] hover:bg-[#4B46C2] text-white w-full sm:w-auto"
-              >
-                <a href={stripePaymentUrl} target="_blank" rel="noopener noreferrer">
-                  Pay via Stripe
-                </a>
-              </Button>
-            )}
-            <Button
-              onClick={() => setShowSuccessModal(false)}
-              className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
-            >
-              Got it, thanks!
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-
-
-       {/* AI Experience Modal */}
+      {/* AI Experience Modal */}
       <AIExperienceModal
         isOpen={showAIModal}
         onClose={() => setShowAIModal(false)}
         roleType={selectedRole as "chair" | "admin"}
         onExperiencesParsed={selectedRole === "chair" ? handleAIChairExperiences : handleAIAdminExperiences}
       />
-    </Card>
+    </>
   )
 }
