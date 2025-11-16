@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { Loader2, LogOut, RefreshCw } from "lucide-react"
+import { Download, Loader2, LogOut, RefreshCw } from "lucide-react"
+import * as XLSX from "xlsx"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createClient } from "@/utils/supabase/client"
 
 export type SignupRecord = {
@@ -17,7 +19,7 @@ export type SignupRecord = {
   email: string
   phone: string
   role: string
-  payment_status: string | null
+  payment_status: PaymentStatusValue | null
   payment_proof_url: string | null
   payment_proof_file_name: string | null
   payment_proof_uploaded_at: string | null
@@ -28,23 +30,49 @@ type PortalContentProps = {
   onSignOut: () => Promise<void>
 }
 
-const formatPaymentStatus = (status: string | null) => {
+type PaymentStatusValue = "unpaid" | "pending" | "paid" | "flagged" | "need_more_info" | "fake"
+
+const statusOptions: { value: PaymentStatusValue; label: string }[] = [
+  { value: "paid", label: "Confirmed" },
+  { value: "flagged", label: "Flagged" },
+  { value: "need_more_info", label: "Need more info" },
+  { value: "fake", label: "Fake" },
+  { value: "pending", label: "Pending review" },
+  { value: "unpaid", label: "Unpaid" },
+]
+
+const formatPaymentStatus = (status: PaymentStatusValue | null) => {
   if (!status) return "Unpaid"
 
   switch (status) {
     case "paid":
       return "Paid"
     case "pending":
-      return "Pending"
+      return "Pending review"
+    case "flagged":
+      return "Flagged"
+    case "need_more_info":
+      return "Need more info"
+    case "fake":
+      return "Fake"
     default:
       return "Unpaid"
   }
 }
 
-const badgeVariantForStatus = (status: string | null) => {
-  if (status === "paid") return "default" as const
-  if (status === "pending") return "secondary" as const
-  return "outline" as const
+const badgeVariantForStatus = (status: PaymentStatusValue | null) => {
+  switch (status) {
+    case "paid":
+      return "default" as const
+    case "pending":
+    case "need_more_info":
+      return "secondary" as const
+    case "flagged":
+    case "fake":
+      return "destructive" as const
+    default:
+      return "outline" as const
+  }
 }
 
 export function PortalContent({ onSignOut }: PortalContentProps) {
@@ -96,15 +124,15 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const paidRegistrations = records.filter((record) => record.payment_status === "paid").length
   const pendingRegistrations = records.filter((record) => record.payment_status === "pending").length
 
-  const handleMarkAsPaid = useCallback(
-    async (recordId: number) => {
+  const handleStatusChange = useCallback(
+    async (recordId: number, nextStatus: PaymentStatusValue) => {
       setUpdateError(null)
       setUpdatingId(recordId)
 
       try {
         const { error: updateError } = await supabase
           .from("users")
-          .update({ payment_status: "paid" })
+          .update({ payment_status: nextStatus })
           .eq("id", recordId)
 
         if (updateError) {
@@ -114,7 +142,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
 
         setRecords((previous) =>
           previous.map((record) =>
-            record.id === recordId ? { ...record, payment_status: "paid" } : record,
+            record.id === recordId ? { ...record, payment_status: nextStatus } : record,
           ),
         )
       } catch (cause) {
@@ -126,6 +154,28 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     },
     [supabase],
   )
+
+  const exportToXlsx = useCallback(() => {
+    if (!records.length) return
+
+    const rows = records.map((record) => ({
+      Name: `${record.first_name} ${record.last_name}`.trim(),
+      Email: record.email,
+      Phone: record.phone,
+      Role: record.role,
+      PaymentStatus: formatPaymentStatus(record.payment_status),
+      ProofFileName: record.payment_proof_file_name ?? "",
+      ProofUrl: record.payment_proof_url ?? "",
+      SubmittedAt: new Date(record.created_at).toLocaleString(),
+    }))
+
+    const worksheet = XLSX.utils.json_to_sheet(rows)
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations")
+
+    const dateStamp = new Date().toISOString().split("T")[0]
+    XLSX.writeFile(workbook, `vofmun-registrations-${dateStamp}.xlsx`)
+  }, [records])
 
   return (
     <div className="space-y-8">
@@ -168,6 +218,15 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
             >
               <RefreshCw className="h-3.5 w-3.5" /> Refresh
             </button>
+            <Button
+              type="button"
+              variant="outline"
+              className="inline-flex items-center gap-1 border-[#B22222]/30 text-xs text-[#B22222] hover:bg-[#B22222]/10"
+              onClick={() => exportToXlsx()}
+              disabled={records.length === 0}
+            >
+              <Download className="h-3.5 w-3.5" /> Export XLSX
+            </Button>
             {lastUpdated && (
               <span className="text-xs text-slate-500">
                 Updated {lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -196,7 +255,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                   <TableHead className="text-slate-500">Payment</TableHead>
                   <TableHead className="text-slate-500">Proof</TableHead>
                   <TableHead className="text-slate-500">Submitted</TableHead>
-                  <TableHead className="text-slate-500">Actions</TableHead>
+                  <TableHead className="text-slate-500">Review status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -248,26 +307,30 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                         })}
                       </TableCell>
                       <TableCell>
-                        {record.payment_status === "pending" ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-[#B22222]/30 text-[#B22222] hover:bg-[#B22222]/10"
-                            disabled={updatingId === record.id}
-                            onClick={() => void handleMarkAsPaid(record.id)}
-                          >
+                        <Select
+                          value={(record.payment_status ?? "unpaid") as PaymentStatusValue}
+                          onValueChange={(value) =>
+                            void handleStatusChange(record.id, value as PaymentStatusValue)
+                          }
+                          disabled={updatingId === record.id}
+                        >
+                          <SelectTrigger className="w-[170px] border-[#B22222]/40 text-left text-sm focus:ring-[#B22222]">
                             {updatingId === record.id ? (
                               <span className="inline-flex items-center gap-2">
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                Verifying...
+                                <Loader2 className="h-3 w-3 animate-spin" /> Updating...
                               </span>
                             ) : (
-                              "Mark as paid"
+                              <SelectValue placeholder="Set status" />
                             )}
-                          </Button>
-                        ) : (
-                          <span className="text-slate-400">—</span>
-                        )}
+                          </SelectTrigger>
+                          <SelectContent className="text-sm">
+                            {statusOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                     </TableRow>
                   )
