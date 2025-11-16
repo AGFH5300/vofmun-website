@@ -46,6 +46,95 @@ type DelegateFormState = {
   referralCodes: string[]
 }
 
+type ChairExperience = {
+  conference: string
+  position: string
+  year: string
+  description: string
+}
+
+type ChairFormState = {
+  experiences: ChairExperience[]
+  committee1: string
+  committee2: string
+  committee3: string
+  crisisBackroomInterest: string
+  whyBestFit: string
+  successfulCommittee: string
+  strengthWeakness: string
+  crisisResponse: string
+  availability: string
+}
+
+type AdminExperience = {
+  role: string
+  organization: string
+  year: string
+  description: string
+}
+
+type AdminFormState = {
+  experiences: AdminExperience[]
+  skills: string[]
+  whyAdmin: string
+  relevantExperience: string
+  previousAdmin: "yes" | "no" | ""
+  understandsRole: "yes" | "no" | ""
+}
+
+const createInitialFormData = () => ({
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  nationality: "",
+  phoneCountry: "AE",
+  school: "",
+  grade: "",
+  dietaryType: "",
+  dietaryOther: "",
+  hasAllergies: "",
+  allergiesDetails: "",
+  emergencyContact: "",
+  emergencyPhone: "",
+  emergencyPhoneCountry: "AE",
+  agreeTerms: false,
+  dateOfBirth: "",
+  role: "",
+  experience: "",
+  institution: "",
+})
+
+const createInitialDelegateData = (): DelegateFormState => ({
+  experience: "",
+  committee1: "",
+  committee2: "",
+  committee3: "",
+  referralCodes: [""],
+})
+
+const createInitialChairData = (): ChairFormState => ({
+  experiences: [{ conference: "", position: "", year: "", description: "" }],
+  committee1: "",
+  committee2: "",
+  committee3: "",
+  crisisBackroomInterest: "",
+  whyBestFit: "",
+  successfulCommittee: "",
+  strengthWeakness: "",
+  crisisResponse: "",
+  availability: "",
+})
+
+const createInitialAdminData = (): AdminFormState => ({
+  experiences: [{ role: "", organization: "", year: "", description: "" }],
+  skills: [],
+  whyAdmin: "",
+  relevantExperience: "",
+  previousAdmin: "",
+  understandsRole: "",
+})
+
 export function SignupFormNew() {
   const [selectedRole, setSelectedRole] = useState<Role>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -58,30 +147,7 @@ export function SignupFormNew() {
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    nationality: "",
-    phoneCountry: "AE", // Default to UAE
-    school: "",
-    grade: "",
-    dietaryType: "",
-    dietaryOther: "",
-    hasAllergies: "",
-    allergiesDetails: "",
-    emergencyContact: "",
-    emergencyPhone: "",
-    emergencyPhoneCountry: "AE",
-    agreeTerms: false,
-    // The following fields were present in the original but not used in the new logic.
-    // They are kept here to maintain consistency with the original state structure if needed elsewhere.
-    dateOfBirth: "",
-    role: "",
-    experience: "",
-    institution: "",
-  })
+  const [formData, setFormData] = useState(createInitialFormData)
 
   const [hasPaid, setHasPaid] = useState<"yes" | "no" | "">("")
   const [paymentFullName, setPaymentFullName] = useState("")
@@ -92,36 +158,11 @@ export function SignupFormNew() {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [lastPaymentStatus, setLastPaymentStatus] = useState<"yes" | "no" | null>(null)
 
-  const [delegateData, setDelegateData] = useState<DelegateFormState>({
-    experience: "",
-    committee1: "",
-    committee2: "",
-    committee3: "",
-    referralCodes: [""],
-  })
+  const [delegateData, setDelegateData] = useState<DelegateFormState>(createInitialDelegateData)
 
-  const [chairData, setChairData] = useState({
-    experiences: [{ conference: "", position: "", year: "", description: "" }],
-    committee1: "",
-    committee2: "",
-    committee3: "",
-    crisisBackroomInterest: "",
-    whyBestFit: "",
-    successfulCommittee: "",
-    strengthWeakness: "",
-    crisisResponse: "",
-    availability: "",
-  })
+  const [chairData, setChairData] = useState<ChairFormState>(createInitialChairData)
 
-  const [adminData, setAdminData] = useState({
-    experiences: [{ role: "", organization: "", year: "", description: "" }],
-    skills: [] as string[],
-    whyAdmin: "",
-    // New fields for admin role
-    relevantExperience: "",
-    previousAdmin: "" as "yes" | "no" | "",
-    understandsRole: "" as "yes" | "no" | "",
-  })
+  const [adminData, setAdminData] = useState<AdminFormState>(createInitialAdminData)
 
   const committeeChoices = [
     { key: "committee1" as const, label: "First Choice", required: true },
@@ -217,6 +258,19 @@ export function SignupFormNew() {
     setPaymentProofFile(null)
     setPaymentProofPreview(null)
     setIsDragActive(false)
+  }
+
+  const resetFullRegistrationForm = () => {
+    setFormData(createInitialFormData())
+    setDelegateData(createInitialDelegateData())
+    setChairData(createInitialChairData())
+    setAdminData(createInitialAdminData())
+    setSelectedRole(null)
+    setHasPaid("")
+    setPaymentFullName("")
+    setHasEditedFullName(false)
+    resetPaymentProof()
+    setErrors({})
   }
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -490,6 +544,8 @@ export function SignupFormNew() {
                 : `Your ${selectedRole} application has been submitted successfully.`,
           duration: 4000,
         })
+
+        resetFullRegistrationForm()
 
       } else {
         // Handle specific HTTP status codes
@@ -1903,68 +1959,10 @@ export function SignupFormNew() {
       <Dialog
         open={showSuccessModal}
         onOpenChange={(open) => {
-          setShowSuccessModal(open);
+          setShowSuccessModal(open)
           if (!open) {
-
-            setFormData({
-              firstName: "",
-              lastName: "",
-              email: "",
-              phone: "",
-              nationality: "",
-              phoneCountry: "AE",
-              school: "",
-              grade: "",
-              dietaryType: "",
-              dietaryOther: "",
-              hasAllergies: "",
-              allergiesDetails: "",
-              emergencyContact: "",
-              emergencyPhone: "",
-              emergencyPhoneCountry: "AE",
-            // keep legacy keys if used elsewhere
-              agreeTerms: false,
-              dateOfBirth: "",
-              role: "",
-              experience: "",
-              institution: "",
-            });
-            setDelegateData({
-              experience: "",
-              committee1: "",
-              committee2: "",
-              committee3: "",
-              referralCodes: [""],
-            });
-            setChairData({
-              experiences: [{ conference: "", position: "", year: "", description: "" }],
-              committee1: "",
-              committee2: "",
-              committee3: "",
-              crisisBackroomInterest: "",
-              whyBestFit: "",
-              successfulCommittee: "",
-              strengthWeakness: "",
-              crisisResponse: "",
-              availability: "",
-            });
-            setAdminData({
-              experiences: [{ role: "", organization: "", year: "", description: "" }],
-              skills: [],
-              whyAdmin: "",
-              relevantExperience: "",
-              previousAdmin: "",
-              understandsRole: "",
-            });
-            setSelectedRole(null);
-            setHasPaid("");
-            setPaymentFullName("");
-            setHasEditedFullName(false);
-            setPaymentRole("");
-            setHasEditedPaymentRole(false);
-            resetPaymentProof();
-            setErrors({});
-            setLastPaymentStatus(null);
+            setLastSubmittedRole(null)
+            setLastPaymentStatus(null)
           }
         }}
       >
