@@ -10,6 +10,12 @@ Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
+### Environment setup
+
+Copy `.env.example` to `.env.local` (or whichever file your hosting provider reads) and populate each value with your real
+credentials. The new email automation relies on `RESEND_API_KEY` being present so the signup API can talk to Resend and send the
+"payment confirmed" / "complete your payment" emails from `no-reply@vofmun.org`.
+
 ### Frontend Architecture
 - **Framework**: Next.js 14 with App Router for server-side rendering and optimal performance
 - **Styling**: Tailwind CSS with custom design system using VOFMUN brand colors (#B22222 primary red, #ffecdd background cream)
