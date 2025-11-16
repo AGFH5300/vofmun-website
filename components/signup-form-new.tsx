@@ -964,7 +964,7 @@ export function SignupFormNew() {
                       className="flex w-full bg-[#B22222] hover:bg-[#B22222] text-white text-xs py-2 sm:py-2.5 mt-auto"
                       data-testid={`button-${card.role}`}
                     >
-                      Select {card.title}
+                      Select
                     </Button>
                   </div>
                 </div>
