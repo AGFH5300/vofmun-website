@@ -9,6 +9,7 @@ import {
   PaymentProofBucketError,
 } from '@/utils/supabase/storage'
 import { insertUserSchema, delegateDataSchema, chairDataSchema, adminDataSchema } from '@/lib/db/schema'
+import { sendPaymentConfirmedEmail, sendPaymentReminderEmail } from '@/lib/email/registration'
 import {
   findReferralSuggestions,
   isValidReferralCode,
@@ -248,9 +249,33 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to create user: ' + error.message)
     }
     
+    if (userData.email && body.selectedRole) {
+      const normalizedRole = body.selectedRole as 'delegate' | 'chair' | 'admin'
+      try {
+        if (rawPaymentStatus === 'yes') {
+          await sendPaymentConfirmedEmail({
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            role: normalizedRole,
+            paymentProofFileName,
+          })
+        } else if (rawPaymentStatus === 'no') {
+          await sendPaymentReminderEmail({
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            role: normalizedRole,
+          })
+        }
+      } catch (emailError) {
+        console.error('Failed to send registration email via Resend', emailError)
+      }
+    }
+
     return NextResponse.json(
-      { 
-        message: 'Registration submitted successfully!', 
+      {
+        message: 'Registration submitted successfully!',
         userId: newUser.id,
         status: 'success'
       },
