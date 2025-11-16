@@ -216,7 +216,7 @@ Academically, I study IGCSE Business and AP Economics, which have strengthened m
     name: "Noya Fareed",
     role: "<strong>Deputy of Media</strong>",
     department: "Media",
-    image: "/founders/NoyaFareed_Media.png",
+    image: "/founders/NoyaFareed_Media.jpeg",
     bio: "Driving creative media projects that celebrate the VOFMUN community.",
     writeup: `Hello everyone, my name is Noya Fareed, I’m 15 years old and I’m from India and Pakistan. I currently go to MTS, and I’m so excited to be part of this project as one of the Deputies of Media. I’ve had three MUN experiences, where I’ve learned so much about leadership, diplomacy, and public speaking. Along with that, I’ve also taken on media roles for different projects, working on content creation, event coverage, and promotion - which helped me grow creatively and work well in a team. I’m really looking forward to bringing that same energy and enthusiasm here, and I can’t wait to collaborate with everyone to make this project a success.`,
   },
