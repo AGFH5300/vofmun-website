@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     
     const rawPaymentStatus = typeof body.paymentStatus === 'string' ? body.paymentStatus : ''
-    const normalizedPaymentStatus = rawPaymentStatus === 'yes' ? 'paid' : rawPaymentStatus === 'pending' ? 'pending' : 'unpaid'
+    const normalizedPaymentStatus = rawPaymentStatus === 'yes' || rawPaymentStatus === 'pending' ? 'pending' : 'unpaid'
 
     let paymentProofUrl: string | null = null
     let paymentProofStoragePath: string | null = null
