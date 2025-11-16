@@ -31,7 +31,9 @@ type RegistrationEmailPayload = {
   role: "delegate" | "chair" | "admin"
 }
 
-export async function sendPaymentConfirmedEmail(payload: RegistrationEmailPayload & { paymentProofFileName?: string | null }) {
+export async function sendPaymentConfirmedEmail(
+  payload: RegistrationEmailPayload & { paymentProofFileName?: string | null }
+) {
   if (!resendClient) {
     console.warn("Resend API key not configured; skipping payment confirmation email")
     return
@@ -39,30 +41,26 @@ export async function sendPaymentConfirmedEmail(payload: RegistrationEmailPayloa
 
   const nameForGreeting = greetingName(payload.firstName, payload.lastName)
   const fullName = formatFullName(payload.firstName, payload.lastName) || "your registration"
-  const proofDescriptor = payload.paymentProofFileName ? ` (file: ${payload.paymentProofFileName})` : ""
 
   const html = `
     <div style="${baseBodyStyle}">
       <p>Hi ${nameForGreeting},</p>
       <p>
         Thank you for registering for <strong>VOFMUN 2026</strong>. We have received your application as a
-        <strong>${payload.role.charAt(0).toUpperCase() + payload.role.slice(1)}</strong> and your proof of payment${proofDescriptor}.
+        <strong>${payload.role.charAt(0).toUpperCase() + payload.role.slice(1)}</strong> and your proof of payment.
         Our finance team will verify the transfer shortly and send your official confirmation with next steps.
       </p>
       <p style="margin-top: 24px; font-weight: 600; color: #0f172a;">Registration summary</p>
       <ul style="${summaryListStyle}">
         <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Full name: ${fullName}</li>
-        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Role: ${payload.role}</li>
-        <li style="padding: 12px 16px;">Payment status: Payment proof received</li>
+        <li style="padding: 12px 16px;">Role: ${payload.role}</li>
       </ul>
-      <p style="margin-top: 24px;">In case you or your finance department need the payment details again, here they are:</p>
-      ${renderPaymentDetailsHtml()}
       <p style="margin-top: 24px;">We'll be in touch soon with conference logistics, committee assignments, and travel information.</p>
       <p style="margin-top: 24px;">Warm regards,<br/>VOFMUN Secretariat</p>
     </div>
   `
 
-  const text = `Hi ${nameForGreeting},\n\nThank you for registering for VOFMUN 2026. We received your ${payload.role} application and payment proof${proofDescriptor}.\n\nRegistration summary:\n- Full name: ${fullName}\n- Role: ${payload.role}\n- Payment status: Payment proof received\n\n${renderPaymentDetailsText()}\n\nWe'll be in touch soon with next steps.\n\nVOFMUN Secretariat`
+  const text = `Hi ${nameForGreeting},\n\nThank you for registering for VOFMUN 2026. We received your ${payload.role} application and your proof of payment.\n\nRegistration summary:\n- Full name: ${fullName}\n- Role: ${payload.role}\n\nWe'll be in touch soon with next steps.\n\nVOFMUN Secretariat`
 
   await resendClient.emails.send({
     from: FROM_EMAIL,
