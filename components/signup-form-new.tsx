@@ -961,7 +961,7 @@ export function SignupFormNew() {
                     <p className="text-sm text-gray-600 mb-4 flex-1">{card.description}</p>
 
                     <Button
-                      className="w-full bg-[#B22222] hover:bg-[#B22222] text-white text-xs py-2 sm:py-2.5 mt-auto"
+                      className="flex w-full bg-[#B22222] hover:bg-[#B22222] text-white text-xs py-2 sm:py-2.5 mt-auto"
                       data-testid={`button-${card.role}`}
                     >
                       Select {card.title}
