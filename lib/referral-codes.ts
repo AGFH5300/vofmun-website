@@ -9,7 +9,7 @@ export const REFERRAL_CODES: ReferralCodeEntry[] = [
   { code: 'TSW67', owner: 'Tala Swaidan' },
   { code: 'VM284', owner: 'Vaibhav Kiran Mundanat' },
   { code: 'GM777', owner: 'Gibran Malaeb' },
-  { code: 'AS198', owner: 'Armaghan Siddiqui' },
+  { code: 'AS831', owner: 'Armaghan Siddiqui' },
   { code: 'ES395', owner: 'Elinore Sweiss' },
   { code: 'CR819', owner: 'Clyde Jared Robis' },
   { code: 'AS198', owner: 'Aryan Shah' },
