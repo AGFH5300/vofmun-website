@@ -55,6 +55,16 @@ export async function POST(request: NextRequest) {
     let chairCvFileName: string | null = null
     let chairCvUploadedAt: string | null = null
 
+    if (body.selectedRole === 'chair' && !body.chairCv) {
+      return NextResponse.json(
+        {
+          message: 'Chair applications must include a CV upload.',
+          status: 'error'
+        },
+        { status: 400 }
+      )
+    }
+
     if (rawPaymentStatus === 'yes') {
       const paymentConfirmation = paymentConfirmationSchema.parse(body.paymentConfirmation)
 
@@ -292,6 +302,10 @@ export async function POST(request: NextRequest) {
       payment_proof_payer_name: paymentProofPayerName,
       payment_proof_role: paymentProofRole,
       payment_proof_uploaded_at: paymentProofUploadedAt,
+      chair_cv_url: chairCvUrl,
+      chair_cv_storage_path: chairCvStoragePath,
+      chair_cv_file_name: chairCvFileName,
+      chair_cv_uploaded_at: chairCvUploadedAt,
     }
     
     // Insert user data using Supabase

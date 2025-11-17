@@ -282,6 +282,10 @@ export function SignupFormNew() {
 
     setChairCvFile(file)
     setChairCvError(null)
+    setErrors((prev) => {
+      const { chairCv, ...rest } = prev
+      return rest
+    })
   }
 
   const resetPaymentProof = () => {
@@ -299,6 +303,10 @@ export function SignupFormNew() {
     if (chairCvInputRef.current) {
       chairCvInputRef.current.value = ""
     }
+    setErrors((prev) => {
+      const { chairCv, ...rest } = prev
+      return rest
+    })
   }
 
   const resetFullRegistrationForm = () => {
@@ -622,9 +630,13 @@ export function SignupFormNew() {
           if (!chairData.availability.trim()) {
             newErrors.chairAvailability = "Please confirm your availability and communication approach"
           } else if (chairData.availability.length < 50) {
-            newErrors.chairAvailability =
+                        newErrors.chairAvailability =
               "Please provide at least 50 characters for your availability and communication"
           }
+        }
+
+        if (!chairCvFile) {
+          newErrors.chairCv = "Please upload your CV before submitting your chair application"
         }
 
         if (chairCvError) {
@@ -1662,7 +1674,7 @@ export function SignupFormNew() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-md font-semibold text-gray-800">Upload your CV (optional)</h4>
+                    <h4 className="text-md font-semibold text-gray-800">Upload your CV <span className="text-red-500">*</span></h4>
                     <p className="text-sm text-gray-600">Attach a PDF or Word version of your chairing CV.</p>
                   </div>
                   <Button
@@ -1687,7 +1699,9 @@ export function SignupFormNew() {
                       {chairCvFile && (
                         <p className="text-xs text-gray-700">Selected file: {chairCvFile.name}</p>
                       )}
-                      {chairCvError && <p className="text-xs text-red-600">{chairCvError}</p>}
+                      {(chairCvError || errors.chairCv) && (
+                        <p className="text-xs text-red-600">{chairCvError ?? errors.chairCv}</p>
+                      )}
                       {chairCvFile && (
                         <Button
                           type="button"
