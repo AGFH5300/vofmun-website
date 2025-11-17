@@ -630,7 +630,7 @@ export function SignupFormNew() {
           if (!chairData.availability.trim()) {
             newErrors.chairAvailability = "Please confirm your availability and communication approach"
           } else if (chairData.availability.length < 50) {
-            newErrors.chairAvailability =
+                        newErrors.chairAvailability =
               "Please provide at least 50 characters for your availability and communication"
           }
         }
