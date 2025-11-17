@@ -42,6 +42,10 @@ export const users = pgTable('users', {
   paymentProofPayerName: text('payment_proof_payer_name'),
   paymentProofRole: varchar('payment_proof_role', { length: 20 }),
   paymentProofUploadedAt: timestamp('payment_proof_uploaded_at'),
+  chairCvUrl: text('chair_cv_url'),
+  chairCvStoragePath: text('chair_cv_storage_path'),
+  chairCvFileName: text('chair_cv_file_name'),
+  chairCvUploadedAt: timestamp('chair_cv_uploaded_at'),
 
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
