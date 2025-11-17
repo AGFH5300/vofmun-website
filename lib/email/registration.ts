@@ -39,16 +39,6 @@ const buildChairAdminEmailContent = (
 ): { subject: string; html: string; text: string } => {
   const nameForGreeting = greetingName(payload.firstName, payload.lastName)
   const roleLabel = payload.role === "chair" ? "Chair" : "Admin"
-  const proofLink = PAYMENT_DETAILS.proofUploadUrl
-  const paymentHtml =
-    mode === "paid"
-      ? `<p>We have received your application and payment confirmation. Your spot is secured while we review applications and complete the selection process.</p>`
-      : `<div style="margin-top: 16px;">${renderPaymentDetailsHtml()}<p style="margin-top: 12px;">Once your transfer is complete, upload your receipt using the link above so we can verify payment.</p><p style="margin-top: 12px;"><a href="${proofLink}" style="display: inline-flex; align-items: center; gap: 8px; background: #B22222; color: #fff; padding: 10px 16px; border-radius: 10px; text-decoration: none; font-weight: 600;">Upload proof of payment</a></p></div>`
-
-  const paymentText =
-    mode === "paid"
-      ? "We have received your application and payment confirmation. Your spot is secured while we review applications and complete the selection process."
-      : `${renderPaymentDetailsText()}\nUpload proof: ${proofLink}\nOnce your transfer is complete, upload your receipt using the link above so we can verify payment.`
 
   const html = `
     <div style="${baseBodyStyle}">
@@ -61,7 +51,7 @@ const buildChairAdminEmailContent = (
           : "Admins will be contacted soon after the deadline regarding whether they have been selected."}
       </p>
       <p>We wish you the best of luck on your application.</p>
-      ${paymentHtml}
+      <p style="margin-top: 12px;">If you are selected, we will share the onboarding details and payment instructions with you directly.</p>
       <p style="margin-top: 24px;">Thanks for applying!<br/>VOFMUN I 2026 Secretariat</p>
     </div>
   `
@@ -70,10 +60,10 @@ const buildChairAdminEmailContent = (
     payload.role === "chair"
       ? "All shortlisted chairing applicants will move on to the interview stage to select the final chairs for VOFMUN I 2026."
       : "Admins will be contacted soon after the deadline regarding whether they have been selected."
-  }\n\nWe wish you the best of luck on your application.\n\n${paymentText}\n\nThanks for applying!\nVOFMUN I 2026 Secretariat`
+  }\n\nWe wish you the best of luck on your application.\n\nIf you are selected, we will share onboarding details and payment instructions with you directly.\n\nThanks for applying!\nVOFMUN I 2026 Secretariat`
 
   return {
-    subject: `VOFMUN ${roleLabel} application received` + (mode === "paid" ? " & payment recorded" : " - payment pending"),
+    subject: `VOFMUN ${roleLabel} application received`,
     html,
     text,
   }
