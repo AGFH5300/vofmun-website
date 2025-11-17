@@ -92,8 +92,6 @@ type ReferralFeedbackEntry = {
   message: string
 }
 
-const temporarilyDisabledRoles: Role[] = ["chair", "admin"]
-
 const createInitialFormData = () => ({
   firstName: "",
   lastName: "",
@@ -1020,10 +1018,6 @@ export function SignupFormNew() {
           <CardDescription className="text-center text-gray-600 text-sm sm:text-base">
             Join the conversation that shapes tomorrow's world
           </CardDescription>
-          <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-            Chair and Admin signups are temporarily disabled until the deadline is up and selections are announced. Please wait
-            until you have been selected for a Chair or Admin position before attempting to register for those roles.
-          </div>
         </CardHeader>
         <CardContent className="p-4 sm:p-6" style={{ paddingTop: "0px" }}>
           <Alert className="mb-6 bg-blue-50 border-blue-200 text-blue-900">
@@ -1051,19 +1045,11 @@ export function SignupFormNew() {
           <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
             {roleCards.map((card) => {
               const IconComponent = card.icon
-              const isTemporarilyDisabled = temporarilyDisabledRoles.includes(card.role)
               return (
                 <div
                   key={card.role}
-                  className={`relative border-2 border-gray-200 rounded-xl p-4 sm:p-6 transition-all duration-300 group flex flex-col ${
-                    isTemporarilyDisabled
-                      ? "opacity-60 cursor-not-allowed"
-                      : "cursor-pointer hover:border-[#B22222] hover:shadow-lg hover:scale-105"
-                  }`}
-                  onClick={() => {
-                    if (isTemporarilyDisabled) return
-                    setSelectedRole(card.role)
-                  }}
+                  className="relative border-2 border-gray-200 rounded-xl p-4 sm:p-6 cursor-pointer transition-all duration-300 hover:border-[#B22222] hover:shadow-lg hover:scale-105 group flex flex-col"
+                  onClick={() => setSelectedRole(card.role)}
                   data-testid={`select-role-${card.role}`}
                 >
                   <div className="text-center flex flex-col h-full">
@@ -1091,17 +1077,10 @@ export function SignupFormNew() {
 
                     <Button
                       className="flex w-full bg-[#B22222] hover:bg-[#B22222] text-white text-xs py-2 sm:py-2.5 mt-auto"
-                      disabled={isTemporarilyDisabled}
                       data-testid={`button-${card.role}`}
                     >
-                      {isTemporarilyDisabled ? "Temporarily Disabled" : "Select"}
+                      Select
                     </Button>
-
-                    {isTemporarilyDisabled && (
-                      <p className="mt-3 text-xs text-amber-800">
-                        This role is closed until the deadline and you have been officially selected.
-                      </p>
-                    )}
                   </div>
                 </div>
               )
@@ -1752,6 +1731,14 @@ export function SignupFormNew() {
                     }}
                   />
 
+                  <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                    <p className="font-semibold">Supabase setup checklist</p>
+                    <ul className="ml-4 list-disc space-y-1">
+                      <li>Create a public bucket named <code>chair-cvs</code> (or set NEXT_PUBLIC_SUPABASE_CHAIR_CV_BUCKET).</li>
+                      <li>Ensure the project has a service role key so the app can provision the bucket automatically.</li>
+                      <li>Confirm storage rules allow public read access for generated CV links.</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
               </div>
