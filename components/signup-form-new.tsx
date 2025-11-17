@@ -978,39 +978,53 @@ export function SignupFormNew() {
             </p>
 
             <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm">
-              <p className="font-medium text-green-900">Next steps: payment & confirmation</p>
-              <p className="text-green-800">Fee: {roleCards.find((r) => r.role === lastSubmittedRole)?.price ?? "—"}</p>
-              <p className="text-green-800">
-                {lastSubmittedIsLeadership
-                  ? "Chair and admin payments are paused until interviews and selections are finalized. Wait for our email after the deadline before sending any fees."
-                  : lastPaymentStatus === "yes"
-                    ? "Thanks for confirming your payment. Our finance team will verify your receipt within two business days."
-                    : lastPaymentStatus === "no"
-                      ? hasStripePaymentLink
-                        ? "You still need to complete your payment. Use the secure Stripe checkout link below or follow the instructions in your confirmation email."
-                        : "You still need to complete your payment. Follow the instructions in your confirmation email to finalize it."
-                      : hasStripePaymentLink
-                        ? "Use the secure Stripe checkout link below to complete your payment."
-                        : "You'll receive a confirmation email with payment instructions shortly."}
-              </p>
-              <p className="text-green-800">
-                {lastSubmittedIsLeadership
-                  ? "If you're selected, we'll enable payment and receipt uploads and send you the next steps."
-                  : lastPaymentStatus === "no"
-                    ? (
-                      <>
-                        When you have your receipt, upload it on the{" "}
-                        <Link
-                          href="/proof-of-payment"
-                          className="font-semibold text-[#B22222] underline-offset-4 hover:underline"
-                        >
-                          Proof of Payment page
-                        </Link>{" "}
-                        so we can verify your registration without delay.
-                      </>
-                    )
-                    : "Keep a copy of your payment confirmation for your records."}
-              </p>
+              {lastSubmittedIsLeadership ? (
+                <>
+                  <p className="font-medium text-green-900">Next steps</p>
+                  <p className="text-green-800">
+                    We will review all {lastSubmittedRole === "chair" ? "chair" : "admin"} applications after the deadline.{' '}
+                    {lastSubmittedRole === "chair"
+                      ? "Shortlisted chairs will be invited to interviews before final selections are made."
+                      : "Admins will be contacted regarding placement and onboarding details once selections are finalized."}
+                  </p>
+                  <p className="text-green-800">
+                    Payment instructions will only be shared with selected {lastSubmittedRole === "chair" ? "chairs" : "admins"},
+                    so no fees are required right now.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium text-green-900">Next steps: payment & confirmation</p>
+                  <p className="text-green-800">Fee: {roleCards.find((r) => r.role === lastSubmittedRole)?.price ?? "—"}</p>
+                  <p className="text-green-800">
+                    {lastPaymentStatus === "yes"
+                      ? "Thanks for confirming your payment. Our finance team will verify your receipt within two business days."
+                      : lastPaymentStatus === "no"
+                        ? hasStripePaymentLink
+                          ? "You still need to complete your payment. Use the secure Stripe checkout link below or follow the instructions in your confirmation email."
+                          : "You still need to complete your payment. Follow the instructions in your confirmation email to finalize it."
+                        : hasStripePaymentLink
+                          ? "Use the secure Stripe checkout link below to complete your payment."
+                          : "You'll receive a confirmation email with payment instructions shortly."}
+                  </p>
+                  <p className="text-green-800">
+                    {lastPaymentStatus === "no"
+                      ? (
+                        <>
+                          When you have your receipt, upload it on the{" "}
+                          <Link
+                            href="/proof-of-payment"
+                            className="font-semibold text-[#B22222] underline-offset-4 hover:underline"
+                          >
+                            Proof of Payment page
+                          </Link>{" "}
+                          so we can verify your registration without delay.
+                        </>
+                      )
+                      : "Keep a copy of your payment confirmation for your records."}
+                  </p>
+                </>
+              )}
             </div>
 
             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
