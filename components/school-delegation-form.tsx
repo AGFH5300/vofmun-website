@@ -294,12 +294,17 @@ export function SchoolDelegationForm() {
         <CardDescription className="text-gray-600 text-sm sm:text-base">
           Provide your school's details and upload the delegate spreadsheet using our official template.
         </CardDescription>
-        <Alert className="bg-blue-50 border-blue-200 text-blue-900">
+        <Alert className="bg-red-50 border-red-200 text-red-900">
           <Building2 className="h-5 w-5" />
-          <AlertTitle>Need the delegate spreadsheet template?</AlertTitle>
-          <AlertDescription className="space-y-2 text-blue-800">
-            <p>Please download the official template, fill it out for each delegate, and upload it unchanged below.</p>
-            <Button asChild variant="outline" size="sm" className="border-blue-300 text-blue-800 hover:bg-blue-100">
+          <AlertTitle>School delegation spreadsheet</AlertTitle>
+          <AlertDescription className="space-y-3 text-red-800">
+            <p>Please download the school delegation spreadsheet from here!</p>
+            <p>
+              Download the official Excel sheet from here and fill it in with the complete details of all students from your
+              delegations. Please leave the column names unchanged or the Excel sheet will not be recognised/accepted by the
+              submission form.
+            </p>
+            <Button asChild variant="outline" size="sm" className="border-red-300 text-red-800 hover:bg-red-100">
               <Link href={TEMPLATE_PATH} download>
                 <Download className="mr-2 h-4 w-4" /> Download template
               </Link>

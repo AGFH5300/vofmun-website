@@ -167,6 +167,10 @@ export function SignupFormNew() {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [lastPaymentStatus, setLastPaymentStatus] = useState<"yes" | "no" | null>(null)
 
+  const [chairCvFile, setChairCvFile] = useState<File | null>(null)
+  const [chairCvError, setChairCvError] = useState<string | null>(null)
+  const chairCvInputRef = useRef<HTMLInputElement | null>(null)
+
   const [delegateData, setDelegateData] = useState<DelegateFormState>(createInitialDelegateData)
 
   const [chairData, setChairData] = useState<ChairFormState>(createInitialChairData)
@@ -264,6 +268,22 @@ export function SignupFormNew() {
     clearError("paymentProof")
   }
 
+  const handleChairCvSelect = (file: File) => {
+    const allowed =
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf") ||
+      file.name.toLowerCase().endsWith(".doc") ||
+      file.name.toLowerCase().endsWith(".docx")
+
+    if (!allowed) {
+      setChairCvError("Please upload a PDF or Word document for your CV.")
+      return
+    }
+
+    setChairCvFile(file)
+    setChairCvError(null)
+  }
+
   const resetPaymentProof = () => {
     if (paymentProofPreview) {
       URL.revokeObjectURL(paymentProofPreview)
@@ -271,6 +291,14 @@ export function SignupFormNew() {
     setPaymentProofFile(null)
     setPaymentProofPreview(null)
     setIsDragActive(false)
+  }
+
+  const resetChairCv = () => {
+    setChairCvFile(null)
+    setChairCvError(null)
+    if (chairCvInputRef.current) {
+      chairCvInputRef.current.value = ""
+    }
   }
 
   const resetFullRegistrationForm = () => {
@@ -284,6 +312,7 @@ export function SignupFormNew() {
     setPaymentFullName("")
     setHasEditedFullName(false)
     resetPaymentProof()
+    resetChairCv()
     setErrors({})
     setReferralFeedback({})
   }
@@ -597,6 +626,10 @@ export function SignupFormNew() {
               "Please provide at least 50 characters for your availability and communication"
           }
         }
+
+        if (chairCvError) {
+          newErrors.chairCv = chairCvError
+        }
       }
 
       if (selectedRole === "admin") {
@@ -652,6 +685,11 @@ export function SignupFormNew() {
         paymentProofDataUrl = await fileToDataURL(paymentProofFile)
       }
 
+      let chairCvDataUrl: string | null = null
+      if (selectedRole === "chair" && chairCvFile) {
+        chairCvDataUrl = await fileToDataURL(chairCvFile)
+      }
+
       const sanitizedDelegateData = selectedRole === "delegate" ? { ...delegateData } : null
 
       const normalizedReferralCodes = referralCodes.map((code) => normalizeReferralCode(code.trim()))
@@ -674,6 +712,14 @@ export function SignupFormNew() {
                 fileName: paymentProofFile?.name ?? "payment-proof",
                 mimeType: paymentProofFile?.type ?? "application/octet-stream",
                 dataUrl: paymentProofDataUrl,
+              }
+            : null,
+        chairCv:
+          selectedRole === "chair" && chairCvFile && chairCvDataUrl
+            ? {
+                fileName: chairCvFile.name,
+                mimeType: chairCvFile.type || "application/pdf",
+                dataUrl: chairCvDataUrl,
               }
             : null,
       }
@@ -1596,22 +1642,91 @@ export function SignupFormNew() {
                   <p className="text-xs text-gray-500">{chairData.successfulCommittee.length} characters</p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>
-                    What is your greatest strength and your greatest weakness as a chair and leader?{" "}
-                    <span className="text-red-500">*</span>
-                  </Label>
+              <div className="space-y-2">
+                <Label>
+                  What is your greatest strength and your greatest weakness as a chair and leader?{" "}
+                  <span className="text-red-500">*</span>
+                </Label>
                   <Textarea
                     value={chairData.strengthWeakness}
                     onChange={(e) => setChairData((prev) => ({ ...prev, strengthWeakness: e.target.value }))}
                     placeholder="Describe your greatest strength and weakness as a leader..."
                     className={`min-h-[100px] ${errors.chairStrengthWeakness ? "border-red-500" : ""}`}
                   />
-                  {errors.chairStrengthWeakness && (
-                    <p className="text-sm text-red-500">{errors.chairStrengthWeakness}</p>
-                  )}
-                  <p className="text-xs text-gray-500">{chairData.strengthWeakness.length} characters</p>
+                {errors.chairStrengthWeakness && (
+                  <p className="text-sm text-red-500">{errors.chairStrengthWeakness}</p>
+                )}
+                <p className="text-xs text-gray-500">{chairData.strengthWeakness.length} characters</p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-md font-semibold text-gray-800">Upload your CV (optional)</h4>
+                    <p className="text-sm text-gray-600">Attach a PDF or Word version of your chairing CV.</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => chairCvInputRef.current?.click()}
+                    className="flex items-center gap-2"
+                  >
+                    <UploadCloud className="h-4 w-4" /> Choose file
+                  </Button>
                 </div>
+
+                <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4">
+                  <div className="flex items-start gap-3">
+                    <FileText className="h-5 w-5 text-gray-600" />
+                    <div className="space-y-1">
+                      <p className="text-sm text-gray-800">Upload your CV (PDF, DOC, or DOCX).</p>
+                      <p className="text-xs text-gray-600">
+                        Files are stored securely in Supabase storage so the Secretariat can review your experience.
+                      </p>
+                      {chairCvFile && (
+                        <p className="text-xs text-gray-700">Selected file: {chairCvFile.name}</p>
+                      )}
+                      {chairCvError && <p className="text-xs text-red-600">{chairCvError}</p>}
+                      {chairCvFile && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="px-0 text-red-600 hover:text-red-700"
+                          onClick={resetChairCv}
+                        >
+                          <X className="mr-1 h-4 w-4" /> Remove file
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  <input
+                    ref={chairCvInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    className="hidden"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0]
+                      if (file) {
+                        handleChairCvSelect(file)
+                      } else {
+                        resetChairCv()
+                      }
+                    }}
+                  />
+
+                  <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                    <p className="font-semibold">Supabase setup checklist</p>
+                    <ul className="ml-4 list-disc space-y-1">
+                      <li>Create a public bucket named <code>chair-cvs</code> (or set NEXT_PUBLIC_SUPABASE_CHAIR_CV_BUCKET).</li>
+                      <li>Ensure the project has a service role key so the app can provision the bucket automatically.</li>
+                      <li>Confirm storage rules allow public read access for generated CV links.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
               </div>
 
               <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
