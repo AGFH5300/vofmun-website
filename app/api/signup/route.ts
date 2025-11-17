@@ -4,9 +4,12 @@ import { randomUUID } from 'crypto'
 import { createClient } from '@/utils/supabase/server'
 import {
   ensurePaymentProofBucketExists,
+  ensureChairCvBucketExists,
   getManualBucketSetupChecklist,
   getPaymentProofBucketName,
+  getChairCvBucketName,
   PaymentProofBucketError,
+  ChairCvBucketError,
 } from '@/utils/supabase/storage'
 import { insertUserSchema, delegateDataSchema, chairDataSchema, adminDataSchema } from '@/lib/db/schema'
 import { sendPaymentConfirmedEmail, sendPaymentReminderEmail } from '@/lib/email/registration'
@@ -27,6 +30,12 @@ const paymentConfirmationSchema = z.object({
   dataUrl: z.string().regex(/^data:.*;base64,.+/, 'Invalid payment proof format'),
 })
 
+const chairCvSchema = z.object({
+  fileName: z.string().min(1),
+  mimeType: z.string().min(1),
+  dataUrl: z.string().regex(/^data:.*;base64,.+/, 'Invalid CV file format'),
+})
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -41,6 +50,20 @@ export async function POST(request: NextRequest) {
     let paymentProofPayerName: string | null = null
     let paymentProofRole: 'delegate' | 'chair' | 'admin' | null = null
     let paymentProofUploadedAt: string | null = null
+    let chairCvUrl: string | null = null
+    let chairCvStoragePath: string | null = null
+    let chairCvFileName: string | null = null
+    let chairCvUploadedAt: string | null = null
+
+    if (body.selectedRole === 'chair' && !body.chairCv) {
+      return NextResponse.json(
+        {
+          message: 'Chair applications must include a CV upload.',
+          status: 'error'
+        },
+        { status: 400 }
+      )
+    }
 
     if (rawPaymentStatus === 'yes') {
       const paymentConfirmation = paymentConfirmationSchema.parse(body.paymentConfirmation)
@@ -94,6 +117,44 @@ export async function POST(request: NextRequest) {
       paymentProofUploadedAt = new Date().toISOString()
     }
 
+    if (body.selectedRole === 'chair' && body.chairCv) {
+      const chairCv = chairCvSchema.parse(body.chairCv)
+
+      const [, base64Data] = chairCv.dataUrl.split(',')
+      if (!base64Data) {
+        throw new Error('Invalid CV payload received')
+      }
+
+      const fileBuffer = Buffer.from(base64Data, 'base64')
+      const rawFileName = chairCv.fileName.trim() || 'chair-cv'
+      const sanitizedFileName = rawFileName.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const hasExtension = sanitizedFileName.includes('.')
+      const mimeExtension = chairCv.mimeType.split('/')[1] || 'pdf'
+      const fileNameWithExtension = hasExtension ? sanitizedFileName : `${sanitizedFileName}.${mimeExtension}`
+      const storagePath = `chair-cvs/${new Date().toISOString().split('T')[0]}/${randomUUID()}-${fileNameWithExtension}`
+      const chairCvBucket = getChairCvBucketName()
+
+      await ensureChairCvBucketExists(chairCvBucket)
+
+      const { error: uploadError } = await supabase.storage
+        .from(chairCvBucket)
+        .upload(storagePath, fileBuffer, {
+          contentType: chairCv.mimeType,
+          upsert: false,
+        })
+
+      if (uploadError) {
+        throw new Error('Failed to upload chair CV: ' + uploadError.message)
+      }
+
+      const { data: publicUrlData } = supabase.storage.from(chairCvBucket).getPublicUrl(storagePath)
+
+      chairCvUrl = publicUrlData?.publicUrl ?? null
+      chairCvStoragePath = storagePath
+      chairCvFileName = fileNameWithExtension
+      chairCvUploadedAt = new Date().toISOString()
+    }
+
     // Transform the form data to match the schema
     const transformedData = {
       email: body.formData?.email,
@@ -144,10 +205,18 @@ export async function POST(request: NextRequest) {
           throw new Error('Invalid committee selection')
         }
       }
-      
+
       roleData = delegateDataParsed
     } else if (body.selectedRole === 'chair') {
-      roleData = chairDataSchema.parse(body.chairData)
+      const chairDataParsed = chairDataSchema.parse(body.chairData)
+
+      roleData = {
+        ...chairDataParsed,
+        cvUrl: chairCvUrl,
+        cvFileName: chairCvFileName,
+        cvStoragePath: chairCvStoragePath,
+        cvUploadedAt: chairCvUploadedAt,
+      }
     } else if (body.selectedRole === 'admin') {
       roleData = adminDataSchema.parse(body.adminData)
     }
@@ -233,6 +302,10 @@ export async function POST(request: NextRequest) {
       payment_proof_payer_name: paymentProofPayerName,
       payment_proof_role: paymentProofRole,
       payment_proof_uploaded_at: paymentProofUploadedAt,
+      chair_cv_url: chairCvUrl,
+      chair_cv_storage_path: chairCvStoragePath,
+      chair_cv_file_name: chairCvFileName,
+      chair_cv_uploaded_at: chairCvUploadedAt,
     }
     
     // Insert user data using Supabase
@@ -309,6 +382,18 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof PaymentProofBucketError) {
       console.error('Payment proof bucket misconfiguration:', error.message)
+
+      return NextResponse.json(
+        {
+          message: error.userFacingMessage,
+          status: 'error'
+        },
+        { status: 500 }
+      )
+    }
+
+    if (error instanceof ChairCvBucketError) {
+      console.error('Chair CV bucket misconfiguration:', error.message)
 
       return NextResponse.json(
         {
