@@ -1752,14 +1752,6 @@ export function SignupFormNew() {
                     }}
                   />
 
-                  <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-                    <p className="font-semibold">Supabase setup checklist</p>
-                    <ul className="ml-4 list-disc space-y-1">
-                      <li>Create a public bucket named <code>chair-cvs</code> (or set NEXT_PUBLIC_SUPABASE_CHAIR_CV_BUCKET).</li>
-                      <li>Ensure the project has a service role key so the app can provision the bucket automatically.</li>
-                      <li>Confirm storage rules allow public read access for generated CV links.</li>
-                    </ul>
-                  </div>
                 </div>
               </div>
               </div>
