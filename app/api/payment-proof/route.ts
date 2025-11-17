@@ -43,8 +43,9 @@ export async function POST(request: NextRequest) {
 
     const { data: matchingUsers, error: lookupError } = await supabase
       .from('users')
-      .select('id, payment_proof_storage_path')
+      .select('id, role, payment_proof_storage_path')
       .ilike('email', escapedEmailPattern)
+      .eq('role', payload.role)
 
     if (lookupError) {
       throw new Error('Failed to verify registration before uploading proof: ' + lookupError.message)
@@ -54,7 +55,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           status: 'not_found',
-          message: 'We could not find a registration with that email. Please complete the signup form first.',
+          message:
+            'We could not find a registration with that email and role. Please choose the role you registered with or complete the signup form first.',
         },
         { status: 404 }
       )
