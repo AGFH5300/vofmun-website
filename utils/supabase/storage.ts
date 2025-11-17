@@ -2,6 +2,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 const FALLBACK_PAYMENT_PROOF_BUCKET = 'payment-proofs'
 const FALLBACK_DELEGATION_SPREADSHEET_BUCKET = 'school-delegation-spreadsheets'
+const FALLBACK_CHAIR_CV_BUCKET = 'chair-cvs'
 
 let resolvedBucketName: string | null = null
 let warnedAboutFallback = false
@@ -9,6 +10,9 @@ let warnedAboutMissingServiceRoleKey = false
 let resolvedDelegationBucketName: string | null = null
 let warnedAboutDelegationFallback = false
 let warnedAboutDelegationMissingServiceRoleKey = false
+let resolvedChairCvBucketName: string | null = null
+let warnedAboutChairCvFallback = false
+let warnedAboutChairCvMissingServiceRoleKey = false
 
 const ensuredBuckets = new Set<string>()
 const ensuringBuckets = new Map<string, Promise<void>>()
@@ -63,6 +67,46 @@ const buildManualBucketSetupChecklist = (bucketName: string) =>
 
 export const getManualBucketSetupChecklist = (bucketName: string) =>
   buildManualBucketSetupChecklist(bucketName)
+
+const resolveChairCvBucketName = () => {
+  if (resolvedChairCvBucketName) {
+    return resolvedChairCvBucketName
+  }
+
+  const candidateEnvVars = [
+    process.env.NEXT_PUBLIC_SUPABASE_CHAIR_CV_BUCKET,
+    process.env.SUPABASE_CHAIR_CV_BUCKET,
+    process.env.SUPABASE_STORAGE_CHAIR_CV_BUCKET,
+  ]
+
+  const matchingEnvVar = candidateEnvVars.find((value) => value && value.trim().length > 0)
+
+  if (matchingEnvVar) {
+    resolvedChairCvBucketName = matchingEnvVar.trim()
+    return resolvedChairCvBucketName
+  }
+
+  if (!warnedAboutChairCvFallback && process.env.NODE_ENV !== 'production') {
+    console.warn('Supabase chair CV bucket env var not set; falling back to default bucket "chair-cvs".')
+    warnedAboutChairCvFallback = true
+  }
+
+  resolvedChairCvBucketName = FALLBACK_CHAIR_CV_BUCKET
+  return resolvedChairCvBucketName
+}
+
+const buildChairCvManualBucketSetupChecklist = (bucketName: string) =>
+  [
+    `Chair CV storage bucket "${bucketName}" is missing. To finish configuring uploads:`,
+    '1. Open your Supabase project dashboard.',
+    '2. Go to **Storage → Buckets**.',
+    `3. Create a new bucket named **${bucketName}** and set it to **Public** access.`,
+    '4. (Optional) Add SUPABASE_CHAIR_CV_BUCKET to your environment variables so future deploys reuse this bucket.',
+    '5. (Optional) Add SUPABASE_SERVICE_ROLE_KEY so the app can auto-provision the bucket in non-production environments.',
+  ].join('\n')
+
+export const getChairCvManualBucketSetupChecklist = (bucketName: string) =>
+  buildChairCvManualBucketSetupChecklist(bucketName)
 
 const resolveDelegationBucketName = () => {
   if (resolvedDelegationBucketName) {
@@ -126,6 +170,17 @@ export class PaymentProofBucketError extends Error {
   ) {
     super(message)
     this.name = 'PaymentProofBucketError'
+  }
+}
+
+export class ChairCvBucketError extends Error {
+  constructor(
+    message: string,
+    public readonly userFacingMessage =
+      'Chair CV uploads are temporarily unavailable. Please contact the site administrator.'
+  ) {
+    super(message)
+    this.name = 'ChairCvBucketError'
   }
 }
 
@@ -214,6 +269,80 @@ export const ensurePaymentProofBucketExists = async (bucketName: string) => {
 }
 
 export const getPaymentProofBucketName = () => resolveBucketName()
+export const getChairCvBucketName = () => resolveChairCvBucketName()
+
+export const ensureChairCvBucketExists = async (bucketName: string) => {
+  if (ensuredBuckets.has(bucketName)) {
+    return
+  }
+
+  const existingPromise = ensuringBuckets.get(bucketName)
+  if (existingPromise) {
+    return existingPromise
+  }
+
+  const ensurePromise = (async () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+
+    if (!supabaseUrl) {
+      throw new ChairCvBucketError(
+        'Supabase URL environment variable NEXT_PUBLIC_SUPABASE_URL is not configured.',
+        'Chair CV storage is not configured. Please contact the site administrator.'
+      )
+    }
+
+    const serviceRoleKey = getServiceRoleKey()
+
+    if (!serviceRoleKey) {
+      if (!warnedAboutChairCvMissingServiceRoleKey && process.env.NODE_ENV !== 'production') {
+        const manualSetupMessage = buildChairCvManualBucketSetupChecklist(bucketName)
+        console.warn(
+          'Supabase service role key env var not set; automatic chair CV bucket provisioning is disabled.\n' +
+            manualSetupMessage
+        )
+        warnedAboutChairCvMissingServiceRoleKey = true
+      }
+
+      return
+    }
+
+    const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey)
+
+    const { data: bucketData, error: bucketLookupError } = await adminClient.storage.getBucket(bucketName)
+
+    if (bucketLookupError && !isNotFoundError(bucketLookupError.message)) {
+      throw new ChairCvBucketError(
+        `Failed to verify Supabase storage bucket "${bucketName}": ${bucketLookupError.message}`
+      )
+    }
+
+    if (bucketData) {
+      ensuredBuckets.add(bucketName)
+      return
+    }
+
+    const { error: bucketCreationError } = await adminClient.storage.createBucket(bucketName, {
+      public: true,
+    })
+
+    if (bucketCreationError) {
+      throw new ChairCvBucketError(
+        `Failed to automatically create Supabase storage bucket "${bucketName}": ${bucketCreationError.message}.`,
+        'Chair CV storage is not configured. Please contact the site administrator.'
+      )
+    }
+
+    ensuredBuckets.add(bucketName)
+  })()
+
+  ensuringBuckets.set(bucketName, ensurePromise)
+
+  try {
+    await ensurePromise
+  } finally {
+    ensuringBuckets.delete(bucketName)
+  }
+}
 
 export const ensureDelegationSpreadsheetBucketExists = async (bucketName: string) => {
   if (ensuredBuckets.has(bucketName)) {
