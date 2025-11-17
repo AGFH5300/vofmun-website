@@ -166,6 +166,7 @@ export function SignupFormNew() {
   const [hasEditedFullName, setHasEditedFullName] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [lastPaymentStatus, setLastPaymentStatus] = useState<"yes" | "no" | null>(null)
+  const paymentProofTemporarilyDisabled = selectedRole === "chair" || selectedRole === "admin"
 
   const [chairCvFile, setChairCvFile] = useState<File | null>(null)
   const [chairCvError, setChairCvError] = useState<string | null>(null)
@@ -193,6 +194,18 @@ export function SignupFormNew() {
       paymentProofFile.name.toLowerCase().endsWith(".pdf"))
 
   const paymentProofIsImage = !!paymentProofFile && paymentProofFile.type.startsWith("image/")
+
+  useEffect(() => {
+    if (paymentProofTemporarilyDisabled) {
+      setHasPaid("no")
+      resetPaymentProof()
+      setPaymentFullName("")
+      setErrors((prev) => {
+        const { paymentFullName, paymentProof, paymentStatus, ...rest } = prev
+        return rest
+      })
+    }
+  }, [paymentProofTemporarilyDisabled])
 
   useEffect(() => {
     const combinedName = [formData.firstName, formData.lastName]
@@ -247,6 +260,12 @@ export function SignupFormNew() {
   }
 
   const handlePaymentProofSelect = (file: File) => {
+    if (paymentProofTemporarilyDisabled) {
+      toast.info(
+        "Payment proof uploads for chair and admin applicants are disabled until selections are announced.",
+      )
+      return
+    }
     const isImage = file.type.startsWith("image/")
     const isPdf =
       file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
@@ -656,17 +675,19 @@ export function SignupFormNew() {
         }
       }
 
-      if (!hasPaid) {
-        newErrors.paymentStatus = "Please let us know if you've already paid"
-      }
-
-      if (hasPaid === "yes") {
-        if (!paymentFullName.trim()) {
-          newErrors.paymentFullName = "Please enter the payer's full name"
+      if (!paymentProofTemporarilyDisabled) {
+        if (!hasPaid) {
+          newErrors.paymentStatus = "Please let us know if you've already paid"
         }
 
-        if (!paymentProofFile) {
-          newErrors.paymentProof = "Please upload proof of payment before submitting"
+        if (hasPaid === "yes") {
+          if (!paymentFullName.trim()) {
+            newErrors.paymentFullName = "Please enter the payer's full name"
+          }
+
+          if (!paymentProofFile) {
+            newErrors.paymentProof = "Please upload proof of payment before submitting"
+          }
         }
       }
 
@@ -693,7 +714,7 @@ export function SignupFormNew() {
       setIsSubmitting(true)
 
       let paymentProofDataUrl: string | null = null
-      if (paymentProofFile) {
+      if (!paymentProofTemporarilyDisabled && paymentProofFile) {
         paymentProofDataUrl = await fileToDataURL(paymentProofFile)
       }
 
@@ -715,9 +736,9 @@ export function SignupFormNew() {
         chairData: selectedRole === "chair" ? chairData : null,
         adminData: selectedRole === "admin" ? adminData : null,
         referralCodes: sanitizedReferralCodes,
-        paymentStatus: hasPaid,
+        paymentStatus: paymentProofTemporarilyDisabled ? "no" : hasPaid,
         paymentConfirmation:
-          hasPaid === "yes" && paymentProofDataUrl && selectedRole
+          !paymentProofTemporarilyDisabled && hasPaid === "yes" && paymentProofDataUrl && selectedRole
             ? {
                 fullName: paymentFullName.trim(),
                 role: selectedRole,
@@ -753,8 +774,9 @@ export function SignupFormNew() {
         setShowSuccessModal(true)
 
         toast.success(`Registration Successful!`, {
-          description:
-            hasPaid === "yes"
+          description: paymentProofTemporarilyDisabled
+            ? `Your ${selectedRole} application has been submitted. Payment will open after selections are announced; please wait until you're confirmed before paying or uploading receipts.`
+            : hasPaid === "yes"
               ? `Your ${selectedRole} application and payment confirmation have been submitted successfully.`
               : hasPaid === "no"
                 ? `Your ${selectedRole} application has been submitted. Please remember to complete payment and upload proof later.`
@@ -932,6 +954,8 @@ export function SignupFormNew() {
     },
   ]
 
+  const lastSubmittedIsLeadership = lastSubmittedRole === "chair" || lastSubmittedRole === "admin"
+
   const successModal = (
     <Dialog
       open={showSuccessModal}
@@ -957,28 +981,35 @@ export function SignupFormNew() {
               <p className="font-medium text-green-900">Next steps: payment & confirmation</p>
               <p className="text-green-800">Fee: {roleCards.find((r) => r.role === lastSubmittedRole)?.price ?? "—"}</p>
               <p className="text-green-800">
-                {lastPaymentStatus === "yes"
-                  ? "Thanks for confirming your payment. Our finance team will verify your receipt within two business days."
-                  : lastPaymentStatus === "no"
-                    ? hasStripePaymentLink
-                      ? "You still need to complete your payment. Use the secure Stripe checkout link below or follow the instructions in your confirmation email."
-                      : "You still need to complete your payment. Follow the instructions in your confirmation email to finalize it."
-                    : hasStripePaymentLink
-                      ? "Use the secure Stripe checkout link below to complete your payment."
-                      : "You'll receive a confirmation email with payment instructions shortly."}
+                {lastSubmittedIsLeadership
+                  ? "Chair and admin payments are paused until interviews and selections are finalized. Wait for our email after the deadline before sending any fees."
+                  : lastPaymentStatus === "yes"
+                    ? "Thanks for confirming your payment. Our finance team will verify your receipt within two business days."
+                    : lastPaymentStatus === "no"
+                      ? hasStripePaymentLink
+                        ? "You still need to complete your payment. Use the secure Stripe checkout link below or follow the instructions in your confirmation email."
+                        : "You still need to complete your payment. Follow the instructions in your confirmation email to finalize it."
+                      : hasStripePaymentLink
+                        ? "Use the secure Stripe checkout link below to complete your payment."
+                        : "You'll receive a confirmation email with payment instructions shortly."}
               </p>
               <p className="text-green-800">
-                {lastPaymentStatus === "no" ? (
-                  <>
-                    When you have your receipt, upload it on the{" "}
-                    <Link href="/proof-of-payment" className="font-semibold text-[#B22222] underline-offset-4 hover:underline">
-                      Proof of Payment page
-                    </Link>{" "}
-                    so we can verify your registration without delay.
-                  </>
-                ) : (
-                  "Keep a copy of your payment confirmation for your records."
-                )}
+                {lastSubmittedIsLeadership
+                  ? "If you're selected, we'll enable payment and receipt uploads and send you the next steps."
+                  : lastPaymentStatus === "no"
+                    ? (
+                      <>
+                        When you have your receipt, upload it on the{" "}
+                        <Link
+                          href="/proof-of-payment"
+                          className="font-semibold text-[#B22222] underline-offset-4 hover:underline"
+                        >
+                          Proof of Payment page
+                        </Link>{" "}
+                        so we can verify your registration without delay.
+                      </>
+                    )
+                    : "Keep a copy of your payment confirmation for your records."}
               </p>
             </div>
 
@@ -992,7 +1023,7 @@ export function SignupFormNew() {
         </DialogHeader>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-3 pt-4">
-          {hasStripePaymentLink && lastPaymentStatus !== "yes" && (
+          {hasStripePaymentLink && lastPaymentStatus !== "yes" && !lastSubmittedIsLeadership && (
             <Button asChild className="bg-[#635BFF] hover:bg-[#4B46C2] text-white w-full sm:w-auto">
               <a href={stripePaymentUrl} target="_blank" rel="noopener noreferrer">
                 Pay via Stripe
@@ -2057,6 +2088,15 @@ export function SignupFormNew() {
           {/* Payment Confirmation */}
           <div className="space-y-3 sm:space-4">
             <h3 className="text-lg sm:text-xl font-serif font-semibold text-primary">Payment Confirmation</h3>
+            {paymentProofTemporarilyDisabled && (
+              <Alert className="border-amber-200 bg-amber-50 text-amber-900">
+                <AlertTitle>Payment uploads paused for chairs and admins</AlertTitle>
+                <AlertDescription>
+                  Payment and receipt uploads for chair and admin applicants are disabled until the deadline passes and
+                  selections are announced. Please wait to pay until you have been selected.
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-1.5 sm:space-y-2">
               <Label className="text-xs sm:text-sm font-medium text-gray-700">
                 Have you already paid the conference fee? <span className="text-red-500">*</span>
@@ -2064,19 +2104,20 @@ export function SignupFormNew() {
               <RadioGroup
                 value={hasPaid || undefined}
                 onValueChange={(value) => {
+                  if (paymentProofTemporarilyDisabled) return
                   setHasPaid(value as "yes" | "no")
                   clearError("paymentStatus")
                 }}
                 className="flex flex-col sm:flex-row gap-3"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="yes" id="has-paid-yes" />
+                  <RadioGroupItem value="yes" id="has-paid-yes" disabled={paymentProofTemporarilyDisabled} />
                   <Label htmlFor="has-paid-yes" className="text-sm text-gray-700">
                     Yes, I've already paid
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="no" id="has-paid-no" />
+                  <RadioGroupItem value="no" id="has-paid-no" disabled={paymentProofTemporarilyDisabled} />
                   <Label htmlFor="has-paid-no" className="text-sm text-gray-700">
                     Not yet
                   </Label>
@@ -2085,7 +2126,7 @@ export function SignupFormNew() {
               {errors.paymentStatus && <p className="text-sm text-red-500">{errors.paymentStatus}</p>}
             </div>
 
-            {hasPaid === "yes" && (
+            {hasPaid === "yes" && !paymentProofTemporarilyDisabled && (
               <>
                 <p className="text-sm text-gray-600">
                   Please upload a clear image or PDF of your payment receipt. This helps us verify registrations quickly.
@@ -2117,7 +2158,11 @@ export function SignupFormNew() {
                     Upload Proof of Payment <span className="text-red-500">*</span>
                   </Label>
                   <div
-                    className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors duration-200 cursor-pointer ${
+                    className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors duration-200 ${
+                      paymentProofTemporarilyDisabled
+                        ? "border-gray-300 bg-gray-50 cursor-not-allowed opacity-70"
+                        : "cursor-pointer"
+                    } ${
                       isDragActive
                         ? "border-[#B22222] bg-[#B22222]/5"
                         : errors.paymentProof
@@ -2126,11 +2171,15 @@ export function SignupFormNew() {
                             ? "border-green-500 bg-green-50"
                             : "border-gray-300 bg-white"
                     }`}
-                    onDragOver={handleDragOver}
-                    onDragEnter={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
+                    aria-disabled={paymentProofTemporarilyDisabled}
+                    onDragOver={paymentProofTemporarilyDisabled ? undefined : handleDragOver}
+                    onDragEnter={paymentProofTemporarilyDisabled ? undefined : handleDragOver}
+                    onDragLeave={paymentProofTemporarilyDisabled ? undefined : handleDragLeave}
+                    onDrop={paymentProofTemporarilyDisabled ? undefined : handleDrop}
+                    onClick={() => {
+                      if (paymentProofTemporarilyDisabled) return
+                      fileInputRef.current?.click()
+                    }}
                   >
                     {isDragActive && (
                       <div className="absolute inset-0 rounded-xl bg-[#B22222]/10 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
@@ -2144,6 +2193,7 @@ export function SignupFormNew() {
                       type="file"
                       accept="image/*,application/pdf"
                       className="hidden"
+                      disabled={paymentProofTemporarilyDisabled}
                       onChange={(event) => {
                         const file = event.target.files?.[0]
                         if (file) {
