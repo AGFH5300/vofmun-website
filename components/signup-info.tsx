@@ -39,10 +39,10 @@ export function SignupInfo() {
                 <span className="text-gray-700">Delegates: January 10th 2026</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Chairs: December 20th 2026</span>
+                <span className="text-gray-700">Chairs: December 20th 2025</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Admin Staff: December 20th 2026</span>
+                <span className="text-gray-700">Admin Staff: December 20th 2025</span>
               </div>
             </div>
           </div>
@@ -54,7 +54,7 @@ export function SignupInfo() {
             <span className="text-gray-800">Venue:</span>
             <div className="text-right space-y-1">
               <span className="text-gray-600 block">
-                United Kingdom College of Business & Computing – Dubai Campus, Academic City
+                UKCBC - Academic City, Dubai
               </span>
               <a
                 href="https://maps.app.goo.gl/jx4SsR7r58oauhedA"
