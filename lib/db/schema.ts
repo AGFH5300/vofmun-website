@@ -42,6 +42,10 @@ export const users = pgTable('users', {
   paymentProofPayerName: text('payment_proof_payer_name'),
   paymentProofRole: varchar('payment_proof_role', { length: 20 }),
   paymentProofUploadedAt: timestamp('payment_proof_uploaded_at'),
+  chairCvUrl: text('chair_cv_url'),
+  chairCvStoragePath: text('chair_cv_storage_path'),
+  chairCvFileName: text('chair_cv_file_name'),
+  chairCvUploadedAt: timestamp('chair_cv_uploaded_at'),
 
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
@@ -130,7 +134,7 @@ export const chairDataSchema = z.object({
     description: z.string().optional(),
   })).min(1, 'At least one experience is required for chairs'),
   committee1: z.string().optional(),
-  committee2: z.string().optional(), 
+  committee2: z.string().optional(),
   committee3: z.string().optional(),
   crisisBackroomInterest: z.string().optional(),
   whyBestFit: z.string().min(50, 'Please provide at least 50 characters explaining why you are the best fit'),
@@ -138,6 +142,10 @@ export const chairDataSchema = z.object({
   strengthWeakness: z.string().min(50, 'Please provide at least 50 characters describing your strengths and weaknesses'),
   crisisResponse: z.string().optional(),
   availability: z.string().optional(),
+  cvUrl: z.string().optional().nullable(),
+  cvFileName: z.string().optional().nullable(),
+  cvStoragePath: z.string().optional().nullable(),
+  cvUploadedAt: z.string().optional().nullable(),
 })
 
 export const adminDataSchema = z.object({

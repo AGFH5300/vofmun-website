@@ -12,6 +12,8 @@ const baseBodyStyle =
 const summaryListStyle =
   "list-style: none; padding: 0; margin: 0; border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb;"
 
+type ChairAdminEmailMode = "paid" | "unpaid"
+
 function formatFullName(firstName?: string | null, lastName?: string | null) {
   return [firstName, lastName]
     .filter((value) => typeof value === "string" && value.trim().length > 0)
@@ -31,11 +33,70 @@ type RegistrationEmailPayload = {
   role: "delegate" | "chair" | "admin"
 }
 
+const buildChairAdminEmailContent = (
+  payload: RegistrationEmailPayload,
+  mode: ChairAdminEmailMode,
+): { subject: string; html: string; text: string } => {
+  const nameForGreeting = greetingName(payload.firstName, payload.lastName)
+  const roleLabel = payload.role === "chair" ? "Chair" : "Admin"
+  const proofLink = PAYMENT_DETAILS.proofUploadUrl
+  const paymentHtml =
+    mode === "paid"
+      ? `<p>We have received your application and payment confirmation. Your spot is secured while we review applications and complete the selection process.</p>`
+      : `<div style="margin-top: 16px;">${renderPaymentDetailsHtml()}<p style="margin-top: 12px;">Once your transfer is complete, upload your receipt using the link above so we can verify payment.</p><p style="margin-top: 12px;"><a href="${proofLink}" style="display: inline-flex; align-items: center; gap: 8px; background: #B22222; color: #fff; padding: 10px 16px; border-radius: 10px; text-decoration: none; font-weight: 600;">Upload proof of payment</a></p></div>`
+
+  const paymentText =
+    mode === "paid"
+      ? "We have received your application and payment confirmation. Your spot is secured while we review applications and complete the selection process."
+      : `${renderPaymentDetailsText()}\nUpload proof: ${proofLink}\nOnce your transfer is complete, upload your receipt using the link above so we can verify payment.`
+
+  const html = `
+    <div style="${baseBodyStyle}">
+      <p>Hi ${nameForGreeting},</p>
+      <p>Thanks for applying to be a ${roleLabel.toLowerCase()} at <strong>VOFMUN I 2026</strong>!</p>
+      <p>
+        We will get in touch with all candidates once the application deadline has elapsed to share your application status.
+        ${payload.role === "chair"
+          ? "All shortlisted chairing applicants will move on to the interview stage to select the final chairs for VOFMUN I 2026."
+          : "Admins will be contacted soon after the deadline regarding whether they have been selected."}
+      </p>
+      <p>We wish you the best of luck on your application.</p>
+      ${paymentHtml}
+      <p style="margin-top: 24px;">Thanks for applying!<br/>VOFMUN I 2026 Secretariat</p>
+    </div>
+  `
+
+  const text = `Hi ${nameForGreeting},\n\nThanks for applying to be a ${roleLabel.toLowerCase()} at VOFMUN I 2026!\n\nWe will get in touch with all candidates once the application deadline has elapsed to share your application status. ${
+    payload.role === "chair"
+      ? "All shortlisted chairing applicants will move on to the interview stage to select the final chairs for VOFMUN I 2026."
+      : "Admins will be contacted soon after the deadline regarding whether they have been selected."
+  }\n\nWe wish you the best of luck on your application.\n\n${paymentText}\n\nThanks for applying!\nVOFMUN I 2026 Secretariat`
+
+  return {
+    subject: `VOFMUN ${roleLabel} application received` + (mode === "paid" ? " & payment recorded" : " - payment pending"),
+    html,
+    text,
+  }
+}
+
 export async function sendPaymentConfirmedEmail(
   payload: RegistrationEmailPayload & { paymentProofFileName?: string | null }
 ) {
   if (!resendClient) {
     console.warn("Resend API key not configured; skipping payment confirmation email")
+    return
+  }
+
+  if (payload.role === "chair" || payload.role === "admin") {
+    const content = buildChairAdminEmailContent(payload, "paid")
+
+    await resendClient.emails.send({
+      from: FROM_EMAIL,
+      to: payload.email,
+      subject: content.subject,
+      html: content.html,
+      text: content.text,
+    })
     return
   }
 
@@ -74,6 +135,19 @@ export async function sendPaymentConfirmedEmail(
 export async function sendPaymentReminderEmail(payload: RegistrationEmailPayload) {
   if (!resendClient) {
     console.warn("Resend API key not configured; skipping payment reminder email")
+    return
+  }
+
+  if (payload.role === "chair" || payload.role === "admin") {
+    const content = buildChairAdminEmailContent(payload, "unpaid")
+
+    await resendClient.emails.send({
+      from: FROM_EMAIL,
+      to: payload.email,
+      subject: content.subject,
+      html: content.html,
+      text: content.text,
+    })
     return
   }
 

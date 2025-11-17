@@ -19,10 +19,13 @@ export type SignupRecord = {
   email: string
   phone: string
   role: string
+  school: string | null
   payment_status: PaymentStatusValue | null
   payment_proof_url: string | null
   payment_proof_file_name: string | null
   payment_proof_uploaded_at: string | null
+  delegate_data: { committee1?: string | null } | null
+  chair_data: { committee1?: string | null } | null
   created_at: string
 }
 
@@ -110,7 +113,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     const { data, error: queryError } = await supabase
       .from("users")
       .select(
-        "id, first_name, last_name, email, phone, role, payment_status, payment_proof_url, payment_proof_file_name, payment_proof_uploaded_at, created_at",
+        "id, first_name, last_name, email, phone, role, school, payment_status, payment_proof_url, payment_proof_file_name, payment_proof_uploaded_at, delegate_data, chair_data, created_at",
       )
       .order("created_at", { ascending: false })
 
@@ -184,7 +187,9 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       Name: `${record.first_name} ${record.last_name}`.trim(),
       Email: record.email,
       Phone: record.phone,
+      School: record.school ?? "",
       Role: record.role,
+      CommitteePreference1: getPrimaryCommitteePreference(record) ?? "",
       PaymentStatus: formatPaymentStatus(record.payment_status),
       ProofFileName: record.payment_proof_file_name ?? "",
       ProofUrl: record.payment_proof_url ?? "",
@@ -273,7 +278,9 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                   <TableHead className="text-slate-500">Name</TableHead>
                   <TableHead className="text-slate-500">Email</TableHead>
                   <TableHead className="text-slate-500">Phone</TableHead>
+                  <TableHead className="text-slate-500">School</TableHead>
                   <TableHead className="text-slate-500">Role</TableHead>
+                  <TableHead className="text-slate-500">Committee pref #1</TableHead>
                   <TableHead className="text-slate-500">Payment</TableHead>
                   <TableHead className="text-slate-500">Proof</TableHead>
                   <TableHead className="text-slate-500">Submitted</TableHead>
@@ -300,7 +307,9 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                         </Link>
                       </TableCell>
                       <TableCell className="text-slate-600">{record.phone}</TableCell>
+                      <TableCell className="text-slate-600">{record.school ?? "—"}</TableCell>
                       <TableCell className="capitalize text-slate-700">{record.role}</TableCell>
+                      <TableCell className="text-slate-700">{getPrimaryCommitteePreference(record) ?? "—"}</TableCell>
                       <TableCell>
                         <Badge
                           variant={badgeVariantForStatus(record.payment_status)}
@@ -367,4 +376,16 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       </Card>
     </div>
   )
+}
+
+function getPrimaryCommitteePreference(record: SignupRecord) {
+  if (record.role === "delegate") {
+    return record.delegate_data?.committee1 ?? null
+  }
+
+  if (record.role === "chair") {
+    return record.chair_data?.committee1 ?? null
+  }
+
+  return null
 }
