@@ -250,11 +250,6 @@ export function ProofOfPaymentForm() {
           <p>Enter the same email you used to register so we can match your payment to your application.</p>
         </div>
 
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          Chair and Admin submissions are temporarily disabled until the deadline and official selections are announced. Please
-          wait to continue until you have been selected for a Chair or Admin position.
-        </div>
-
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">
@@ -338,12 +333,8 @@ export function ProofOfPaymentForm() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="delegate">Delegate</SelectItem>
-                      <SelectItem value="chair" disabled>
-                        Chair (temporarily disabled)
-                      </SelectItem>
-                      <SelectItem value="admin" disabled>
-                        Admin (temporarily disabled)
-                      </SelectItem>
+                      <SelectItem value="chair">Chair</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
