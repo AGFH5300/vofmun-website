@@ -182,6 +182,8 @@ const USER_VIEW_DEFAULT_FIELDS: Record<UserView, string[]> = {
   ],
 }
 
+const USER_VIEWS: UserView[] = ["all", "delegates", "chairs", "admins"]
+
 const SCHOOL_DEFAULT_FIELDS = [
   "schoolName",
   "schoolEmail",
@@ -196,6 +198,9 @@ const SCHOOL_DEFAULT_FIELDS = [
   "spreadsheetUrl",
   "submittedAt",
 ]
+
+const USER_FIELD_STORAGE_KEY = "vofmun_system_user_fields_v1"
+const SCHOOL_FIELD_STORAGE_KEY = "vofmun_system_school_fields_v1"
 
 const COLUMN_MENU_LABELS: Record<RegistrationView, string> = {
   all: "All signup columns",
@@ -244,6 +249,35 @@ function formatNullableText(value?: string | null) {
   return trimmed.length ? trimmed : "—"
 }
 
+function renderMultilineText(value?: string | null): ReactNode {
+  if (!value) {
+    return <span className="text-slate-400">—</span>
+  }
+
+  const trimmed = value.trim()
+
+  if (!trimmed) {
+    return <span className="text-slate-400">—</span>
+  }
+
+  const normalized = trimmed.replace(/\r\n/g, "\n")
+  const paragraphs = normalized.split(/\n{2,}/).map((paragraph) => paragraph.trim()).filter(Boolean)
+
+  if (!paragraphs.length) {
+    return <span className="text-slate-400">—</span>
+  }
+
+  return (
+    <div className="space-y-2 text-sm leading-relaxed text-slate-600">
+      {paragraphs.map((paragraph, index) => (
+        <p key={`${index}-${paragraph.slice(0, 12)}`} className="whitespace-pre-line break-words">
+          {paragraph}
+        </p>
+      ))}
+    </div>
+  )
+}
+
 function formatList(values?: string[] | null) {
   if (!values || values.length === 0) {
     return "—"
@@ -257,20 +291,32 @@ function renderExperienceEntries(entries?: ExperienceEntry[] | null): ReactNode 
     return <span className="text-slate-400">Not provided</span>
   }
 
-  return (
-    <div className="space-y-2 text-xs text-slate-600">
-      {entries.map((entry, index) => (
-        <div key={`${entry.title ?? "entry"}-${index}`} className="rounded border border-slate-200/80 p-2">
-          <div className="font-semibold text-slate-900">
-            {entry.title ?? "—"}
-            {entry.meta ? <span className="text-slate-500"> · {entry.meta}</span> : null}
-          </div>
-          {entry.subtitle ? <div className="text-slate-600">{entry.subtitle}</div> : null}
-          {entry.description ? <div className="text-slate-500">{entry.description}</div> : null}
-        </div>
-      ))}
-    </div>
-  )
+  return <ExperienceEntriesList entries={entries} />
+}
+
+function sanitizeFieldList(value: unknown, fallback: string[]) {
+  if (!Array.isArray(value)) {
+    return [...fallback]
+  }
+
+  const filtered = value.filter((entry): entry is string => typeof entry === "string")
+  return filtered.length ? filtered : [...fallback]
+}
+
+function sanitizeUserFieldSelections(value: unknown): Record<UserView, string[]> {
+  if (typeof value !== "object" || value === null) {
+    return buildDefaultUserFieldSelection()
+  }
+
+  return USER_VIEWS.reduce((acc, view) => {
+    const stored = (value as Record<string, unknown>)[view]
+    acc[view] = sanitizeFieldList(stored, USER_VIEW_DEFAULT_FIELDS[view])
+    return acc
+  }, {} as Record<UserView, string[]>)
+}
+
+function sanitizeSchoolFieldSelection(value: unknown) {
+  return sanitizeFieldList(value, SCHOOL_DEFAULT_FIELDS)
 }
 
 const SCHOOL_FIELD_OPTIONS: FieldOption<SchoolDelegationRecord>[] = [
@@ -606,7 +652,7 @@ function createUserFieldOptions(
     {
       key: "delegateExperience",
       label: "Delegate experience",
-      render: (record) => <span className="text-slate-600">{record.delegate_data?.experience ?? "—"}</span>,
+      render: (record) => renderMultilineText(record.delegate_data?.experience),
     },
     {
       key: "delegateCommittee1",
@@ -657,32 +703,32 @@ function createUserFieldOptions(
     {
       key: "chairCrisisInterest",
       label: "Crisis/backroom interest",
-      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.crisisBackroomInterest)}</span>,
+      render: (record) => renderMultilineText(record.chair_data?.crisisBackroomInterest),
     },
     {
       key: "chairWhyBestFit",
       label: "Why best fit",
-      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.whyBestFit)}</span>,
+      render: (record) => renderMultilineText(record.chair_data?.whyBestFit),
     },
     {
       key: "chairSuccessfulCommittee",
       label: "Successful committee",
-      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.successfulCommittee)}</span>,
+      render: (record) => renderMultilineText(record.chair_data?.successfulCommittee),
     },
     {
       key: "chairStrengthWeakness",
       label: "Strengths & weaknesses",
-      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.strengthWeakness)}</span>,
+      render: (record) => renderMultilineText(record.chair_data?.strengthWeakness),
     },
     {
       key: "chairCrisisResponse",
       label: "Crisis response",
-      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.crisisResponse)}</span>,
+      render: (record) => renderMultilineText(record.chair_data?.crisisResponse),
     },
     {
       key: "chairAvailability",
       label: "Availability",
-      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.availability)}</span>,
+      render: (record) => renderMultilineText(record.chair_data?.availability),
     },
     {
       key: "chairCvFileName",
@@ -722,12 +768,12 @@ function createUserFieldOptions(
     {
       key: "adminRelevantExperience",
       label: "Relevant experience",
-      render: (record) => <span className="text-slate-600">{formatNullableText(record.admin_data?.relevantExperience)}</span>,
+      render: (record) => renderMultilineText(record.admin_data?.relevantExperience),
     },
     {
       key: "adminWhy",
       label: "Why admin",
-      render: (record) => <span className="text-slate-600">{formatNullableText(record.admin_data?.whyAdmin)}</span>,
+      render: (record) => renderMultilineText(record.admin_data?.whyAdmin),
     },
     {
       key: "adminSkills",
@@ -849,6 +895,48 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const [activeView, setActiveView] = useState<RegistrationView>("all")
   const [selectedUserFields, setSelectedUserFields] = useState<Record<UserView, string[]>>(buildDefaultUserFieldSelection)
   const [selectedSchoolFields, setSelectedSchoolFields] = useState<string[]>(buildDefaultSchoolFieldSelection)
+  const [preferencesHydrated, setPreferencesHydrated] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    try {
+      const storedUserFields = window.localStorage.getItem(USER_FIELD_STORAGE_KEY)
+      const storedSchoolFields = window.localStorage.getItem(SCHOOL_FIELD_STORAGE_KEY)
+
+      if (storedUserFields) {
+        setSelectedUserFields(sanitizeUserFieldSelections(JSON.parse(storedUserFields)))
+      }
+
+      if (storedSchoolFields) {
+        setSelectedSchoolFields(sanitizeSchoolFieldSelection(JSON.parse(storedSchoolFields)))
+      }
+    } catch (cause) {
+      console.warn("Failed to restore saved column preferences", cause)
+    } finally {
+      setPreferencesHydrated(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!preferencesHydrated || typeof window === "undefined") return
+
+    try {
+      window.localStorage.setItem(USER_FIELD_STORAGE_KEY, JSON.stringify(selectedUserFields))
+    } catch (cause) {
+      console.warn("Unable to persist user column preferences", cause)
+    }
+  }, [preferencesHydrated, selectedUserFields])
+
+  useEffect(() => {
+    if (!preferencesHydrated || typeof window === "undefined") return
+
+    try {
+      window.localStorage.setItem(SCHOOL_FIELD_STORAGE_KEY, JSON.stringify(selectedSchoolFields))
+    } catch (cause) {
+      console.warn("Unable to persist school column preferences", cause)
+    }
+  }, [preferencesHydrated, selectedSchoolFields])
 
   const fetchRecords = useCallback(async () => {
     setLoading(true)
@@ -1459,4 +1547,46 @@ function getPrimaryCommitteePreference(record: SignupRecord) {
   }
 
   return null
+}
+
+const EXPERIENCE_PREVIEW_COUNT = 4
+
+type ExperienceEntriesListProps = {
+  entries: ExperienceEntry[]
+}
+
+function ExperienceEntriesList({ entries }: ExperienceEntriesListProps) {
+  const [expanded, setExpanded] = useState(false)
+
+  const visibleEntries = expanded ? entries : entries.slice(0, EXPERIENCE_PREVIEW_COUNT)
+
+  return (
+    <div className="space-y-3 text-xs text-slate-600">
+      <div className="grid gap-2 md:grid-cols-2">
+        {visibleEntries.map((entry, index) => (
+          <div key={`${entry.title ?? "entry"}-${index}`} className="rounded border border-slate-200/80 p-2">
+            <div className="font-semibold text-slate-900">
+              {entry.title ?? "—"}
+              {entry.meta ? <span className="text-slate-500"> · {entry.meta}</span> : null}
+            </div>
+            {entry.subtitle ? <div className="text-slate-600">{entry.subtitle}</div> : null}
+            {entry.description ? (
+              <div className="text-slate-500">
+                <div className="whitespace-pre-line break-words text-[0.8rem]">{entry.description}</div>
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+      {entries.length > EXPERIENCE_PREVIEW_COUNT ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((previous) => !previous)}
+          className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#B22222] transition hover:text-[#8B1A1A]"
+        >
+          {expanded ? "Show fewer experiences" : `Show all ${entries.length} experiences`}
+        </button>
+      ) : null}
+    </div>
+  )
 }
