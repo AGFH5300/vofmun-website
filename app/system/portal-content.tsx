@@ -1,8 +1,8 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
 import Link from "next/link"
-import { Download, Loader2, LogOut, RefreshCw } from "lucide-react"
+import { Columns3, Download, Loader2, LogOut, RefreshCw } from "lucide-react"
 import * as XLSX from "xlsx"
 
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { createClient } from "@/utils/supabase/client"
 
 export type SignupRecord = {
@@ -20,14 +29,78 @@ export type SignupRecord = {
   email: string
   phone: string
   role: string
+  nationality: string | null
   school: string | null
+  grade: string | null
   payment_status: PaymentStatusValue | null
   payment_proof_url: string | null
+  payment_proof_storage_path: string | null
   payment_proof_file_name: string | null
+  payment_proof_payer_name: string | null
+  payment_proof_role: string | null
   payment_proof_uploaded_at: string | null
-  delegate_data: { committee1?: string | null } | null
-  chair_data: { committee1?: string | null } | null
+  dietary_type: string | null
+  dietary_other: string | null
+  has_allergies: string | null
+  allergies_details: string | null
+  emergency_contact_name: string
+  emergency_contact_phone: string
+  agree_terms: boolean
+  agree_photos: boolean | null
+  registration_status: string | null
+  referral_codes: string[] | null
+  delegate_data:
+    | {
+        experience?: string | null
+        committee1?: string | null
+        committee2?: string | null
+        committee3?: string | null
+      }
+    | null
+  chair_data:
+    | {
+        committee1?: string | null
+        committee2?: string | null
+        committee3?: string | null
+        crisisBackroomInterest?: string | null
+        whyBestFit?: string | null
+        successfulCommittee?: string | null
+        strengthWeakness?: string | null
+        crisisResponse?: string | null
+        availability?: string | null
+        experiences?: {
+          conference?: string | null
+          position?: string | null
+          year?: string | null
+          description?: string | null
+        }[]
+        cvUrl?: string | null
+        cvFileName?: string | null
+        cvStoragePath?: string | null
+        cvUploadedAt?: string | null
+      }
+    | null
+  admin_data:
+    | {
+        experiences?: {
+          role?: string | null
+          organization?: string | null
+          year?: string | null
+          description?: string | null
+        }[]
+        skills?: string[] | null
+        whyAdmin?: string | null
+        relevantExperience?: string | null
+        previousAdmin?: string | null
+        understandsRole?: string | null
+      }
+    | null
+  chair_cv_url: string | null
+  chair_cv_storage_path: string | null
+  chair_cv_file_name: string | null
+  chair_cv_uploaded_at: string | null
   created_at: string
+  updated_at: string
 }
 
 type SchoolDelegationRecord = {
@@ -45,8 +118,11 @@ type SchoolDelegationRecord = {
   heard_about: string | null
   terms_accepted: boolean
   spreadsheet_file_name: string
+  spreadsheet_storage_path: string
+  spreadsheet_mime_type: string
   spreadsheet_url: string | null
   created_at: string
+  updated_at: string
 }
 
 type PortalContentProps = {
@@ -54,6 +130,642 @@ type PortalContentProps = {
 }
 
 type RegistrationView = "all" | "delegates" | "chairs" | "admins" | "school"
+
+type UserView = Exclude<RegistrationView, "school">
+
+type FieldOption<RecordType> = {
+  key: string
+  label: string
+  description?: string
+  render: (record: RecordType) => ReactNode
+}
+
+const USER_VIEW_DEFAULT_FIELDS: Record<UserView, string[]> = {
+  all: ["name", "email", "phone", "school", "role", "primaryCommittee", "paymentStatus", "paymentProof", "submittedAt", "reviewStatus"],
+  delegates: [
+    "name",
+    "email",
+    "phone",
+    "school",
+    "grade",
+    "delegateExperience",
+    "delegateCommittee1",
+    "delegateCommittee2",
+    "delegateCommittee3",
+    "dietaryType",
+    "emergencyContactName",
+    "paymentStatus",
+    "reviewStatus",
+  ],
+  chairs: [
+    "name",
+    "email",
+    "phone",
+    "school",
+    "chairCommittee1",
+    "chairCommittee2",
+    "chairExperiences",
+    "chairWhyBestFit",
+    "paymentStatus",
+    "reviewStatus",
+  ],
+  admins: [
+    "name",
+    "email",
+    "phone",
+    "school",
+    "adminRelevantExperience",
+    "adminPreviousAdmin",
+    "adminUnderstandsRole",
+    "paymentStatus",
+    "reviewStatus",
+  ],
+}
+
+const SCHOOL_DEFAULT_FIELDS = [
+  "schoolName",
+  "schoolEmail",
+  "schoolCountry",
+  "directorName",
+  "directorEmail",
+  "directorPhone",
+  "numDelegates",
+  "numFaculty",
+  "additionalRequests",
+  "heardAbout",
+  "spreadsheetUrl",
+  "submittedAt",
+]
+
+const COLUMN_MENU_LABELS: Record<RegistrationView, string> = {
+  all: "All signup columns",
+  delegates: "Delegate columns",
+  chairs: "Chair columns",
+  admins: "Admin columns",
+  school: "School delegation columns",
+}
+
+const buildDefaultUserFieldSelection = (): Record<UserView, string[]> => ({
+  all: [...USER_VIEW_DEFAULT_FIELDS.all],
+  delegates: [...USER_VIEW_DEFAULT_FIELDS.delegates],
+  chairs: [...USER_VIEW_DEFAULT_FIELDS.chairs],
+  admins: [...USER_VIEW_DEFAULT_FIELDS.admins],
+})
+
+const buildDefaultSchoolFieldSelection = () => [...SCHOOL_DEFAULT_FIELDS]
+
+type ExperienceEntry = {
+  title?: string | null
+  subtitle?: string | null
+  meta?: string | null
+  description?: string | null
+}
+
+const dateTimeDisplayOptions: Intl.DateTimeFormatOptions = {
+  month: "short",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+}
+
+function formatDateTime(value: string | null) {
+  if (!value) return "—"
+  return new Date(value).toLocaleDateString(undefined, dateTimeDisplayOptions)
+}
+
+function formatBooleanFlag(value: boolean | null | undefined) {
+  if (value === null || value === undefined) return "—"
+  return value ? "Yes" : "No"
+}
+
+function formatNullableText(value?: string | null) {
+  if (!value) return "—"
+  const trimmed = value.trim()
+  return trimmed.length ? trimmed : "—"
+}
+
+function formatList(values?: string[] | null) {
+  if (!values || values.length === 0) {
+    return "—"
+  }
+
+  return values.join(", ")
+}
+
+function renderExperienceEntries(entries?: ExperienceEntry[] | null): ReactNode {
+  if (!entries || entries.length === 0) {
+    return <span className="text-slate-400">Not provided</span>
+  }
+
+  return (
+    <div className="space-y-2 text-xs text-slate-600">
+      {entries.map((entry, index) => (
+        <div key={`${entry.title ?? "entry"}-${index}`} className="rounded border border-slate-200/80 p-2">
+          <div className="font-semibold text-slate-900">
+            {entry.title ?? "—"}
+            {entry.meta ? <span className="text-slate-500"> · {entry.meta}</span> : null}
+          </div>
+          {entry.subtitle ? <div className="text-slate-600">{entry.subtitle}</div> : null}
+          {entry.description ? <div className="text-slate-500">{entry.description}</div> : null}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+const SCHOOL_FIELD_OPTIONS: FieldOption<SchoolDelegationRecord>[] = [
+  {
+    key: "schoolName",
+    label: "School name",
+    description: "Name submitted by the school delegation",
+    render: (record) => <span className="font-medium text-slate-900">{record.school_name}</span>,
+  },
+  {
+    key: "schoolEmail",
+    label: "School email",
+    render: (record) => (
+      <Link
+        href={`mailto:${record.school_email}`}
+        className="text-[#B22222] underline-offset-2 hover:text-[#8B1A1A] hover:underline"
+      >
+        {record.school_email}
+      </Link>
+    ),
+  },
+  {
+    key: "schoolAddress",
+    label: "School address",
+    render: (record) => <span className="text-slate-600">{record.school_address}</span>,
+  },
+  {
+    key: "schoolCountry",
+    label: "Country",
+    render: (record) => <span className="text-slate-600">{record.school_country}</span>,
+  },
+  {
+    key: "directorName",
+    label: "Director name",
+    render: (record) => <span className="font-medium text-slate-900">{record.director_name}</span>,
+  },
+  {
+    key: "directorEmail",
+    label: "Director email",
+    render: (record) => (
+      <Link
+        href={`mailto:${record.director_email}`}
+        className="text-[#B22222] underline-offset-2 hover:text-[#8B1A1A] hover:underline"
+      >
+        {record.director_email}
+      </Link>
+    ),
+  },
+  {
+    key: "directorPhone",
+    label: "Director phone",
+    render: (record) => <span className="text-slate-600">{record.director_phone}</span>,
+  },
+  {
+    key: "numDelegates",
+    label: "# Delegates",
+    render: (record) => <span className="text-slate-700">{record.num_delegates}</span>,
+  },
+  {
+    key: "numFaculty",
+    label: "# Faculty",
+    render: (record) => <span className="text-slate-700">{record.num_faculty}</span>,
+  },
+  {
+    key: "additionalRequests",
+    label: "Additional requests",
+    render: (record) => <span className="text-slate-600">{formatNullableText(record.additional_requests)}</span>,
+  },
+  {
+    key: "heardAbout",
+    label: "Heard about",
+    render: (record) => <span className="text-slate-600">{formatNullableText(record.heard_about)}</span>,
+  },
+  {
+    key: "termsAccepted",
+    label: "Terms accepted",
+    render: (record) => <span className="text-slate-600">{formatBooleanFlag(record.terms_accepted)}</span>,
+  },
+  {
+    key: "spreadsheetFileName",
+    label: "Spreadsheet file",
+    render: (record) => <span className="text-slate-600">{record.spreadsheet_file_name}</span>,
+  },
+  {
+    key: "spreadsheetUrl",
+    label: "Spreadsheet URL",
+    render: (record) =>
+      record.spreadsheet_url ? (
+        <Link
+          href={record.spreadsheet_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-emerald-600 underline-offset-2 hover:text-emerald-500 hover:underline"
+        >
+          Download
+        </Link>
+      ) : (
+        <span className="text-slate-400">Not available</span>
+      ),
+  },
+  {
+    key: "spreadsheetStoragePath",
+    label: "Spreadsheet path",
+    render: (record) => <span className="font-mono text-xs text-slate-500">{record.spreadsheet_storage_path}</span>,
+  },
+  {
+    key: "spreadsheetMimeType",
+    label: "Spreadsheet MIME",
+    render: (record) => <span className="text-slate-600">{record.spreadsheet_mime_type}</span>,
+  },
+  {
+    key: "submittedAt",
+    label: "Submitted at",
+    render: (record) => <span className="text-slate-500">{formatDateTime(record.created_at)}</span>,
+  },
+  {
+    key: "updatedAt",
+    label: "Updated at",
+    render: (record) => <span className="text-slate-500">{formatDateTime(record.updated_at)}</span>,
+  },
+]
+
+function createUserFieldOptions(
+  handleStatusChange: (recordId: number, nextStatus: PaymentStatusValue) => Promise<void> | void,
+  updatingId: number | null,
+): Record<UserView, FieldOption<SignupRecord>[]> {
+  const baseFields: FieldOption<SignupRecord>[] = [
+    {
+      key: "id",
+      label: "Record ID",
+      description: "Primary key stored in Supabase",
+      render: (record) => <span className="font-mono text-xs text-slate-500">{record.id}</span>,
+    },
+    {
+      key: "name",
+      label: "Name",
+      render: (record) => (
+        <div className="font-medium text-slate-900">
+          {record.first_name} {record.last_name}
+        </div>
+      ),
+    },
+    {
+      key: "email",
+      label: "Email",
+      render: (record) => (
+        <Link
+          href={`mailto:${record.email}`}
+          className="text-[#B22222] underline-offset-2 hover:text-[#8B1A1A] hover:underline"
+        >
+          {record.email}
+        </Link>
+      ),
+    },
+    {
+      key: "phone",
+      label: "Phone",
+      render: (record) => <span className="text-slate-600">{record.phone}</span>,
+    },
+    {
+      key: "school",
+      label: "School",
+      render: (record) => <span className="text-slate-600">{record.school ?? "—"}</span>,
+    },
+    {
+      key: "role",
+      label: "Role",
+      render: (record) => <span className="capitalize text-slate-700">{record.role}</span>,
+    },
+    {
+      key: "grade",
+      label: "Grade",
+      render: (record) => <span className="text-slate-600">{record.grade ?? "—"}</span>,
+    },
+    {
+      key: "nationality",
+      label: "Nationality",
+      render: (record) => <span className="text-slate-600">{record.nationality ?? "—"}</span>,
+    },
+    {
+      key: "primaryCommittee",
+      label: "Committee pref #1",
+      render: (record) => <span className="text-slate-700">{getPrimaryCommitteePreference(record) ?? "—"}</span>,
+    },
+    {
+      key: "paymentStatus",
+      label: "Payment status",
+      render: (record) => (
+        <Badge
+          variant={badgeVariantForStatus(record.payment_status)}
+          className={badgeClassNameForStatus(record.payment_status)}
+        >
+          {formatPaymentStatus(record.payment_status)}
+        </Badge>
+      ),
+    },
+    {
+      key: "paymentProof",
+      label: "Payment proof",
+      render: (record) =>
+        record.payment_proof_url ? (
+          <Link
+            href={record.payment_proof_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-emerald-600 underline-offset-2 hover:text-emerald-500 hover:underline"
+          >
+            {record.payment_proof_file_name ?? "View proof"}
+          </Link>
+        ) : (
+          <span className="text-slate-400">Not provided</span>
+        ),
+    },
+    {
+      key: "paymentProofFileName",
+      label: "Proof file",
+      render: (record) => <span className="text-slate-600">{record.payment_proof_file_name ?? "—"}</span>,
+    },
+    {
+      key: "paymentProofPayer",
+      label: "Payer name",
+      render: (record) => <span className="text-slate-600">{record.payment_proof_payer_name ?? "—"}</span>,
+    },
+    {
+      key: "paymentProofRole",
+      label: "Payment role",
+      render: (record) => <span className="text-slate-600">{record.payment_proof_role ?? "—"}</span>,
+    },
+    {
+      key: "paymentProofUploadedAt",
+      label: "Proof uploaded",
+      render: (record) => <span className="text-slate-500">{formatDateTime(record.payment_proof_uploaded_at)}</span>,
+    },
+    {
+      key: "paymentProofStoragePath",
+      label: "Proof storage path",
+      render: (record) => (
+        <span className="font-mono text-xs text-slate-500">{record.payment_proof_storage_path ?? "—"}</span>
+      ),
+    },
+    {
+      key: "registrationStatus",
+      label: "Registration status",
+      render: (record) => <span className="text-slate-600">{record.registration_status ?? "—"}</span>,
+    },
+    {
+      key: "submittedAt",
+      label: "Submitted at",
+      render: (record) => <span className="text-slate-500">{formatDateTime(record.created_at)}</span>,
+    },
+    {
+      key: "updatedAt",
+      label: "Updated at",
+      render: (record) => <span className="text-slate-500">{formatDateTime(record.updated_at)}</span>,
+    },
+    {
+      key: "dietaryType",
+      label: "Dietary preference",
+      render: (record) => <span className="text-slate-600">{record.dietary_type ?? "—"}</span>,
+    },
+    {
+      key: "dietaryOther",
+      label: "Dietary notes",
+      render: (record) => <span className="text-slate-600">{formatNullableText(record.dietary_other)}</span>,
+    },
+    {
+      key: "hasAllergies",
+      label: "Allergies",
+      render: (record) => <span className="text-slate-600">{record.has_allergies ?? "—"}</span>,
+    },
+    {
+      key: "allergiesDetails",
+      label: "Allergy details",
+      render: (record) => <span className="text-slate-600">{formatNullableText(record.allergies_details)}</span>,
+    },
+    {
+      key: "emergencyContactName",
+      label: "Emergency contact",
+      render: (record) => <span className="text-slate-600">{record.emergency_contact_name}</span>,
+    },
+    {
+      key: "emergencyContactPhone",
+      label: "Emergency phone",
+      render: (record) => <span className="text-slate-600">{record.emergency_contact_phone}</span>,
+    },
+    {
+      key: "agreeTerms",
+      label: "Agreed to terms",
+      render: (record) => <span className="text-slate-600">{formatBooleanFlag(record.agree_terms)}</span>,
+    },
+    {
+      key: "agreePhotos",
+      label: "Photo consent",
+      render: (record) => <span className="text-slate-600">{formatBooleanFlag(record.agree_photos)}</span>,
+    },
+    {
+      key: "referralCodes",
+      label: "Referral codes",
+      render: (record) => <span className="text-slate-600">{formatList(record.referral_codes)}</span>,
+    },
+    {
+      key: "reviewStatus",
+      label: "Review status",
+      description: "Update payment review status",
+      render: (record) => (
+        <Select
+          value={(record.payment_status ?? "unpaid") as PaymentStatusValue}
+          onValueChange={(value) => void handleStatusChange(record.id, value as PaymentStatusValue)}
+          disabled={updatingId === record.id}
+        >
+          <SelectTrigger className="w-[180px] border-[#B22222]/40 text-left text-sm focus:ring-[#B22222]">
+            {updatingId === record.id ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-3 w-3 animate-spin" /> Updating...
+              </span>
+            ) : (
+              <SelectValue />
+            )}
+          </SelectTrigger>
+          <SelectContent className="text-sm">
+            {statusOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ),
+    },
+  ]
+
+  const delegateFields: FieldOption<SignupRecord>[] = [
+    {
+      key: "delegateExperience",
+      label: "Delegate experience",
+      render: (record) => <span className="text-slate-600">{record.delegate_data?.experience ?? "—"}</span>,
+    },
+    {
+      key: "delegateCommittee1",
+      label: "Delegate pref #1",
+      render: (record) => <span className="text-slate-600">{record.delegate_data?.committee1 ?? "—"}</span>,
+    },
+    {
+      key: "delegateCommittee2",
+      label: "Delegate pref #2",
+      render: (record) => <span className="text-slate-600">{record.delegate_data?.committee2 ?? "—"}</span>,
+    },
+    {
+      key: "delegateCommittee3",
+      label: "Delegate pref #3",
+      render: (record) => <span className="text-slate-600">{record.delegate_data?.committee3 ?? "—"}</span>,
+    },
+  ]
+
+  const chairFields: FieldOption<SignupRecord>[] = [
+    {
+      key: "chairCommittee1",
+      label: "Chair pref #1",
+      render: (record) => <span className="text-slate-600">{record.chair_data?.committee1 ?? "—"}</span>,
+    },
+    {
+      key: "chairCommittee2",
+      label: "Chair pref #2",
+      render: (record) => <span className="text-slate-600">{record.chair_data?.committee2 ?? "—"}</span>,
+    },
+    {
+      key: "chairCommittee3",
+      label: "Chair pref #3",
+      render: (record) => <span className="text-slate-600">{record.chair_data?.committee3 ?? "—"}</span>,
+    },
+    {
+      key: "chairExperiences",
+      label: "Chair experiences",
+      render: (record) =>
+        renderExperienceEntries(
+          record.chair_data?.experiences?.map((experience) => ({
+            title: experience.conference,
+            subtitle: experience.position,
+            meta: experience.year,
+            description: experience.description,
+          })),
+        ),
+    },
+    {
+      key: "chairCrisisInterest",
+      label: "Crisis/backroom interest",
+      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.crisisBackroomInterest)}</span>,
+    },
+    {
+      key: "chairWhyBestFit",
+      label: "Why best fit",
+      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.whyBestFit)}</span>,
+    },
+    {
+      key: "chairSuccessfulCommittee",
+      label: "Successful committee",
+      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.successfulCommittee)}</span>,
+    },
+    {
+      key: "chairStrengthWeakness",
+      label: "Strengths & weaknesses",
+      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.strengthWeakness)}</span>,
+    },
+    {
+      key: "chairCrisisResponse",
+      label: "Crisis response",
+      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.crisisResponse)}</span>,
+    },
+    {
+      key: "chairAvailability",
+      label: "Availability",
+      render: (record) => <span className="text-slate-600">{formatNullableText(record.chair_data?.availability)}</span>,
+    },
+    {
+      key: "chairCvFileName",
+      label: "Chair CV file",
+      render: (record) => <span className="text-slate-600">{record.chair_cv_file_name ?? "—"}</span>,
+    },
+    {
+      key: "chairCvUrl",
+      label: "Chair CV URL",
+      render: (record) =>
+        record.chair_cv_url ? (
+          <Link
+            href={record.chair_cv_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-emerald-600 underline-offset-2 hover:text-emerald-500 hover:underline"
+          >
+            View CV
+          </Link>
+        ) : (
+          <span className="text-slate-400">Not uploaded</span>
+        ),
+    },
+    {
+      key: "chairCvUploadedAt",
+      label: "Chair CV uploaded",
+      render: (record) => <span className="text-slate-500">{formatDateTime(record.chair_cv_uploaded_at)}</span>,
+    },
+    {
+      key: "chairCvStoragePath",
+      label: "Chair CV path",
+      render: (record) => <span className="font-mono text-xs text-slate-500">{record.chair_cv_storage_path ?? "—"}</span>,
+    },
+  ]
+
+  const adminFields: FieldOption<SignupRecord>[] = [
+    {
+      key: "adminRelevantExperience",
+      label: "Relevant experience",
+      render: (record) => <span className="text-slate-600">{formatNullableText(record.admin_data?.relevantExperience)}</span>,
+    },
+    {
+      key: "adminWhy",
+      label: "Why admin",
+      render: (record) => <span className="text-slate-600">{formatNullableText(record.admin_data?.whyAdmin)}</span>,
+    },
+    {
+      key: "adminSkills",
+      label: "Skills",
+      render: (record) => <span className="text-slate-600">{formatList(record.admin_data?.skills)}</span>,
+    },
+    {
+      key: "adminExperiences",
+      label: "Admin experiences",
+      render: (record) =>
+        renderExperienceEntries(
+          record.admin_data?.experiences?.map((experience) => ({
+            title: experience.organization ?? experience.role,
+            subtitle: experience.role,
+            meta: experience.year,
+            description: experience.description,
+          })),
+        ),
+    },
+    {
+      key: "adminPreviousAdmin",
+      label: "Previous admin?",
+      render: (record) => <span className="text-slate-600">{record.admin_data?.previousAdmin ?? "—"}</span>,
+    },
+    {
+      key: "adminUnderstandsRole",
+      label: "Understands role?",
+      render: (record) => <span className="text-slate-600">{record.admin_data?.understandsRole ?? "—"}</span>,
+    },
+  ]
+
+  return {
+    all: baseFields,
+    delegates: [...baseFields, ...delegateFields],
+    chairs: [...baseFields, ...chairFields],
+    admins: [...baseFields, ...adminFields],
+  }
+}
 
 type PaymentStatusValue =
   | "unpaid"
@@ -135,13 +847,51 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const [schoolError, setSchoolError] = useState<string | null>(null)
   const [schoolLastUpdated, setSchoolLastUpdated] = useState<Date | null>(null)
   const [activeView, setActiveView] = useState<RegistrationView>("all")
+  const [selectedUserFields, setSelectedUserFields] = useState<Record<UserView, string[]>>(buildDefaultUserFieldSelection)
+  const [selectedSchoolFields, setSelectedSchoolFields] = useState<string[]>(buildDefaultSchoolFieldSelection)
 
   const fetchRecords = useCallback(async () => {
     setLoading(true)
     const { data, error: queryError } = await supabase
       .from("users")
       .select(
-        "id, first_name, last_name, email, phone, role, school, payment_status, payment_proof_url, payment_proof_file_name, payment_proof_uploaded_at, delegate_data, chair_data, created_at",
+        [
+          "id",
+          "first_name",
+          "last_name",
+          "email",
+          "phone",
+          "role",
+          "nationality",
+          "school",
+          "grade",
+          "payment_status",
+          "payment_proof_url",
+          "payment_proof_storage_path",
+          "payment_proof_file_name",
+          "payment_proof_payer_name",
+          "payment_proof_role",
+          "payment_proof_uploaded_at",
+          "dietary_type",
+          "dietary_other",
+          "has_allergies",
+          "allergies_details",
+          "emergency_contact_name",
+          "emergency_contact_phone",
+          "agree_terms",
+          "agree_photos",
+          "registration_status",
+          "referral_codes",
+          "delegate_data",
+          "chair_data",
+          "admin_data",
+          "chair_cv_url",
+          "chair_cv_storage_path",
+          "chair_cv_file_name",
+          "chair_cv_uploaded_at",
+          "created_at",
+          "updated_at",
+        ].join(", "),
       )
       .order("created_at", { ascending: false })
 
@@ -163,7 +913,27 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     const { data, error: queryError } = await supabase
       .from("school_delegations")
       .select(
-        "id, school_name, school_address, school_email, school_country, director_name, director_email, director_phone, num_faculty, num_delegates, additional_requests, heard_about, terms_accepted, spreadsheet_file_name, spreadsheet_url, created_at",
+        [
+          "id",
+          "school_name",
+          "school_address",
+          "school_email",
+          "school_country",
+          "director_name",
+          "director_email",
+          "director_phone",
+          "num_faculty",
+          "num_delegates",
+          "additional_requests",
+          "heard_about",
+          "terms_accepted",
+          "spreadsheet_file_name",
+          "spreadsheet_storage_path",
+          "spreadsheet_mime_type",
+          "spreadsheet_url",
+          "created_at",
+          "updated_at",
+        ].join(", "),
       )
       .order("created_at", { ascending: false })
 
@@ -227,6 +997,54 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     void fetchSchoolDelegations()
   }, [fetchRecords, fetchSchoolDelegations])
 
+  const handleUserFieldToggle = useCallback((view: UserView, fieldKey: string, isChecked: boolean) => {
+    setSelectedUserFields((previous) => {
+      const current = previous[view] ?? []
+
+      if (!isChecked && current.length === 1) {
+        return previous
+      }
+
+      const nextViewFields = isChecked
+        ? Array.from(new Set([...current, fieldKey]))
+        : current.filter((key) => key !== fieldKey)
+
+      return {
+        ...previous,
+        [view]: nextViewFields,
+      }
+    })
+  }, [])
+
+  const resetUserFields = useCallback((view: UserView) => {
+    setSelectedUserFields((previous) => ({
+      ...previous,
+      [view]: [...USER_VIEW_DEFAULT_FIELDS[view]],
+    }))
+  }, [])
+
+  const handleSchoolFieldToggle = useCallback((fieldKey: string, isChecked: boolean) => {
+    setSelectedSchoolFields((previous) => {
+      if (!isChecked && previous.length === 1) {
+        return previous
+      }
+
+      if (isChecked) {
+        if (previous.includes(fieldKey)) {
+          return previous
+        }
+
+        return [...previous, fieldKey]
+      }
+
+      return previous.filter((key) => key !== fieldKey)
+    })
+  }, [])
+
+  const resetSchoolFields = useCallback(() => {
+    setSelectedSchoolFields(buildDefaultSchoolFieldSelection())
+  }, [])
+
   const handleStatusChange = useCallback(
     async (recordId: number, nextStatus: PaymentStatusValue) => {
       setUpdateError(null)
@@ -258,6 +1076,11 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     [supabase],
   )
 
+  const userFieldOptions = useMemo(
+    () => createUserFieldOptions(handleStatusChange, updatingId),
+    [handleStatusChange, updatingId],
+  )
+
   const exportToXlsx = useCallback(() => {
     if (!records.length) return
 
@@ -282,7 +1105,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     XLSX.writeFile(workbook, `vofmun-registrations-${dateStamp}.xlsx`)
   }, [records])
 
-  const renderUserTab = (recordsToDisplay: SignupRecord[], emptyMessage: string) => {
+  const renderUserTab = (recordsToDisplay: SignupRecord[], emptyMessage: string, view: UserView) => {
     if (loading) {
       return (
         <div className="flex justify-center py-16 text-slate-400">
@@ -303,102 +1126,37 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       return <div className="px-6 py-10 text-center text-sm text-slate-500">{emptyMessage}</div>
     }
 
+    const availableFields = userFieldOptions[view] ?? []
+    const selectedFields = selectedUserFields[view] ?? []
+    const visibleFields = availableFields.filter((field) => selectedFields.includes(field.key))
+
+    if (visibleFields.length === 0) {
+      return (
+        <div className="px-6 py-10 text-center text-sm text-slate-500">
+          Select at least one column to display results.
+        </div>
+      )
+    }
+
     return (
       <Table className="min-w-full text-slate-900">
         <TableHeader>
           <TableRow className="border-[#B22222]/20">
-            <TableHead className="text-slate-500">Name</TableHead>
-            <TableHead className="text-slate-500">Email</TableHead>
-            <TableHead className="text-slate-500">Phone</TableHead>
-            <TableHead className="text-slate-500">School</TableHead>
-            <TableHead className="text-slate-500">Role</TableHead>
-            <TableHead className="text-slate-500">Committee pref #1</TableHead>
-            <TableHead className="text-slate-500">Payment</TableHead>
-            <TableHead className="text-slate-500">Proof</TableHead>
-            <TableHead className="text-slate-500">Submitted</TableHead>
-            <TableHead className="text-slate-500">Review status</TableHead>
+            {visibleFields.map((field) => (
+              <TableHead key={field.key} className="text-slate-500" title={field.description ?? undefined}>
+                {field.label}
+              </TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {recordsToDisplay.map((record) => {
-            const proofAvailable = Boolean(record.payment_proof_url)
-
-            return (
-              <TableRow key={record.id} className="border-[#B22222]/10">
-                <TableCell>
-                  <div className="font-medium text-slate-900">
-                    {record.first_name} {record.last_name}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Link
-                    href={`mailto:${record.email}`}
-                    className="text-[#B22222] underline-offset-2 hover:text-[#8B1A1A] hover:underline"
-                  >
-                    {record.email}
-                  </Link>
-                </TableCell>
-                <TableCell className="text-slate-600">{record.phone}</TableCell>
-                <TableCell className="text-slate-600">{record.school ?? "—"}</TableCell>
-                <TableCell className="capitalize text-slate-700">{record.role}</TableCell>
-                <TableCell className="text-slate-700">{getPrimaryCommitteePreference(record) ?? "—"}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={badgeVariantForStatus(record.payment_status)}
-                    className={badgeClassNameForStatus(record.payment_status)}
-                  >
-                    {formatPaymentStatus(record.payment_status)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {proofAvailable ? (
-                    <Link
-                      href={record.payment_proof_url ?? "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-emerald-600 underline-offset-2 hover:text-emerald-500 hover:underline"
-                    >
-                      {record.payment_proof_file_name ?? "View proof"}
-                    </Link>
-                  ) : (
-                    <span className="text-slate-400">Not provided</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-slate-500">
-                  {new Date(record.created_at).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </TableCell>
-                <TableCell>
-                  <Select
-                    value={(record.payment_status ?? "unpaid") as PaymentStatusValue}
-                    onValueChange={(value) => void handleStatusChange(record.id, value as PaymentStatusValue)}
-                    disabled={updatingId === record.id}
-                  >
-                    <SelectTrigger className="w-[170px] border-[#B22222]/40 text-left text-sm focus:ring-[#B22222]">
-                      {updatingId === record.id ? (
-                        <span className="inline-flex items-center gap-2">
-                          <Loader2 className="h-3 w-3 animate-spin" /> Updating...
-                        </span>
-                      ) : (
-                        <SelectValue placeholder="Set status" />
-                      )}
-                    </SelectTrigger>
-                    <SelectContent className="text-sm">
-                      {statusOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-              </TableRow>
-            )
-          })}
+          {recordsToDisplay.map((record) => (
+            <TableRow key={record.id} className="border-[#B22222]/10">
+              {visibleFields.map((field) => (
+                <TableCell key={`${record.id}-${field.key}`}>{field.render(record)}</TableCell>
+              ))}
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     )
@@ -421,67 +1179,33 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       return <div className="px-6 py-10 text-center text-sm text-slate-500">No school delegation submissions yet.</div>
     }
 
+    const visibleFields = SCHOOL_FIELD_OPTIONS.filter((field) => selectedSchoolFields.includes(field.key))
+
+    if (visibleFields.length === 0) {
+      return (
+        <div className="px-6 py-10 text-center text-sm text-slate-500">
+          Select at least one column to display results.
+        </div>
+      )
+    }
+
     return (
       <Table className="min-w-full text-slate-900">
         <TableHeader>
           <TableRow className="border-[#B22222]/20">
-            <TableHead className="text-slate-500">School</TableHead>
-            <TableHead className="text-slate-500">Country</TableHead>
-            <TableHead className="text-slate-500">Director</TableHead>
-            <TableHead className="text-slate-500">Delegates</TableHead>
-            <TableHead className="text-slate-500">Faculty</TableHead>
-            <TableHead className="text-slate-500">Requests</TableHead>
-            <TableHead className="text-slate-500">Heard about</TableHead>
-            <TableHead className="text-slate-500">Spreadsheet</TableHead>
-            <TableHead className="text-slate-500">Submitted</TableHead>
+            {visibleFields.map((field) => (
+              <TableHead key={field.key} className="text-slate-500" title={field.description ?? undefined}>
+                {field.label}
+              </TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
           {schoolDelegations.map((record) => (
             <TableRow key={record.id} className="border-[#B22222]/10">
-              <TableCell>
-                <div className="font-medium text-slate-900">{record.school_name}</div>
-                <div className="text-sm text-slate-500">{record.school_email}</div>
-              </TableCell>
-              <TableCell className="text-slate-600">{record.school_country}</TableCell>
-              <TableCell>
-                <div className="font-medium text-slate-900">{record.director_name}</div>
-                <Link
-                  href={`mailto:${record.director_email}`}
-                  className="text-sm text-[#B22222] underline-offset-2 hover:text-[#8B1A1A] hover:underline"
-                >
-                  {record.director_email}
-                </Link>
-                <div className="text-sm text-slate-500">{record.director_phone}</div>
-              </TableCell>
-              <TableCell className="text-slate-700">{record.num_delegates}</TableCell>
-              <TableCell className="text-slate-700">{record.num_faculty}</TableCell>
-              <TableCell className="text-sm text-slate-600">
-                {record.additional_requests ? record.additional_requests : "—"}
-              </TableCell>
-              <TableCell className="text-sm text-slate-600">{record.heard_about ?? "—"}</TableCell>
-              <TableCell>
-                {record.spreadsheet_url ? (
-                  <Link
-                    href={record.spreadsheet_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-emerald-600 underline-offset-2 hover:text-emerald-500 hover:underline"
-                  >
-                    {record.spreadsheet_file_name}
-                  </Link>
-                ) : (
-                  <span className="text-slate-400">Not available</span>
-                )}
-              </TableCell>
-              <TableCell className="text-slate-500">
-                {new Date(record.created_at).toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </TableCell>
+              {visibleFields.map((field) => (
+                <TableCell key={`${record.id}-${field.key}`}>{field.render(record)}</TableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>
@@ -599,29 +1323,129 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
               </TabsList>
             </div>
 
-            <TabsContent value="all" className="px-0">
+            <TabsContent value="all" className="px-0 space-y-2">
+              <div className="flex justify-end px-6">
+                <ColumnSelector
+                  label={COLUMN_MENU_LABELS.all}
+                  options={userFieldOptions.all}
+                  selectedKeys={selectedUserFields.all}
+                  onToggle={(fieldKey, checked) => handleUserFieldToggle("all", fieldKey, checked)}
+                  onReset={() => resetUserFields("all")}
+                />
+              </div>
               {updateError && <div className="px-6 pt-0 text-sm text-red-500">{updateError}</div>}
-              {renderUserTab(records, "No registrations found yet.")}
+              {renderUserTab(records, "No registrations found yet.", "all")}
             </TabsContent>
-            <TabsContent value="delegates" className="px-0">
+            <TabsContent value="delegates" className="px-0 space-y-2">
+              <div className="flex justify-end px-6">
+                <ColumnSelector
+                  label={COLUMN_MENU_LABELS.delegates}
+                  options={userFieldOptions.delegates}
+                  selectedKeys={selectedUserFields.delegates}
+                  onToggle={(fieldKey, checked) => handleUserFieldToggle("delegates", fieldKey, checked)}
+                  onReset={() => resetUserFields("delegates")}
+                />
+              </div>
               {updateError && <div className="px-6 pt-0 text-sm text-red-500">{updateError}</div>}
-              {renderUserTab(delegateRegistrations, "No delegate registrations yet.")}
+              {renderUserTab(delegateRegistrations, "No delegate registrations yet.", "delegates")}
             </TabsContent>
-            <TabsContent value="chairs" className="px-0">
+            <TabsContent value="chairs" className="px-0 space-y-2">
+              <div className="flex justify-end px-6">
+                <ColumnSelector
+                  label={COLUMN_MENU_LABELS.chairs}
+                  options={userFieldOptions.chairs}
+                  selectedKeys={selectedUserFields.chairs}
+                  onToggle={(fieldKey, checked) => handleUserFieldToggle("chairs", fieldKey, checked)}
+                  onReset={() => resetUserFields("chairs")}
+                />
+              </div>
               {updateError && <div className="px-6 pt-0 text-sm text-red-500">{updateError}</div>}
-              {renderUserTab(chairRegistrations, "No chair applications yet.")}
+              {renderUserTab(chairRegistrations, "No chair applications yet.", "chairs")}
             </TabsContent>
-            <TabsContent value="admins" className="px-0">
+            <TabsContent value="admins" className="px-0 space-y-2">
+              <div className="flex justify-end px-6">
+                <ColumnSelector
+                  label={COLUMN_MENU_LABELS.admins}
+                  options={userFieldOptions.admins}
+                  selectedKeys={selectedUserFields.admins}
+                  onToggle={(fieldKey, checked) => handleUserFieldToggle("admins", fieldKey, checked)}
+                  onReset={() => resetUserFields("admins")}
+                />
+              </div>
               {updateError && <div className="px-6 pt-0 text-sm text-red-500">{updateError}</div>}
-              {renderUserTab(adminRegistrations, "No admin applications yet.")}
+              {renderUserTab(adminRegistrations, "No admin applications yet.", "admins")}
             </TabsContent>
-            <TabsContent value="school" className="px-0">
+            <TabsContent value="school" className="px-0 space-y-2">
+              <div className="flex justify-end px-6">
+                <ColumnSelector
+                  label={COLUMN_MENU_LABELS.school}
+                  options={SCHOOL_FIELD_OPTIONS}
+                  selectedKeys={selectedSchoolFields}
+                  onToggle={handleSchoolFieldToggle}
+                  onReset={resetSchoolFields}
+                />
+              </div>
               {renderSchoolTab()}
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+type ColumnSelectorProps = {
+  label: string
+  options: Pick<FieldOption<unknown>, "key" | "label" | "description">[]
+  selectedKeys: string[]
+  onToggle: (fieldKey: string, checked: boolean) => void
+  onReset: () => void
+}
+
+function ColumnSelector({ label, options, selectedKeys, onToggle, onReset }: ColumnSelectorProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="gap-2 border-[#B22222]/30 text-xs text-[#B22222] hover:bg-[#B22222]/10"
+        >
+          <Columns3 className="h-3.5 w-3.5" /> Columns ({selectedKeys.length}/{options.length})
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64">
+        <DropdownMenuLabel className="text-xs uppercase tracking-[0.2em] text-slate-500">
+          {label}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {options.map((option) => (
+          <DropdownMenuCheckboxItem
+            key={option.key}
+            checked={selectedKeys.includes(option.key)}
+            onCheckedChange={(checked) => onToggle(option.key, checked === true)}
+            className="py-2 text-sm"
+          >
+            <div className="flex flex-col">
+              <span className="text-slate-900">{option.label}</span>
+              {option.description ? (
+                <span className="text-xs text-slate-500">{option.description}</span>
+              ) : null}
+            </div>
+          </DropdownMenuCheckboxItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={(event) => {
+            event.preventDefault()
+            onReset()
+          }}
+        >
+          Reset to defaults
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
