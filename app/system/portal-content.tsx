@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { Columns3, Download, Loader2, LogOut, RefreshCw } from "lucide-react"
 import * as XLSX from "xlsx"
@@ -896,6 +896,14 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const [selectedUserFields, setSelectedUserFields] = useState<Record<UserView, string[]>>(buildDefaultUserFieldSelection)
   const [selectedSchoolFields, setSelectedSchoolFields] = useState<string[]>(buildDefaultSchoolFieldSelection)
   const [preferencesHydrated, setPreferencesHydrated] = useState(false)
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
+  const [schoolColumnWidths, setSchoolColumnWidths] = useState<Record<string, number>>({})
+  const resizeState = useRef<{
+    key: string
+    startX: number
+    startWidth: number
+    target: "user" | "school"
+  } | null>(null)
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -937,6 +945,63 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       console.warn("Unable to persist school column preferences", cause)
     }
   }, [preferencesHydrated, selectedSchoolFields])
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!resizeState.current) return
+
+      const { key, startX, startWidth, target } = resizeState.current
+      const delta = event.clientX - startX
+      const nextWidth = Math.min(900, Math.max(180, startWidth + delta))
+
+      if (target === "user") {
+        setColumnWidths((previous) => (previous[key] === nextWidth ? previous : { ...previous, [key]: nextWidth }))
+      } else {
+        setSchoolColumnWidths((previous) => (previous[key] === nextWidth ? previous : { ...previous, [key]: nextWidth }))
+      }
+    }
+
+    const handleMouseUp = () => {
+      resizeState.current = null
+      document.body.style.removeProperty("user-select")
+    }
+
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("mouseup", handleMouseUp)
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("mouseup", handleMouseUp)
+    }
+  }, [])
+
+  const getColumnStyle = useCallback(
+    (key: string, target: "user" | "school") => {
+      const width = target === "user" ? columnWidths[key] : schoolColumnWidths[key]
+      return {
+        width: width ?? 260,
+        minWidth: 200,
+        maxWidth: 900,
+      }
+    },
+    [columnWidths, schoolColumnWidths],
+  )
+
+  const handleResizeStart = useCallback(
+    (key: string, event: React.MouseEvent<HTMLSpanElement, MouseEvent>, target: "user" | "school") => {
+      event.preventDefault()
+      const headerCell = event.currentTarget.parentElement as HTMLElement | null
+      const currentWidth = headerCell?.getBoundingClientRect().width
+      resizeState.current = {
+        key,
+        startX: event.clientX,
+        startWidth: currentWidth ?? getColumnStyle(key, target).width ?? 260,
+        target,
+      }
+      document.body.style.userSelect = "none"
+    },
+    [getColumnStyle],
+  )
 
   const fetchRecords = useCallback(async () => {
     setLoading(true)
@@ -1229,20 +1294,51 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     return (
       <Table className="min-w-full text-slate-900">
         <TableHeader>
-          <TableRow className="border-[#B22222]/20">
-            {visibleFields.map((field) => (
-              <TableHead key={field.key} className="text-slate-500" title={field.description ?? undefined}>
-                {field.label}
-              </TableHead>
-            ))}
+          <TableRow className="border-slate-200/90">
+            {visibleFields.map((field) => {
+              const columnStyle = getColumnStyle(field.key, "user")
+
+              return (
+                <TableHead
+                  key={field.key}
+                  style={columnStyle}
+                  className="group relative whitespace-normal text-slate-700"
+                  title={field.description ?? undefined}
+                >
+                  <div className="flex items-start gap-2 pr-3">
+                    <span className="truncate text-[11px] font-semibold tracking-wide text-slate-700">
+                      {field.label}
+                    </span>
+                    {field.description ? (
+                      <span className="text-[10px] font-normal leading-snug text-slate-400">{field.description}</span>
+                    ) : null}
+                  </div>
+                  <span
+                    aria-hidden
+                    onMouseDown={(event) => handleResizeStart(field.key, event, "user")}
+                    className="absolute right-0 top-0 h-full w-2 cursor-col-resize select-none bg-transparent transition-colors group-hover:bg-[#B22222]/15"
+                  />
+                </TableHead>
+              )
+            })}
           </TableRow>
         </TableHeader>
         <TableBody>
           {recordsToDisplay.map((record) => (
-            <TableRow key={record.id} className="border-[#B22222]/10">
-              {visibleFields.map((field) => (
-                <TableCell key={`${record.id}-${field.key}`}>{field.render(record)}</TableCell>
-              ))}
+            <TableRow key={record.id} className="border-slate-200/80 odd:bg-white even:bg-slate-50/50">
+              {visibleFields.map((field) => {
+                const columnStyle = getColumnStyle(field.key, "user")
+
+                return (
+                  <TableCell
+                    key={`${record.id}-${field.key}`}
+                    style={columnStyle}
+                    className="align-top text-slate-800"
+                  >
+                    {field.render(record)}
+                  </TableCell>
+                )
+              })}
             </TableRow>
           ))}
         </TableBody>
@@ -1280,20 +1376,51 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     return (
       <Table className="min-w-full text-slate-900">
         <TableHeader>
-          <TableRow className="border-[#B22222]/20">
-            {visibleFields.map((field) => (
-              <TableHead key={field.key} className="text-slate-500" title={field.description ?? undefined}>
-                {field.label}
-              </TableHead>
-            ))}
+          <TableRow className="border-slate-200/90">
+            {visibleFields.map((field) => {
+              const columnStyle = getColumnStyle(field.key, "school")
+
+              return (
+                <TableHead
+                  key={field.key}
+                  style={columnStyle}
+                  className="group relative whitespace-normal text-slate-700"
+                  title={field.description ?? undefined}
+                >
+                  <div className="flex items-start gap-2 pr-3">
+                    <span className="truncate text-[11px] font-semibold tracking-wide text-slate-700">
+                      {field.label}
+                    </span>
+                    {field.description ? (
+                      <span className="text-[10px] font-normal leading-snug text-slate-400">{field.description}</span>
+                    ) : null}
+                  </div>
+                  <span
+                    aria-hidden
+                    onMouseDown={(event) => handleResizeStart(field.key, event, "school")}
+                    className="absolute right-0 top-0 h-full w-2 cursor-col-resize select-none bg-transparent transition-colors group-hover:bg-[#B22222]/15"
+                  />
+                </TableHead>
+              )
+            })}
           </TableRow>
         </TableHeader>
         <TableBody>
           {schoolDelegations.map((record) => (
-            <TableRow key={record.id} className="border-[#B22222]/10">
-              {visibleFields.map((field) => (
-                <TableCell key={`${record.id}-${field.key}`}>{field.render(record)}</TableCell>
-              ))}
+            <TableRow key={record.id} className="border-slate-200/80 odd:bg-white even:bg-slate-50/50">
+              {visibleFields.map((field) => {
+                const columnStyle = getColumnStyle(field.key, "school")
+
+                return (
+                  <TableCell
+                    key={`${record.id}-${field.key}`}
+                    style={columnStyle}
+                    className="align-top text-slate-800"
+                  >
+                    {field.render(record)}
+                  </TableCell>
+                )
+              })}
             </TableRow>
           ))}
         </TableBody>
