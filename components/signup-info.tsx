@@ -39,10 +39,10 @@ export function SignupInfo() {
                 <span className="text-gray-700">Delegates: January 10th 2026</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Chairs: December 20th 2025</span>
+                <span className="text-gray-700">Chairs: December 10th 2025</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Admin Staff: December 20th 2025</span>
+                <span className="text-gray-700">Admin Staff: December 10th 2025</span>
               </div>
             </div>
           </div>
