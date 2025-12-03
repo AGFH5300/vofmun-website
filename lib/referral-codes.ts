@@ -10,9 +10,8 @@ export const REFERRAL_CODES: ReferralCodeEntry[] = [
   { code: 'VM284', owner: 'Vaibhav Kiran Mundanat' },
   { code: 'GM777', owner: 'Gibran Malaeb' },
   { code: 'AS831', owner: 'Armaghan Siddiqui' },
-  { code: 'ES395', owner: 'Elinore Sweiss' },
-  { code: 'CR819', owner: 'Clyde Jared Robis' },
-  { code: 'AS198', owner: 'Aryan Shah' },
+  { code: 'VP804', owner: 'Vyom Patel' },
+  { code: 'VK245', owner: 'Vidur Aravind Kumar' },
 ]
 
 const normalizedLookup = new Map(
