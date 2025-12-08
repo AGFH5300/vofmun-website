@@ -1,7 +1,8 @@
 "use client"
 
+import { useState } from "react"
 import { useFormState, useFormStatus } from "react-dom"
-import { Lock } from "lucide-react"
+import { Eye, EyeOff, Lock } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -37,6 +38,7 @@ function SubmitButton() {
 
 export function PasswordGate({ authenticate }: PasswordGateProps) {
   const [state, formAction] = useFormState(authenticate, initialState)
+  const [showPassword, setShowPassword] = useState(false)
 
   return (
     <div className="mx-auto max-w-md">
@@ -59,15 +61,25 @@ export function PasswordGate({ authenticate }: PasswordGateProps) {
               <label htmlFor="password" className="text-sm font-medium text-slate-700">
                 Access phrase
               </label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Enter password"
-                className="bg-slate-100 text-slate-900 placeholder:text-slate-500"
-                autoComplete="current-password"
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  className="bg-slate-100 pr-10 text-slate-900 placeholder:text-slate-500"
+                  autoComplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-600 transition hover:text-slate-800"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="flex items-center gap-2 text-sm text-slate-700">
               <Checkbox id="remember-device" name="remember-device" defaultChecked />
