@@ -186,3 +186,60 @@ export async function sendPaymentReminderEmail(payload: RegistrationEmailPayload
     text,
   })
 }
+
+export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPayload) {
+  if (!resendClient) {
+    console.warn("Resend API key not configured; skipping short payment reminder email")
+    return
+  }
+
+  if (payload.role === "chair" || payload.role === "admin") {
+    const content = buildChairAdminEmailContent(payload, "unpaid")
+
+    await resendClient.emails.send({
+      from: FROM_EMAIL,
+      to: payload.email,
+      subject: content.subject,
+      html: content.html,
+      text: content.text,
+    })
+    return
+  }
+
+  const nameForGreeting = greetingName(payload.firstName, payload.lastName)
+  const proofLink = PAYMENT_DETAILS.proofUploadUrl
+
+  const html = `
+    <div style="${baseBodyStyle}">
+      <p>Hi ${nameForGreeting},</p>
+      <p>
+        This is a quick reminder to complete your payment for VOFMUN 2026 so we can confirm your delegate spot.
+      </p>
+      ${renderStripeCtaHtml()}
+      ${renderPaymentDetailsHtml()}
+      <p style="margin-top: 24px;">Upload your transfer receipt or screenshot here:</p>
+      <p>
+        <a
+          href="${proofLink}"
+          style="display: inline-flex; align-items: center; gap: 8px; background: #B22222; color: #fff; padding: 12px 20px; border-radius: 999px; text-decoration: none; font-weight: 600;"
+        >
+          Upload proof of payment
+        </a>
+      </p>
+      <p style="margin-top: 24px;">If you’ve already paid, you can ignore this message.</p>
+      <p style="margin-top: 24px;">Warm regards,<br/>VOFMUN Secretariat</p>
+    </div>
+  `
+
+  const text = `Hi ${nameForGreeting},\n\nThis is a quick reminder to complete your payment for VOFMUN 2026 so we can confirm your delegate spot.\n${
+    renderStripeCtaText() ? `\n${renderStripeCtaText()}\n` : ""
+  }\n${renderPaymentDetailsText()}\n\nUpload proof: ${proofLink}\n\nIf you’ve already paid, you can ignore this message.\nWarm regards,\nVOFMUN Secretariat`
+
+  await resendClient.emails.send({
+    from: FROM_EMAIL,
+    to: payload.email,
+    subject: "Quick reminder: complete your VOFMUN payment",
+    html,
+    text,
+  })
+}
