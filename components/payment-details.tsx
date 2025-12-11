@@ -7,11 +7,19 @@ import { ShieldCheck, UploadCloud, Wallet, Copy, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
-import { PAYMENT_DETAILS_ENTRIES, PAYMENT_DETAILS_INTRO, PAYMENT_DETAILS } from "@/lib/payment-details"
+import {
+  HAS_STRIPE_PAYMENT_LINK,
+  PAYMENT_DETAILS_ENTRIES,
+  PAYMENT_DETAILS_INTRO,
+  PAYMENT_DETAILS,
+  STRIPE_PAYMENT_URL,
+} from "@/lib/payment-details"
 
 export function PaymentDetails() {
   const [copiedLabel, setCopiedLabel] = useState<string | null>(null)
   const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const stripeButtonClasses =
+    "inline-flex items-center justify-center gap-2 rounded-lg bg-[#635bff] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-[#4f47d8] active:bg-[#423ac7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635bff]"
 
   useEffect(() => {
     return () => {
@@ -61,6 +69,27 @@ export function PaymentDetails() {
           <div className="rounded-2xl bg-white shadow-lg shadow-[#b22222]/5 border border-[#f4d5d6] overflow-hidden">
             <div className="grid gap-8 p-8 md:grid-cols-2">
               <div>
+                {HAS_STRIPE_PAYMENT_LINK && (
+                  <div className="mb-6 rounded-xl border border-[#e3ddff] bg-[#f4f2ff] p-4">
+                    <p className="text-sm font-semibold text-[#362f78]">Pay instantly with Stripe</p>
+                    <p className="text-sm text-[#362f78]">
+                      Use debit/credit cards or local payment methods with our secure Stripe checkout.
+                    </p>
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                      <a
+                        href={STRIPE_PAYMENT_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`${stripeButtonClasses} group w-full sm:w-auto`}
+                        style={{ fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
+                      >
+                        Pay now via Stripe
+                        <span className="transition-transform duration-200 group-hover:translate-x-1">➜</span>
+                      </a>
+                      <span className="text-xs text-[#362f78]">Or use the bank transfer details below.</span>
+                    </div>
+                  </div>
+                )}
                 <p className="text-gray-700 leading-relaxed">{PAYMENT_DETAILS_INTRO}</p>
                 <dl className="mt-6 space-y-4">
                   {PAYMENT_DETAILS_ENTRIES.map((entry) => (

@@ -41,6 +41,7 @@ import {
   isValidReferralCode,
   normalizeReferralCode,
 } from "@/lib/referral-codes"
+import { HAS_STRIPE_PAYMENT_LINK, STRIPE_PAYMENT_URL } from "@/lib/payment-details"
 
 type Role = "delegate" | "chair" | "admin" | null
 
@@ -151,8 +152,8 @@ export function SignupFormNew() {
   const [showAIModal, setShowAIModal] = useState(false)
   const [lastSubmittedRole, setLastSubmittedRole] = useState<Role | null>(null)
 
-  const stripePaymentUrl = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_URL ?? ""
-  const hasStripePaymentLink = stripePaymentUrl.trim().length > 0
+  const stripeButtonClasses =
+    "inline-flex items-center justify-center gap-2 rounded-lg bg-[#635bff] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-[#4f47d8] active:bg-[#423ac7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635bff]"
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -1000,10 +1001,10 @@ export function SignupFormNew() {
                     {lastPaymentStatus === "yes"
                       ? "Thanks for confirming your payment. Our finance team will verify your receipt within two business days."
                       : lastPaymentStatus === "no"
-                        ? hasStripePaymentLink
+                        ? HAS_STRIPE_PAYMENT_LINK
                           ? "You still need to complete your payment. Use the secure Stripe checkout link below or follow the instructions in your confirmation email."
                           : "You still need to complete your payment. Follow the instructions in your confirmation email to finalize it."
-                        : hasStripePaymentLink
+                        : HAS_STRIPE_PAYMENT_LINK
                           ? "Use the secure Stripe checkout link below to complete your payment."
                           : "You'll receive a confirmation email with payment instructions shortly."}
                   </p>
@@ -1037,12 +1038,17 @@ export function SignupFormNew() {
         </DialogHeader>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-3 pt-4">
-          {hasStripePaymentLink && lastPaymentStatus !== "yes" && !lastSubmittedIsLeadership && (
-            <Button asChild className="bg-[#635BFF] hover:bg-[#4B46C2] text-white w-full sm:w-auto">
-              <a href={stripePaymentUrl} target="_blank" rel="noopener noreferrer">
-                Pay via Stripe
-              </a>
-            </Button>
+          {HAS_STRIPE_PAYMENT_LINK && lastPaymentStatus !== "yes" && !lastSubmittedIsLeadership && (
+            <a
+              href={STRIPE_PAYMENT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${stripeButtonClasses} group w-full sm:w-auto`}
+              style={{ fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
+            >
+              Pay via Stripe
+              <span className="transition-transform duration-200 group-hover:translate-x-1">➜</span>
+            </a>
           )}
           <Button onClick={() => setShowSuccessModal(false)} className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
             Got it, thanks!
