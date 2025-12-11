@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
-import { Columns3, Download, Loader2, LogOut, RefreshCw } from "lucide-react"
+import { Columns3, Download, Loader2, LogOut, MailWarning, RefreshCw } from "lucide-react"
 import * as XLSX from "xlsx"
 
 import { Badge } from "@/components/ui/badge"
@@ -1438,15 +1438,25 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
             Real-time overview of all delegate, chair, and admin registrations submitted through the public signup form.
           </p>
         </div>
-        <form action={onSignOut}>
+        <div className="flex flex-wrap items-center gap-2">
           <Button
-            type="submit"
-            variant="outline"
-            className="gap-2 border-[#B22222]/40 text-[#B22222] hover:bg-[#B22222]/10 hover:text-[#B22222]"
+            asChild
+            className="gap-2 bg-[#B22222] text-white shadow-sm transition hover:bg-[#9b1d1d]"
           >
-            <LogOut className="h-4 w-4" /> Sign out
+            <Link href="/system/payment-reminders">
+              <MailWarning className="h-4 w-4" /> Payment reminders
+            </Link>
           </Button>
-        </form>
+          <form action={onSignOut}>
+            <Button
+              type="submit"
+              variant="outline"
+              className="gap-2 border-[#B22222]/40 text-[#B22222] hover:bg-[#B22222]/10 hover:text-[#B22222]"
+            >
+              <LogOut className="h-4 w-4" /> Sign out
+            </Button>
+          </form>
+        </div>
       </div>
 
       <Card className="border-[#B22222]/30 bg-white text-slate-900 shadow-xl">
