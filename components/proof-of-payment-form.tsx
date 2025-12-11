@@ -11,8 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { UploadCloud, X, Loader2, FileText } from "lucide-react"
 
-const stripePaymentUrl = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_URL ?? ""
-const hasStripePaymentLink = stripePaymentUrl.trim().length > 0
+const stripePaymentUrl =
+  (process.env.NEXT_PUBLIC_STRIPE_PAYMENT_URL ?? "").trim() ||
+  "https://buy.stripe.com/cNiaEWba42k75iw83lcAo01"
+const hasStripePaymentLink = stripePaymentUrl.length > 0
+const stripeButtonClasses =
+  "inline-flex items-center justify-center gap-2 rounded-md bg-[#24B47E] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1E9C6C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#24B47E]"
 
 export function ProofOfPaymentForm() {
   const [hasPaid, setHasPaid] = useState<"yes" | "no" | "">("")
@@ -247,16 +251,20 @@ export function ProofOfPaymentForm() {
       </CardHeader>
       <CardContent className="space-y-6 p-6">
         <div className="rounded-md border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900 space-y-2">
-          <p>
-            Need to make a payment first? {" "}
+          <p className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span>Need to make a payment first?</span>
             {hasStripePaymentLink ? (
-              <Link href={stripePaymentUrl} target="_blank" className="font-semibold text-[#B22222] hover:underline">
-                Use our secure Stripe checkout
+              <Link
+                href={stripePaymentUrl}
+                target="_blank"
+                className={stripeButtonClasses}
+                style={{ fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
+              >
+                Pay with Stripe
               </Link>
             ) : (
-              "Check the confirmation email for payment instructions"
+              <span className="font-semibold text-[#B22222]">Check the confirmation email for payment instructions.</span>
             )}
-            .
           </p>
           <p>If you have already paid, fill in the details below and upload your receipt.</p>
           <p className="text-amber-800 font-medium">
