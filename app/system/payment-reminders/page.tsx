@@ -2,7 +2,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { SYSTEM_ADMIN_AUTH_COOKIE, verifySystemAdminToken } from "@/lib/auth/system-admin"
-import { sendPaymentReminderEmail } from "@/lib/email/registration"
+import { sendShortPaymentReminderEmail } from "@/lib/email/registration"
 import { createClient } from "@/utils/supabase/server"
 
 import { PaymentReminderForm, type ReminderFormState } from "./reminder-form"
@@ -65,7 +65,7 @@ async function sendDelegateReminders(_: ReminderFormState, __: FormData): Promis
 
   for (const record of recipients) {
     try {
-      await sendPaymentReminderEmail({
+      await sendShortPaymentReminderEmail({
         firstName: record.first_name,
         lastName: record.last_name,
         email: record.email!,
