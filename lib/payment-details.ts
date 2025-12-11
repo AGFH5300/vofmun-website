@@ -1,3 +1,9 @@
+export const STRIPE_PAYMENT_URL =
+  (process.env.NEXT_PUBLIC_STRIPE_PAYMENT_URL ?? "").trim() ||
+  "https://buy.stripe.com/cNiaEWba42k75iw83lcAo01"
+
+export const HAS_STRIPE_PAYMENT_LINK = STRIPE_PAYMENT_URL.length > 0
+
 export const PAYMENT_DETAILS = {
   beneficiaryName: "Vishesh Shah Event Management LLC",
   bankBranch: "Business Bay, ADCB",
@@ -9,7 +15,9 @@ export const PAYMENT_DETAILS = {
   proofUploadUrl: "https://vofmun.org/proof-of-payment",
 }
 
-export const PAYMENT_DETAILS_INTRO = "Please complete your payment via bank transfer:"
+export const PAYMENT_DETAILS_INTRO = HAS_STRIPE_PAYMENT_LINK
+  ? "You can pay via secure Stripe checkout or bank transfer:"
+  : "Please complete your payment via bank transfer:"
 
 export const PAYMENT_DETAILS_ENTRIES = [
   { label: "Beneficiary Name", value: PAYMENT_DETAILS.beneficiaryName },
@@ -44,4 +52,39 @@ export function renderPaymentDetailsText() {
     PAYMENT_DETAILS.proofInstructions,
     `Upload proof: ${PAYMENT_DETAILS.proofUploadUrl}`,
   ].join("\n")
+}
+
+export function renderStripeCtaHtml() {
+  if (!HAS_STRIPE_PAYMENT_LINK) return ""
+
+  return `
+    <p style=\"margin: 20px 0 10px; font-weight: 600; color: #111827;\">Pay instantly with Stripe:</p>
+    <a
+      href=\"${STRIPE_PAYMENT_URL}\"
+      style=\"
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 22px;
+        background-color: #635bff;
+        color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+      \"
+      target=\"_blank\"
+      rel=\"noopener noreferrer\"
+    >
+      Pay now via Stripe
+      <span style=\"display: inline-block; transition: transform 0.25s ease;\">➜</span>
+    </a>
+  `
+}
+
+export function renderStripeCtaText() {
+  if (!HAS_STRIPE_PAYMENT_LINK) return ""
+  return `Pay instantly with Stripe: ${STRIPE_PAYMENT_URL}`
 }
