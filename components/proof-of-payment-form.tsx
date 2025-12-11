@@ -10,13 +10,10 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { UploadCloud, X, Loader2, FileText } from "lucide-react"
+import { HAS_STRIPE_PAYMENT_LINK, STRIPE_PAYMENT_URL } from "@/lib/payment-details"
 
-const stripePaymentUrl =
-  (process.env.NEXT_PUBLIC_STRIPE_PAYMENT_URL ?? "").trim() ||
-  "https://buy.stripe.com/cNiaEWba42k75iw83lcAo01"
-const hasStripePaymentLink = stripePaymentUrl.length > 0
 const stripeButtonClasses =
-  "inline-flex items-center justify-center gap-2 rounded-md bg-[#24B47E] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1E9C6C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#24B47E]"
+  "inline-flex items-center justify-center gap-2 rounded-lg bg-[#635bff] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-[#4f47d8] active:bg-[#423ac7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635bff]"
 
 export function ProofOfPaymentForm() {
   const [hasPaid, setHasPaid] = useState<"yes" | "no" | "">("")
@@ -253,14 +250,15 @@ export function ProofOfPaymentForm() {
         <div className="rounded-md border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900 space-y-2">
           <p className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span>Need to make a payment first?</span>
-            {hasStripePaymentLink ? (
+            {HAS_STRIPE_PAYMENT_LINK ? (
               <Link
-                href={stripePaymentUrl}
+                href={STRIPE_PAYMENT_URL}
                 target="_blank"
-                className={stripeButtonClasses}
+                className={`${stripeButtonClasses} group`}
                 style={{ fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
               >
                 Pay with Stripe
+                <span className="arrow-animated transition-transform duration-200 group-hover:translate-x-1">➜</span>
               </Link>
             ) : (
               <span className="font-semibold text-[#B22222]">Check the confirmation email for payment instructions.</span>
