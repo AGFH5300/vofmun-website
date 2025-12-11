@@ -10,9 +10,10 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { UploadCloud, X, Loader2, FileText } from "lucide-react"
+import { HAS_STRIPE_PAYMENT_LINK, STRIPE_PAYMENT_URL } from "@/lib/payment-details"
 
-const stripePaymentUrl = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_URL ?? ""
-const hasStripePaymentLink = stripePaymentUrl.trim().length > 0
+const stripeButtonClasses =
+  "inline-flex items-center justify-center gap-2 rounded-lg bg-[#635bff] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-[#4f47d8] active:bg-[#423ac7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635bff]"
 
 export function ProofOfPaymentForm() {
   const [hasPaid, setHasPaid] = useState<"yes" | "no" | "">("")
@@ -247,16 +248,21 @@ export function ProofOfPaymentForm() {
       </CardHeader>
       <CardContent className="space-y-6 p-6">
         <div className="rounded-md border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900 space-y-2">
-          <p>
-            Need to make a payment first? {" "}
-            {hasStripePaymentLink ? (
-              <Link href={stripePaymentUrl} target="_blank" className="font-semibold text-[#B22222] hover:underline">
-                Use our secure Stripe checkout
+          <p className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span>Need to make a payment first?</span>
+            {HAS_STRIPE_PAYMENT_LINK ? (
+              <Link
+                href={STRIPE_PAYMENT_URL}
+                target="_blank"
+                className={`${stripeButtonClasses} group`}
+                style={{ fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
+              >
+                Pay with Stripe
+                <span className="arrow-animated transition-transform duration-200 group-hover:translate-x-1">➜</span>
               </Link>
             ) : (
-              "Check the confirmation email for payment instructions"
+              <span className="font-semibold text-[#B22222]">Check the confirmation email for payment instructions.</span>
             )}
-            .
           </p>
           <p>If you have already paid, fill in the details below and upload your receipt.</p>
           <p className="text-amber-800 font-medium">
