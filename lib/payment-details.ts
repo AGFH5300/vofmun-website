@@ -58,20 +58,20 @@ export function renderStripeCtaHtml() {
   if (!HAS_STRIPE_PAYMENT_LINK) return ""
 
   return `
-    <p style=\"margin: 20px 0 10px; font-weight: 600; color: #111827;\">Pay instantly with Stripe:</p>
+    <p style=\"margin: 14px 0 8px; font-weight: 600; color: #111827; font-size: 14px;\">Or pay instantly with Stripe:</p>
     <a
       href=\"${STRIPE_PAYMENT_URL}\"
       style=\"
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 14px 22px;
+        gap: 6px;
+        padding: 11px 18px;
         background-color: #635bff;
         color: #ffffff;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 600;
-        border-radius: 8px;
+        border-radius: 7px;
         text-decoration: none;
         transition: background-color 0.2s ease;
       \"
@@ -86,5 +86,5 @@ export function renderStripeCtaHtml() {
 
 export function renderStripeCtaText() {
   if (!HAS_STRIPE_PAYMENT_LINK) return ""
-  return `Pay instantly with Stripe: ${STRIPE_PAYMENT_URL}`
+  return `Or pay instantly with Stripe: ${STRIPE_PAYMENT_URL}`
 }
