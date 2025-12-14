@@ -82,11 +82,6 @@ const founders = [
     image: "/founders/TamaraMoshawrab_Media.png",
   },
   {
-    name: "Noya Fareed",
-    role: "Deputy of Media & Marketing",
-    image: "/founders/NoyaFareed_Media.jpeg",
-  },
-  {
     name: "Hanxiao Yu",
     role: "Deputy of Media & Marketing",
     image: "/founders/HanxiaoYu_Media.jpg",
