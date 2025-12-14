@@ -205,14 +205,6 @@ I've taken part in the World Scholar's Cup before, so I already have some experi
 Academically, I study IGCSE Business and AP Economics, which have strengthened my analytical and organisational skills - skills I bring into planning and managing media for VOFMUN. Outside of school, I’m passionate about debate, MUN, and tennis, all of which help me develop focus, creativity, and teamwork. I’m excited to contribute to making VOFMUN 2026 a memorable and inspiring conference for all!`,
   },
   {
-    name: "Noya Fareed",
-    role: "<strong>Deputy of Media & Marketing</strong>",
-    department: "Media",
-    image: "/founders/NoyaFareed_Media.jpeg",
-    bio: "Driving creative media projects that celebrate the VOFMUN community.",
-    writeup: `Hello everyone, my name is Noya Fareed, I’m 15 years old and I’m from India and Pakistan. I currently go to MTS, and I’m so excited to be part of this project as one of the Deputies of Media. I’ve had three MUN experiences, where I’ve learned so much about leadership, diplomacy, and public speaking. Along with that, I’ve also taken on media roles for different projects, working on content creation, event coverage, and promotion - which helped me grow creatively and work well in a team. I’m really looking forward to bringing that same energy and enthusiasm here, and I can’t wait to collaborate with everyone to make this project a success.`,
-  },
-  {
     name: "Pranav Verma",
     role: "<strong>Deputy of Finance</strong>",
     department: "Finance",
