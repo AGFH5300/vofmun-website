@@ -34,7 +34,7 @@ const DEFAULT_LINKEDIN = "https://www.linkedin.com/company/vofmun";
 const foundingSecretariat: SecretariatMember[] = [
   {
     name: "Tala Swaidan",
-    role: "<strong>Founder &<br/>Secretary-General</strong>",
+    role: "<strong>Founder <br/>Secretary-General</strong>",
     department: "Core",
     image: "/founders/TalaSwaidan_SG.jpg",
     bio: "Co-founder guiding VOFMUN's vision for inclusive and empowering youth diplomacy.",
@@ -51,7 +51,7 @@ As VOFMUN continues to grow, my hope is that it remains a space where young lead
   },
   {
     name: "Vihaan Shukla",
-    role: "<strong>Co-Founder &<br/>Head of Conference Affairs & Operations</strong>",
+    role: "<strong>Co-Founder <br/>Head of Conference Affairs & Operations</strong>",
     department: "Conference Affairs",
     image: "/founders/VihaanShukla_ConferenceAffairs.png",
     bio: "Co-founder overseeing conference operations, logistics, and delegate experience design.",
@@ -100,6 +100,7 @@ See more on my website: `,
     department: "Committees",
     image: "/founders/VidurKumar_Committees.jpeg",
     bio: "Overseeing committee quality, background guide direction, and delegate experience.",
+    linkedin: "https://www.linkedin.com/in/vidur-ak",
     writeup: `Hi, I'm Vidur Kumar, Co-Head of Committees at VOFMUN 2026 and a Year 11 student at Dubai International Academy, Emirates Hills. I'm a student leader with experience in multiple school organisations, including Water for Life, World Scholars Cup Club, and DIAMUN 2026.
 
 Through these roles, I've developed strong skills in communication, logistics, event planning, and team coordination. I've also participated in six MUN conferences, gaining experience in different committees and topics. This has helped me create structured and intellectually engaging committee environments.
@@ -153,6 +154,7 @@ const deputies: SecretariatMember[] = [
     department: "Committees",
     image: "/founders/ArshSaxena_Committees.jpeg",
     bio: "Supporting committee quality, alignment, and delegate experience initiatives.",
+    linkedin: "https://www.linkedin.com/in/arsh-saxena-798408290/",
     writeup: `Hi, I'm Arsh Saxena, Deputy Head of Committees at VOMUN 2026 and a Year 11 student at Dubai International Academy, Emirates Hills. I’m an active student leader involved in multiple school initiatives, from academic clubs to service-based organisations. These experiences have shaped how I approach leadership: with purpose, curiosity, and a focus on elevating the people around me.
 
 Beyond my formal roles, I’ve built a rep for being that person who keeps things moving — whether it’s helping streamline planning, stepping in to fix last-minute issues, or supporting teams when the workload hits. I like bringing order to chaos, staying organised under pressure, and making sure everyone feels confident in what they’re doing.
@@ -165,15 +167,7 @@ As Deputy Head of Committees, I support the Co-Heads in managing committee quali
     department: "Logistics",
     image: "/founders/AryanShah_Committees.jpg",
     bio: "Supporting logistical planning, coordination, and on-site readiness for VOFMUN.",
-    writeup: `Hi I'm Aryan Shah, Deputy of Logistics for VOFMUN 2026! I have previously participated in 4 MUN conferences, and have received an honorable mention in one of them. I am currently a Year 11 student at Dubai International Academy. I am also Vice-President of my school's Cubing and AI clubs. Outside of school I have organised and hosted multiple internationally recognized and licensed Rubik's Cube Competitions that have attracted the attention of some of the best cubers in the MENA region. At VOFMUN my goal is to ensure that all the delegates have an amazing experience at VOFMUN by handling all committee-related matters that range from finalising topics to country allocation and communication with all delegates.`,
-  },
-  {
-    name: "Ayaan Agrawal",
-    role: "<strong>Deputy of Media & Marketing</strong>",
-    department: "Media",
-    image: "/founders/AyaanAgrawal_Media.png",
-    bio: "Producing engaging multimedia content to showcase VOFMUN's story.",
-    writeup: `Hi! I’m Ayaan, and I’m a 15 year old student at DIAEH, currently in Year 11. I have a strong passion for content creation, particularly when it comes to video editing. I enjoy working on creative projects and finding new ways to make videos engaging to the audience and impactful. Content creation has always been something I love because it lets me express ideas visually and tell stories in unique ways. I’m super excited to be part of the VOFMUN team and I look forward to contributing my knowledge, and learning from everyone I work with!`,
+    writeup: `Hi I'm Aryan Shah, Deputy of Logistics for VOFMUN 2026! I have previously participated in 4 MUN conferences, and have received an honorable mention in one of them. I am currently a Year 11 student at Dubai International Academy. I am also Vice-President of my school's Cubing and AI club. Outside of school I have organised and hosted multiple internationally recognized and licensed Rubik's Cube Competitions that have attracted the attention of some of the best cubers in the MENA region. At VOFMUN my goal is to ensure that all the delegates have an amazing experience at VOFMUN by handling all committee-related matters that range from finalising topics to country allocation and communication with all delegates.`,
   },
   {
     name: "Hanxiao Yu",
