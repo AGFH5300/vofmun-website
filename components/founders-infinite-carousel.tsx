@@ -73,11 +73,6 @@ const founders = [
     image: "/founders/GibranMalaeb_Media.jpg",
   },
   {
-    name: "Ayaan Agrawal",
-    role: "Deputy of Media & Marketing",
-    image: "/founders/AyaanAgrawal_Media.png",
-  },
-  {
     name: "Jaden Shibu",
     role: "Deputy of Media & Marketing",
     image: "/founders/JadenShibu_Media.jpg",
