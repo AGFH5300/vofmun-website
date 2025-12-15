@@ -79,7 +79,9 @@ async function loadEligibleRecipients(existingClient?: SupabaseServerClient): Pr
 async function sendDelegateReminders(_: ReminderFormState, formData: FormData): Promise<ReminderFormState> {
   "use server"
 
-  if (!process.env.RESEND_API_KEY) {
+  const actionType = formData.get("actionType")?.toString() === "record" ? "record" : "send"
+
+  if (actionType === "send" && !process.env.RESEND_API_KEY) {
     return {
       status: "error",
       message: "RESEND_API_KEY is not configured; cannot send reminders.",
@@ -91,16 +93,23 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
   const selectedIds = formData.getAll("recipient").map((value) => Number(value)).filter(Boolean)
   const selectionMode = formData.get("selectionMode")?.toString() === "selected" ? "selected" : "all"
 
-  const emailReadyRecipients = recipients.filter((record) => Boolean(record.email))
-  const recipientsToNotify =
+  const recipientsInScope =
     selectionMode === "selected"
-      ? emailReadyRecipients.filter((record) => selectedIds.includes(record.id))
-      : emailReadyRecipients
+      ? recipients.filter((record) => selectedIds.includes(record.id))
+      : recipients
+
+  const emailReadyRecipients = recipientsInScope.filter((record) => Boolean(record.email))
+  const recipientsToNotify = actionType === "send" ? emailReadyRecipients : recipientsInScope
 
   if (recipientsToNotify.length === 0) {
     return {
       status: "idle",
-      message: selectionMode === "selected" ? "Select at least one recipient to send a reminder." : "No unpaid delegates found to notify.",
+      message:
+        selectionMode === "selected"
+          ? "Select at least one recipient to update."
+          : actionType === "send"
+            ? "No unpaid delegates with valid emails found to notify."
+            : "No unpaid delegates found to update.",
     }
   }
 
@@ -108,12 +117,14 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
 
   for (const record of recipientsToNotify) {
     try {
-      await sendShortPaymentReminderEmail({
-        firstName: record.firstName,
-        lastName: record.lastName,
-        email: record.email!,
-        role: "delegate",
-      })
+      if (actionType === "send") {
+        await sendShortPaymentReminderEmail({
+          firstName: record.firstName,
+          lastName: record.lastName,
+          email: record.email!,
+          role: "delegate",
+        })
+      }
 
       const previousDelegateData = (record.delegateData as Record<string, unknown>) ?? {}
       const previousReminders = previousDelegateData.paymentReminders as
@@ -152,12 +163,18 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
     }
   }
 
+  const successMessage =
+    actionType === "send"
+      ? selectionMode === "selected"
+        ? "Payment reminders sent to the selected delegates."
+        : "Payment reminders sent to all unpaid delegates."
+      : selectionMode === "selected"
+        ? "Reminder history recorded for the selected delegates."
+        : "Reminder history recorded for all unpaid delegates."
+
   return {
     status: "success",
-    message:
-      selectionMode === "selected"
-        ? "Payment reminders sent to the selected delegates."
-        : "Payment reminders sent to all unpaid delegates.",
+    message: successMessage,
     sentCount: recipientsToNotify.length,
   }
 }
