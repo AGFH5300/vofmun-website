@@ -48,20 +48,27 @@ type ReminderFormProps = {
 
 const initialState: ReminderFormState = { status: "idle" }
 
-function SubmitButton({ selectedCount, resendConfigured }: { selectedCount: number; resendConfigured: boolean }) {
+function SubmitButton({
+  resendConfigured,
+  sendableCount,
+}: {
+  resendConfigured: boolean
+  sendableCount: number
+}) {
   const { pending } = useFormStatus()
 
   const label = useMemo(() => {
-    if (!selectedCount) return "No delegates selected"
+    if (!resendConfigured) return "Email setup required"
+    if (!sendableCount) return "No emailable delegates"
     if (pending) return "Sending reminders..."
-    return `Send reminder to ${selectedCount} delegate${selectedCount === 1 ? "" : "s"}`
-  }, [pending, selectedCount])
+    return `Send reminder to ${sendableCount} delegate${sendableCount === 1 ? "" : "s"}`
+  }, [pending, resendConfigured, sendableCount])
 
   return (
     <Button
       type="submit"
-      disabled={pending || selectedCount === 0 || !resendConfigured}
-      className="w-full bg-[#B22222] text-white hover:bg-[#9b1d1d]"
+      disabled={pending || sendableCount === 0 || !resendConfigured}
+      className="w-full bg-[#B22222] text-white hover:bg-[#9b1d1d] sm:w-auto"
     >
       <Send className="mr-2 h-4 w-4" />
       {label}
@@ -71,18 +78,32 @@ function SubmitButton({ selectedCount, resendConfigured }: { selectedCount: numb
 
 export function PaymentReminderForm({ action, eligibleCount, recipients, resendConfigured }: ReminderFormProps) {
   const [state, formAction] = useFormState(action, initialState)
-  const [selectedIds, setSelectedIds] = useState<number[]>(() =>
-    recipients.filter((recipient) => Boolean(recipient.email)).map((recipient) => recipient.id),
-  )
+  const [selectedIds, setSelectedIds] = useState<number[]>(() => recipients.map((recipient) => recipient.id))
 
   useEffect(() => {
-    setSelectedIds(recipients.filter((recipient) => Boolean(recipient.email)).map((recipient) => recipient.id))
+    setSelectedIds(recipients.map((recipient) => recipient.id))
   }, [recipients])
 
   const emailReadyRecipients = useMemo(() => recipients.filter((recipient) => Boolean(recipient.email)), [recipients])
   const selectedCount = selectedIds.length
+  const selectedEmailCount = useMemo(
+    () => recipients.filter((recipient) => recipient.email && selectedIds.includes(recipient.id)).length,
+    [recipients, selectedIds],
+  )
   const selectionMode: "all" | "selected" =
-    selectedCount === emailReadyRecipients.length && selectedCount > 0 ? "all" : "selected"
+    selectedCount === recipients.length && selectedCount > 0 ? "all" : "selected"
+
+  const reminderFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "UTC",
+      }),
+    [],
+  )
 
   const toggleRecipient = (recipientId: number, checked: boolean | "indeterminate") => {
     if (checked) {
@@ -94,7 +115,7 @@ export function PaymentReminderForm({ action, eligibleCount, recipients, resendC
 
   const toggleAll = (checked: boolean | "indeterminate") => {
     if (checked) {
-      setSelectedIds(emailReadyRecipients.map((recipient) => recipient.id))
+      setSelectedIds(recipients.map((recipient) => recipient.id))
     } else {
       setSelectedIds([])
     }
@@ -110,7 +131,7 @@ export function PaymentReminderForm({ action, eligibleCount, recipients, resendC
           </Badge>
         </div>
         <CardDescription className="text-sm text-slate-600">
-          This will email every delegate without a recorded payment using the payment reminder template.
+          Send reminder emails directly from the portal or record reminders you sent manually.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -169,9 +190,9 @@ export function PaymentReminderForm({ action, eligibleCount, recipients, resendC
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="select-all"
-                  checked={selectionMode === "all" && emailReadyRecipients.length > 0}
+                  checked={selectionMode === "all" && recipients.length > 0}
                   onCheckedChange={toggleAll}
-                  disabled={!emailReadyRecipients.length}
+                  disabled={!recipients.length}
                 />
                 <Label htmlFor="select-all" className="text-sm font-medium text-slate-800">
                   Send to all unpaid delegates
@@ -207,7 +228,6 @@ export function PaymentReminderForm({ action, eligibleCount, recipients, resendC
                           <TableCell>
                             <Checkbox
                               checked={isSelected}
-                              disabled={!recipient.email}
                               onCheckedChange={(checked) => toggleRecipient(recipient.id, checked)}
                               aria-label={`Select ${recipient.name}`}
                             />
@@ -220,16 +240,13 @@ export function PaymentReminderForm({ action, eligibleCount, recipients, resendC
                             {formatPaymentStatus(recipient.paymentStatus ?? "unpaid")}
                           </TableCell>
                           <TableCell className="text-sm text-slate-700">
-                            {recipient.reminderCount > 0 ? `${recipient.reminderCount} time${recipient.reminderCount === 1 ? "" : "s"}` : "Never"}
+                            {recipient.reminderCount > 0
+                              ? `${recipient.reminderCount} time${recipient.reminderCount === 1 ? "" : "s"}`
+                              : "Never"}
                           </TableCell>
                           <TableCell className="text-sm text-slate-700">
                             {recipient.lastReminderAt
-                              ? new Date(recipient.lastReminderAt).toLocaleString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })
+                              ? reminderFormatter.format(new Date(recipient.lastReminderAt))
                               : "—"}
                           </TableCell>
                         </TableRow>
@@ -245,10 +262,29 @@ export function PaymentReminderForm({ action, eligibleCount, recipients, resendC
           {selectionMode === "selected" &&
             selectedIds.map((id) => <input key={id} type="hidden" name="recipient" value={id} />)}
 
-          <SubmitButton selectedCount={selectedCount} resendConfigured={resendConfigured} />
-          <p className="text-center text-xs text-slate-500">
-            The reminder template reuses the existing payment instructions and proof upload link.
-          </p>
+          <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-slate-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <SubmitButton sendableCount={selectedEmailCount} resendConfigured={resendConfigured} />
+              <Button
+                type="submit"
+                variant="outline"
+                name="actionType"
+                value="record"
+                className="w-full border-amber-200 text-amber-900 hover:bg-amber-50 sm:w-auto"
+                disabled={selectedCount === 0}
+              >
+                <MailWarning className="mr-2 h-4 w-4" />
+                Record manual reminder
+              </Button>
+            </div>
+            <div className="space-y-1 text-xs text-slate-600 sm:text-right">
+              <p>
+                Delegates without an email address are included when recording manual reminders but skipped when sending
+                emails.
+              </p>
+              <p>The reminder template reuses the existing payment instructions and proof upload link.</p>
+            </div>
+          </div>
         </form>
       </CardContent>
     </Card>
