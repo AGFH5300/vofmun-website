@@ -49,6 +49,10 @@ const initialFormState = {
   directorPhoneCountry: "AE",
   numFaculty: "",
   numDelegates: "",
+  wantsHotels: false,
+  wantsFlights: false,
+  wantsAirportTransfers: false,
+  wantsConferenceTransport: false,
   requests: "",
   heardAbout: "",
   termsAccepted: false,
@@ -245,6 +249,10 @@ export function SchoolDelegationForm() {
         directorPhone: formData.directorPhone.trim(),
         numFaculty: Number.parseInt(formData.numFaculty, 10),
         numDelegates: Number.parseInt(formData.numDelegates, 10),
+        wantsHotels: formData.wantsHotels,
+        wantsFlights: formData.wantsFlights,
+        wantsAirportTransfers: formData.wantsAirportTransfers,
+        wantsConferenceTransport: formData.wantsConferenceTransport,
         requests: formData.requests.trim(),
         heardAbout: formData.heardAbout.trim(),
         termsAccepted: formData.termsAccepted,
@@ -458,6 +466,57 @@ export function SchoolDelegationForm() {
                 />
                 {errors.numDelegates && <p className="text-sm text-red-500">{errors.numDelegates}</p>}
               </div>
+            </div>
+          </div>
+
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-lg sm:text-xl font-serif font-semibold text-primary">Logistics support</h3>
+            <p className="text-sm text-gray-600">
+              Let us know if you'd like the VOFMUN team to organise any of the following for your delegation.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="flex items-start gap-3 rounded-lg border border-gray-200 p-3 hover:border-[#B22222]">
+                <Checkbox
+                  checked={formData.wantsHotels}
+                  onCheckedChange={(checked) => handleInputChange("wantsHotels", Boolean(checked))}
+                />
+                <div className="space-y-1">
+                  <p className="font-medium text-gray-900">Hotels</p>
+                  <p className="text-sm text-gray-600">Accommodation arrangements for the delegation.</p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 rounded-lg border border-gray-200 p-3 hover:border-[#B22222]">
+                <Checkbox
+                  checked={formData.wantsFlights}
+                  onCheckedChange={(checked) => handleInputChange("wantsFlights", Boolean(checked))}
+                />
+                <div className="space-y-1">
+                  <p className="font-medium text-gray-900">Flights</p>
+                  <p className="text-sm text-gray-600">Outbound and return flight bookings.</p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 rounded-lg border border-gray-200 p-3 hover:border-[#B22222]">
+                <Checkbox
+                  checked={formData.wantsAirportTransfers}
+                  onCheckedChange={(checked) => handleInputChange("wantsAirportTransfers", Boolean(checked))}
+                />
+                <div className="space-y-1">
+                  <p className="font-medium text-gray-900">Airport transfers</p>
+                  <p className="text-sm text-gray-600">Transport between the airport and accommodation.</p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 rounded-lg border border-gray-200 p-3 hover:border-[#B22222]">
+                <Checkbox
+                  checked={formData.wantsConferenceTransport}
+                  onCheckedChange={(checked) => handleInputChange("wantsConferenceTransport", Boolean(checked))}
+                />
+                <div className="space-y-1">
+                  <p className="font-medium text-gray-900">Conference day transport</p>
+                  <p className="text-sm text-gray-600">
+                    Transport between the venue and accommodation on all conference days.
+                  </p>
+                </div>
+              </label>
             </div>
           </div>
 
