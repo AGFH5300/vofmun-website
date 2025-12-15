@@ -114,6 +114,10 @@ type SchoolDelegationRecord = {
   director_phone: string
   num_faculty: number
   num_delegates: number
+  wants_hotels: boolean
+  wants_flights: boolean
+  wants_airport_transfers: boolean
+  wants_conference_transport: boolean
   additional_requests: string | null
   heard_about: string | null
   terms_accepted: boolean
@@ -193,6 +197,10 @@ const SCHOOL_DEFAULT_FIELDS = [
   "directorPhone",
   "numDelegates",
   "numFaculty",
+  "wantsHotels",
+  "wantsFlights",
+  "wantsAirportTransfers",
+  "wantsConferenceTransport",
   "additionalRequests",
   "heardAbout",
   "spreadsheetUrl",
@@ -379,6 +387,26 @@ const SCHOOL_FIELD_OPTIONS: FieldOption<SchoolDelegationRecord>[] = [
     key: "numFaculty",
     label: "# Faculty",
     render: (record) => <span className="text-slate-700">{record.num_faculty}</span>,
+  },
+  {
+    key: "wantsHotels",
+    label: "Hotels",
+    render: (record) => <span className="text-slate-600">{formatBooleanFlag(record.wants_hotels)}</span>,
+  },
+  {
+    key: "wantsFlights",
+    label: "Flights",
+    render: (record) => <span className="text-slate-600">{formatBooleanFlag(record.wants_flights)}</span>,
+  },
+  {
+    key: "wantsAirportTransfers",
+    label: "Airport transfers",
+    render: (record) => <span className="text-slate-600">{formatBooleanFlag(record.wants_airport_transfers)}</span>,
+  },
+  {
+    key: "wantsConferenceTransport",
+    label: "Conference day transport",
+    render: (record) => <span className="text-slate-600">{formatBooleanFlag(record.wants_conference_transport)}</span>,
   },
   {
     key: "additionalRequests",
@@ -1077,6 +1105,10 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
           "director_phone",
           "num_faculty",
           "num_delegates",
+          "wants_hotels",
+          "wants_flights",
+          "wants_airport_transfers",
+          "wants_conference_transport",
           "additional_requests",
           "heard_about",
           "terms_accepted",
