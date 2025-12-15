@@ -47,11 +47,11 @@ export function SignupInfo() {
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-800">Conference Dates:</span>
+            <span className="text-gray-800"><strong>Conference Dates:</strong></span>
             <span className="text-gray-600">February 14-15, 2026</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <span className="text-gray-800">Venue:</span>
+            <span className="text-gray-800"><strong>Venue:</strong></span>
             <div className="text-right space-y-1">
               <span className="text-gray-600 block">
                 UKCBC - Academic City, Dubai
