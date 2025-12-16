@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useFormState, useFormStatus } from "react-dom"
 import { AlertCircle, CheckCircle2, Loader2, MailWarning, Send } from "lucide-react"
 
@@ -69,7 +69,6 @@ function SubmitButton({ resendConfigured, sendableCount }: { resendConfigured: b
 
 export function PaymentReminderForm({ action, eligibleCount, recipients, resendConfigured }: ReminderFormProps) {
   const [formState, formAction] = useFormState(action, { status: "idle" })
-  const [, startTransition] = useTransition()
   const [selectedIds, setSelectedIds] = useState<number[]>(() => recipients.map((recipient) => recipient.id))
   const [recipientList, setRecipientList] = useState<EligibleRecipient[]>(recipients)
 
@@ -113,11 +112,6 @@ export function PaymentReminderForm({ action, eligibleCount, recipients, resendC
       setSelectedIds([])
     }
   }
-
-  const handleSubmit = (formData: FormData) =>
-    startTransition(() => {
-      formAction(formData)
-    })
 
   return (
     <Card className="border-amber-100 bg-white shadow-xl">
@@ -176,7 +170,7 @@ export function PaymentReminderForm({ action, eligibleCount, recipients, resendC
           </Alert>
         )}
 
-        <form action={handleSubmit} className="space-y-4">
+        <form action={formAction} className="space-y-4">
           <input type="hidden" name="selectionMode" value={selectionMode} />
           <input type="hidden" name="actionType" value="send" />
           <div className="rounded-lg border border-slate-200">
@@ -226,9 +220,15 @@ export function PaymentReminderForm({ action, eligibleCount, recipients, resendC
                       return (
                         <TableRow key={recipient.id} className="hover:bg-slate-50/70">
                           <TableCell>
-                            <Checkbox
+                            <input
+                              type="checkbox"
                               name="recipient"
                               value={recipient.id}
+                              checked={isSelected}
+                              readOnly
+                              className="hidden"
+                            />
+                            <Checkbox
                               checked={isSelected}
                               onCheckedChange={(checked) => toggleRecipient(recipient.id, checked)}
                               aria-label={`Select ${recipient.name}`}
