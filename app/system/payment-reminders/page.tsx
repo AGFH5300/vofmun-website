@@ -80,6 +80,12 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
   "use server"
 
   const actionType = formData.get("actionType")?.toString() === "record" ? "record" : "send"
+  const manualReminderInput = formData.get("manualReminderAt")?.toString() ?? ""
+  const parsedManualReminder = manualReminderInput ? new Date(manualReminderInput) : null
+  const manualReminderTimestamp =
+    actionType === "record" && parsedManualReminder && !Number.isNaN(parsedManualReminder.getTime())
+      ? parsedManualReminder
+      : null
 
   if (actionType === "send" && !process.env.RESEND_API_KEY) {
     return {
@@ -132,11 +138,12 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
         | undefined
 
       const nextCount = (typeof previousReminders?.count === "number" ? previousReminders.count : 0) + 1
+      const recordedAt = (manualReminderTimestamp ?? new Date()).toISOString()
       const updatedDelegateData = {
         ...previousDelegateData,
         paymentReminders: {
           count: nextCount,
-          lastSentAt: new Date().toISOString(),
+          lastSentAt: recordedAt,
         },
       }
 

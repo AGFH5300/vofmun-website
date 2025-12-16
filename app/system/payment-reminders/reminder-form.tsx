@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -76,9 +77,19 @@ function SubmitButton({
   )
 }
 
+const formatLocalDateTimeInput = (date: Date) => {
+  const pad = (value: number) => value.toString().padStart(2, "0")
+
+  return [
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
+    `${pad(date.getHours())}:${pad(date.getMinutes())}`,
+  ].join("T")
+}
+
 export function PaymentReminderForm({ action, eligibleCount, recipients, resendConfigured }: ReminderFormProps) {
   const [state, formAction] = useFormState(action, initialState)
   const [selectedIds, setSelectedIds] = useState<number[]>(() => recipients.map((recipient) => recipient.id))
+  const [manualReminderAt, setManualReminderAt] = useState(() => formatLocalDateTimeInput(new Date()))
 
   useEffect(() => {
     setSelectedIds(recipients.map((recipient) => recipient.id))
@@ -261,6 +272,26 @@ export function PaymentReminderForm({ action, eligibleCount, recipients, resendC
           <input type="hidden" name="selectionMode" value={selectionMode} />
           {selectionMode === "selected" &&
             selectedIds.map((id) => <input key={id} type="hidden" name="recipient" value={id} />)}
+
+          <div className="space-y-2 rounded-lg border border-slate-200 bg-white p-4">
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="manualReminderAt" className="text-sm font-semibold text-slate-900">
+                Manual reminder sent at
+              </Label>
+              <p className="text-xs text-slate-600">
+                When recording a manual reminder, use the date and time you sent it so the delegate history stays
+                accurate.
+              </p>
+            </div>
+            <Input
+              id="manualReminderAt"
+              name="manualReminderAt"
+              type="datetime-local"
+              value={manualReminderAt}
+              onChange={(event) => setManualReminderAt(event.target.value)}
+              className="w-full sm:w-64"
+            />
+          </div>
 
           <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-slate-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
