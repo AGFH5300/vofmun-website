@@ -34,18 +34,15 @@ type DelegateRecord = {
   last_name: string | null
   email: string | null
   payment_status: string | null
-  delegate_data: Record<string, unknown> | null
+  payment_reminder_count: number | null
+  payment_reminder_last_sent_at: string | null
 }
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>
 
 const mapToRecipient = (record: DelegateRecord): EligibleRecipient => {
-  const paymentReminders = (record.delegate_data as Record<string, unknown> | null)?.paymentReminders as
-    | { count?: unknown; lastSentAt?: unknown }
-    | undefined
-
-  const reminderCount = typeof paymentReminders?.count === "number" ? paymentReminders.count : 0
-  const lastReminderAt = typeof paymentReminders?.lastSentAt === "string" ? paymentReminders.lastSentAt : null
+  const reminderCount = typeof record.payment_reminder_count === "number" ? record.payment_reminder_count : 0
+  const lastReminderAt = record.payment_reminder_last_sent_at
 
   return {
     id: record.id,
@@ -56,7 +53,6 @@ const mapToRecipient = (record: DelegateRecord): EligibleRecipient => {
     paymentStatus: record.payment_status,
     reminderCount,
     lastReminderAt,
-    delegateData: record.delegate_data,
   }
 }
 
@@ -64,7 +60,7 @@ async function loadEligibleRecipients(existingClient?: SupabaseServerClient): Pr
   const supabase = existingClient ?? (await createClient())
   const { data, error } = await supabase
     .from("users")
-    .select("id, first_name, last_name, email, payment_status, delegate_data")
+    .select("id, first_name, last_name, email, payment_status, payment_reminder_count, payment_reminder_last_sent_at")
     .eq("role", "delegate")
     .or("payment_status.is.null,payment_status.eq.unpaid")
 
@@ -132,24 +128,15 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
         })
       }
 
-      const previousDelegateData = (record.delegateData as Record<string, unknown>) ?? {}
-      const previousReminders = previousDelegateData.paymentReminders as
-        | { count?: unknown; lastSentAt?: unknown }
-        | undefined
-
-      const nextCount = (typeof previousReminders?.count === "number" ? previousReminders.count : 0) + 1
+      const nextCount = record.reminderCount + 1
       const recordedAt = (manualReminderTimestamp ?? new Date()).toISOString()
-      const updatedDelegateData = {
-        ...previousDelegateData,
-        paymentReminders: {
-          count: nextCount,
-          lastSentAt: recordedAt,
-        },
-      }
 
       const { error: updateError } = await supabase
         .from("users")
-        .update({ delegate_data: updatedDelegateData })
+        .update({
+          payment_reminder_count: nextCount,
+          payment_reminder_last_sent_at: recordedAt,
+        })
         .eq("id", record.id)
         .select("id")
 
