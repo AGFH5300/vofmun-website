@@ -901,6 +901,8 @@ const badgeVariantForStatus = (status: PaymentStatusValue | null) => {
 const badgeClassNameForStatus = (status: PaymentStatusValue | null) => {
   switch (status) {
     case "flagged":
+    case "pending":
+      return "border border-amber-200 bg-amber-50 text-amber-900"
     case "fake":
       return "border border-[#B22222]/30 bg-white text-[#B22222]"
     default:
