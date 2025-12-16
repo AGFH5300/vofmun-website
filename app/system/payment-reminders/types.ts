@@ -7,5 +7,4 @@ export type EligibleRecipient = {
   paymentStatus: string | null
   reminderCount: number
   lastReminderAt: string | null
-  delegateData: Record<string, unknown> | null
 }
