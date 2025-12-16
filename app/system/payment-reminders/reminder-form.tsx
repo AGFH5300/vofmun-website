@@ -92,7 +92,7 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-        timeZone: "UTC",
+        timeZone: "Asia/Dubai",
       }),
     [],
   )
@@ -346,8 +346,6 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
               <SubmitButton sendableCount={selectedEmailCount} resendConfigured={resendConfigured} isSending={isSending} />
             </div>
             <div className="space-y-1 text-xs text-slate-600 sm:text-right">
-              <p>Delegates without an email address are skipped when sending emails.</p>
-              <p>The reminder template reuses the existing payment instructions and proof upload link.</p>
               {selectedCount > selectedEmailCount ? (
                 <p className="text-amber-700">{selectedCount - selectedEmailCount} selected delegate(s) are missing email addresses.</p>
               ) : null}
