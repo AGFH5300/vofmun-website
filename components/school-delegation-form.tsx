@@ -295,7 +295,7 @@ export function SchoolDelegationForm() {
 
   return (
     <Card className="w-full diplomatic-shadow border-0 bg-white/95">
-      <CardHeader className="space-y-3 sm:space-y-4 p-4 sm:p-6">
+      <CardHeader className="space-y-3 sm:space-y-4 p-4 sm:p-6" style={ {paddingTop: "0px", paddingBottom: "0px",} }>
         <CardTitle className="text-xl sm:text-2xl font-serif text-gray-900">
           School Delegation Signup
         </CardTitle>
@@ -320,7 +320,7 @@ export function SchoolDelegationForm() {
           </AlertDescription>
         </Alert>
       </CardHeader>
-      <CardContent className="space-y-6 sm:space-y-8 p-4 sm:p-6">
+      <CardContent className="space-y-6 sm:space-y-8 p-4 sm:p-6" style={ {paddingTop: "12px", paddingBottom: "6px",} }>
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           <div className="space-y-4 sm:space-y-5">
             <h3 className="text-lg sm:text-xl font-serif font-semibold text-primary">School Details</h3>
