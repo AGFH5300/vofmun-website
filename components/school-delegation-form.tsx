@@ -601,7 +601,7 @@ export function SchoolDelegationForm() {
                   id="requests"
                   value={formData.requests}
                   onChange={(event) => handleInputChange("requests", event.target.value)}
-                  placeholder="Let us know about accommodation, transportation, or other special assistance requests"
+                  placeholder="Let us know regarding any other special assistance requests"
                   className="min-h-[80px]"
                 />
               </div>
