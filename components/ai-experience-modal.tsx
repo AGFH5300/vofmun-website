@@ -39,8 +39,8 @@ export function AIExperienceModal({ isOpen, onClose, roleType, onExperiencesPars
 
     try {
       const prompt = roleType === "chair" 
-        ? `Parse the following text about MUN experience and extract structured data. Return a JSON array where each item has: conference (string), position (string), year (string), description (string, optional). Focus on Model UN conferences, debate competitions, and leadership roles. Here's the text: ${experienceText}`
-        : `Parse the following text about relevant experience and extract structured data. Return a JSON array where each item has: role (string), organization (string), year (string), description (string, optional). Focus on leadership roles, organizational experience, event management, and administrative positions. Here's the text: ${experienceText}`
+        ? "Parse the text about MUN experience and extract structured data. Return a JSON array where each item has: conference (string), position (string), year (string), description (string, optional). Focus on Model UN conferences, debate competitions, and leadership roles."
+        : "Parse the text about relevant experience and extract structured data. Return a JSON array where each item has: role (string), organization (string), year (string), description (string, optional). Focus on leadership roles, organizational experience, event management, and administrative positions."
 
       const response = await fetch('/api/parse-experience', {
         method: 'POST',
