@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import Link from "next/link"
-import * as XLSX from "xlsx"
+import type { CellValue } from "exceljs"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -84,29 +84,57 @@ export function SchoolDelegationForm() {
     })
   }
 
+  const normalizeCellValue = (value: CellValue) => {
+    if (value === null || value === undefined) return ""
+    if (typeof value === "object") {
+      if ("text" in value && typeof value.text === "string") return value.text
+      if ("richText" in value && Array.isArray(value.richText)) {
+        return value.richText.map((segment) => segment.text).join("")
+      }
+      if ("result" in value && value.result !== undefined && value.result !== null) {
+        return String(value.result)
+      }
+      if ("hyperlink" in value && typeof value.hyperlink === "string") {
+        if ("text" in value && typeof value.text === "string") return value.text
+        return value.hyperlink
+      }
+    }
+    return String(value)
+  }
+
   const validateSpreadsheet = async (file: File) => {
     if (!file.name.toLowerCase().endsWith(".xlsx")) {
       throw new Error("Please upload an .xlsx Excel spreadsheet using the official template.")
     }
 
+    const ExcelJS = await import("exceljs")
     const arrayBuffer = await file.arrayBuffer()
-    const workbook = XLSX.read(arrayBuffer, { type: "array" })
+    const workbook = new ExcelJS.Workbook()
+    await workbook.xlsx.load(arrayBuffer)
 
-    if (!workbook.SheetNames.length) {
+    if (!workbook.worksheets.length) {
       throw new Error("The uploaded spreadsheet is empty. Please use the official template.")
     }
 
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-    const rows = XLSX.utils.sheet_to_json<(string | number | null)[]>(worksheet, { header: 1 })
-    const headerRow = rows.find((row) =>
-      Array.isArray(row) && row.some((cell) => String(cell ?? "").trim().length > 0)
-    )
+    const worksheet = workbook.worksheets[0]
+    let headerRow: CellValue[] | null = null
+
+    for (let rowIndex = 1; rowIndex <= worksheet.rowCount; rowIndex += 1) {
+      const row = worksheet.getRow(rowIndex)
+      const rowValues = row.values.slice(1) as CellValue[]
+      const hasContent = rowValues.some((cell) => normalizeCellValue(cell).trim().length > 0)
+
+      if (hasContent) {
+        headerRow = rowValues
+        break
+      }
+    }
 
     if (!headerRow) {
       throw new Error("Unable to read the spreadsheet header. Please ensure the template headers are present.")
     }
 
-    const headers = headerRow.map((cell) => String(cell ?? "").trim())
+    const headers = headerRow.map((cell) => normalizeCellValue(cell).trim())
     const missingColumns = REQUIRED_COLUMNS.filter((column) => !headers.includes(column))
 
     if (missingColumns.length > 0) {
