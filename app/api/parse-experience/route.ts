@@ -60,6 +60,10 @@ function buildPrompt(roleType: "chair" | "admin", prompt: string, extraText?: st
 You extract structured ${isChair ? "chair" : "admin"} experiences.
 
 Return ONLY a JSON array. Follow this shape exactly.
+Return ONE array element per distinct conference/role/experience mentioned.
+Do NOT merge multiple conferences or roles into a single item.
+If a field is missing, use an empty string instead of omitting it.
+Extract as many experiences as possible; a long array (20–30 items) is OK.
 
 ${
   isChair
@@ -74,6 +78,34 @@ ${
 Source text:
 ${prompt}${userContext}
 `.trim();
+}
+
+const CHAIR_FIELDS = ["conference", "position", "year", "description"] as const;
+const ADMIN_FIELDS = ["role", "organization", "year", "description"] as const;
+
+function coerceString(value: unknown) {
+  if (value === null || value === undefined) return "";
+  return String(value).trim();
+}
+
+function normalizeExperience(
+  value: unknown,
+  roleType: "chair" | "admin"
+): ChairExp | AdminExp | null {
+  if (!value || typeof value !== "object") return null;
+  const fields = roleType === "chair" ? CHAIR_FIELDS : ADMIN_FIELDS;
+  const normalized = Object.fromEntries(
+    fields.map((field) => [field, coerceString((value as Record<string, unknown>)[field])])
+  ) as ChairExp | AdminExp;
+
+  const hasAnyField = fields.some((field) => (normalized as Record<string, string>)[field]);
+  return hasAnyField ? normalized : null;
+}
+
+function looksLikeExperienceObject(value: unknown, roleType: "chair" | "admin") {
+  if (!value || typeof value !== "object") return false;
+  const fields = roleType === "chair" ? CHAIR_FIELDS : ADMIN_FIELDS;
+  return fields.some((field) => Object.prototype.hasOwnProperty.call(value, field));
 }
 
 function looksLikePublisherAccess404(err: any) {
@@ -109,15 +141,38 @@ async function callModelOnce(opts: {
     });
 
     const raw = result.response?.text() ?? "";
-    let experiences: Array<ChairExp | AdminExp> = JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    let candidates: unknown[] = [];
 
-    if (!Array.isArray(experiences)) throw new Error("Response is not an array");
+    if (Array.isArray(parsed)) {
+      candidates = parsed;
+    } else if (parsed && typeof parsed === "object") {
+      const parsedObj = parsed as { experiences?: unknown };
+      if (Array.isArray(parsedObj.experiences)) {
+        candidates = parsedObj.experiences;
+      } else if (looksLikeExperienceObject(parsedObj, roleType)) {
+        candidates = [parsedObj];
+      }
+    }
 
-    // runtime guard rails
-    experiences = experiences.filter((exp: any) => {
-      if (isChair) return exp?.conference && exp?.position && exp?.year;
-      return exp?.role && exp?.organization && exp?.year;
-    });
+    if (candidates.length === 0) {
+      throw new Error("Response did not contain any experience entries");
+    }
+
+    const total = candidates.length;
+    const experiences = candidates
+      .map((exp) => normalizeExperience(exp, roleType))
+      .filter((exp): exp is ChairExp | AdminExp => Boolean(exp));
+    const discarded = total - experiences.length;
+
+    if (discarded > 0) {
+      console.info("Experience parsing: filtered empty entries", {
+        modelName,
+        total,
+        kept: experiences.length,
+        discarded,
+      });
+    }
 
     if (experiences.length === 0) throw new Error("No valid experiences found");
 
