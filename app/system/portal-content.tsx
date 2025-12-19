@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { Columns3, Download, Loader2, LogOut, MailWarning, RefreshCw } from "lucide-react"
-import * as XLSX from "xlsx"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -1268,7 +1267,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     [handleStatusChange, updatingId],
   )
 
-  const exportToXlsx = useCallback(() => {
+  const exportToXlsx = useCallback(async () => {
     if (!records.length) return
 
     const rows = records.map((record) => ({
@@ -1284,12 +1283,24 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       SubmittedAt: new Date(record.created_at).toLocaleString(),
     }))
 
-    const worksheet = XLSX.utils.json_to_sheet(rows)
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations")
+    const ExcelJS = await import("exceljs")
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet("Registrations")
+    const headers = Object.keys(rows[0] ?? {})
+    worksheet.columns = headers.map((header) => ({ header, key: header }))
+    worksheet.addRows(rows)
 
     const dateStamp = new Date().toISOString().split("T")[0]
-    XLSX.writeFile(workbook, `vofmun-registrations-${dateStamp}.xlsx`)
+    const buffer = await workbook.xlsx.writeBuffer()
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `vofmun-registrations-${dateStamp}.xlsx`
+    link.click()
+    URL.revokeObjectURL(url)
   }, [records])
 
   const renderUserTab = (recordsToDisplay: SignupRecord[], emptyMessage: string, view: UserView) => {
