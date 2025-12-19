@@ -1,6 +1,10 @@
 // app/api/parse-experience/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  GEMINI_FALLBACK_MODEL_IDS,
+  GEMINI_MODEL_ID,
+} from "@/lib/gemini";
 
 // Types for clarity (your app can adjust as needed)
 type ChairExp = {
@@ -16,13 +20,6 @@ type AdminExp = {
   year: string;
   description?: string;
 };
-
-// Start with 2.0 (per your docs) and include robust fallbacks for AI Studio
-const FALLBACK_MODELS = [
-  "gemini-1.5-flash-001",
-  "gemini-1.5-flash-8b",
-  "gemini-1.5-pro-001",
-] as const;
 
 // --- helpers ---------------------------------------------------------------
 
@@ -102,28 +99,40 @@ async function callModelOnce(opts: {
   const isChair = roleType === "chair";
   const model = genAI.getGenerativeModel({ model: modelName });
 
-  const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: buildPrompt(roleType, prompt, text) }] }],
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: makeSchema(isChair),
-    },
-  });
+  try {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: buildPrompt(roleType, prompt, text) }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: makeSchema(isChair),
+      },
+    });
 
-  const raw = result.response?.text() ?? "";
-  let experiences: Array<ChairExp | AdminExp> = JSON.parse(raw);
+    const raw = result.response?.text() ?? "";
+    let experiences: Array<ChairExp | AdminExp> = JSON.parse(raw);
 
-  if (!Array.isArray(experiences)) throw new Error("Response is not an array");
+    if (!Array.isArray(experiences)) throw new Error("Response is not an array");
 
-  // runtime guard rails
-  experiences = experiences.filter((exp: any) => {
-    if (isChair) return exp?.conference && exp?.position && exp?.year;
-    return exp?.role && exp?.organization && exp?.year;
-  });
+    // runtime guard rails
+    experiences = experiences.filter((exp: any) => {
+      if (isChair) return exp?.conference && exp?.position && exp?.year;
+      return exp?.role && exp?.organization && exp?.year;
+    });
 
-  if (experiences.length === 0) throw new Error("No valid experiences found");
+    if (experiences.length === 0) throw new Error("No valid experiences found");
 
-  return experiences;
+    return experiences;
+  } catch (error: any) {
+    const status = error?.response?.status ?? error?.status;
+    const details = error?.response?.data ?? error?.details;
+    console.error("Gemini model call failed:", {
+      modelName,
+      status,
+      message: error?.message,
+      details,
+    });
+    throw error;
+  }
 }
 
 // --- route -----------------------------------------------------------------
@@ -156,12 +165,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Prefer your docs’ model first; allow override via env
-    // Examples:
-    //   GEMINI_MODEL=gemini-2.0-flash
-    //   GEMINI_MODEL=gemini-1.5-flash-001
-    const preferredModel = process.env.GEMINI_MODEL || "gemini-2.0-flash";
-    const candidateModels = [preferredModel, ...FALLBACK_MODELS];
+    // Prefer a 2.5 model by default; allow override via env (GEMINI_MODEL_ID).
+    const preferredModel = GEMINI_MODEL_ID;
+    const candidateModels = [preferredModel, ...GEMINI_FALLBACK_MODEL_IDS];
 
     let lastErr: any = null;
 
