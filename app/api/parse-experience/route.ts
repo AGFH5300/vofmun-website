@@ -49,21 +49,39 @@ function makeSchema(isChair: boolean) {
   } as const;
 }
 
-function buildPrompt(roleType: "chair" | "admin", prompt: string, extraText?: string) {
+function splitIntoExperienceLines(raw: string): string[] {
+  return raw
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => {
+      if (!line) return false;
+      return !/^(completed muns|delegate|chairing)\s*:?\s*$/i.test(line);
+    });
+}
+
+function buildNumberedExperienceBlock(lines: string[]): string {
+  return lines.map((line, index) => `${index + 1}. ${line}`).join("\n");
+}
+
+function buildPrompt(roleType: "chair" | "admin", text: string, extraContext?: string) {
   const isChair = roleType === "chair";
+  const lines = splitIntoExperienceLines(text);
+  const numberedLines = buildNumberedExperienceBlock(lines);
   const userContext =
-    extraText && typeof extraText === "string"
-      ? `\n\nAdditional context:\n${extraText}`
+    extraContext && typeof extraContext === "string"
+      ? `\n\nAdditional context (optional):\n${extraContext}`
       : "";
 
   return `
 You extract structured ${isChair ? "chair" : "admin"} experiences.
 
 Return ONLY a JSON array. Follow this shape exactly.
-Return ONE array element per distinct conference/role/experience mentioned.
-Do NOT merge multiple conferences or roles into a single item.
+You are given a numbered list of experience lines.
+Treat each line as at most one experience.
+Return a JSON array with the same number of items as there are lines.
+The item at index i must correspond to line i.
+Do NOT merge multiple lines into a single item.
 If a field is missing, use an empty string instead of omitting it.
-Extract as many experiences as possible; a long array (20–30 items) is OK.
 
 ${
   isChair
@@ -75,8 +93,9 @@ ${
 ]`
 }
 
-Source text:
-${prompt}${userContext}
+Numbered experience lines:
+${numberedLines || "(no valid experience lines found)"}
+${userContext}
 `.trim();
 }
 
@@ -123,17 +142,18 @@ async function callModelOnce(opts: {
   apiKey: string;
   modelName: string;
   roleType: "chair" | "admin";
-  prompt: string;
-  text?: string;
+  prompt?: string;
+  text: string;
+  expectedCount?: number;
 }) {
-  const { apiKey, modelName, roleType, prompt, text } = opts;
+  const { apiKey, modelName, roleType, prompt, text, expectedCount } = opts;
   const genAI = new GoogleGenerativeAI(apiKey);
   const isChair = roleType === "chair";
   const model = genAI.getGenerativeModel({ model: modelName });
 
   try {
     const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: buildPrompt(roleType, prompt, text) }] }],
+      contents: [{ role: "user", parts: [{ text: buildPrompt(roleType, text, prompt) }] }],
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: makeSchema(isChair),
@@ -174,6 +194,15 @@ async function callModelOnce(opts: {
       });
     }
 
+    if (typeof expectedCount === "number") {
+      console.log("Gemini experiences parsed", {
+        modelName,
+        expectedCount,
+        received: experiences.length,
+        emptyFiltered: discarded,
+      });
+    }
+
     if (experiences.length === 0) throw new Error("No valid experiences found");
 
     return experiences;
@@ -198,9 +227,9 @@ export async function POST(request: NextRequest) {
     const { text, roleType, prompt } = body ?? {};
 
     // Validate user inputs
-    if (!roleType || !prompt) {
+    if (!roleType || !text) {
       return NextResponse.json(
-        { error: "Missing required fields: roleType and prompt are required." },
+        { error: "Missing required fields: roleType and text are required." },
         { status: 400 }
       );
     }
@@ -226,6 +255,9 @@ export async function POST(request: NextRequest) {
 
     let lastErr: any = null;
 
+    const experienceLines = splitIntoExperienceLines(String(text));
+    const expectedCount = experienceLines.length;
+
     for (const modelName of candidateModels) {
       try {
         const experiences = await callModelOnce({
@@ -233,7 +265,8 @@ export async function POST(request: NextRequest) {
           modelName,
           roleType,
           prompt,
-          text,
+          text: String(text),
+          expectedCount,
         });
         return NextResponse.json({
           success: true,
