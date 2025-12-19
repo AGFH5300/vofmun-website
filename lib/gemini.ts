@@ -1,10 +1,9 @@
-export const DEFAULT_GEMINI_MODEL_ID = "gemini-2.5-pro";
+export const DEFAULT_GEMINI_MODEL_ID = "gemini-2.5-flash";
 
-// Prefer the new env var, but keep legacy GEMINI_MODEL for compatibility.
 export const GEMINI_MODEL_ID =
   process.env.GEMINI_MODEL_ID ?? process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL_ID;
 
-const FALLBACK_MODEL_IDS = ["gemini-2.5-flash"];
+const FALLBACK_MODEL_IDS = ["gemini-2.5-flash-lite"];
 
 export const GEMINI_FALLBACK_MODEL_IDS = process.env.GEMINI_FALLBACK_MODEL_IDS
   ? process.env.GEMINI_FALLBACK_MODEL_IDS.split(",")
