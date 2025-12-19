@@ -52,10 +52,16 @@ function makeSchema(isChair: boolean) {
 function splitIntoExperienceLines(raw: string): string[] {
   return raw
     .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => {
-      if (!line) return false;
-      return !/^(completed muns|delegate|chairing)\s*:?\s*$/i.test(line);
+    .flatMap((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return [];
+      return trimmed
+        .split(/[;•·]/)
+        .map((segment) => segment.trim())
+        .filter(Boolean);
+    })
+    .filter((segment) => {
+      return !/^(completed muns|delegate|chairing)\s*:?\s*$/i.test(segment);
     });
 }
 
@@ -75,12 +81,17 @@ function buildPrompt(roleType: "chair" | "admin", text: string, extraContext?: s
   return `
 You extract structured ${isChair ? "chair" : "admin"} experiences.
 
-Return ONLY a JSON array. Follow this shape exactly.
-You are given a numbered list of experience lines.
-Treat each line as at most one experience.
-Return a JSON array with the same number of items as there are lines.
-The item at index i must correspond to line i.
-Do NOT merge multiple lines into a single item.
+Return ONLY valid JSON. Return a JSON array and follow this shape exactly.
+You are given a numbered list of experience fragments.
+Many lines map cleanly to a single experience, but some lines may contain multiple conferences or roles.
+Your job is to extract a JSON array of distinct experiences.
+Do NOT merge different conferences or roles into a single item.
+Whenever a line clearly contains multiple conferences/roles (different conferences, locations, or years),
+create multiple array items.
+It is OK if the array has more items than there are lines, as long as each item corresponds to
+some distinct experience from the text.
+If you are unsure, err on the side of extracting more items rather than fewer.
+Extract as many experiences as possible; do not summarize.
 If a field is missing, use an empty string instead of omitting it.
 
 ${
