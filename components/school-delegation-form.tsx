@@ -70,6 +70,7 @@ export function SchoolDelegationForm() {
   const [spreadsheetFile, setSpreadsheetFile] = useState<File | null>(null)
   const [spreadsheetError, setSpreadsheetError] = useState<string | null>(null)
   const [spreadsheetSuccess, setSpreadsheetSuccess] = useState<string | null>(null)
+  const [isValidatingSpreadsheet, setIsValidatingSpreadsheet] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const handleInputChange = (field: keyof FormState, value: string | boolean) => {
@@ -147,6 +148,7 @@ export function SchoolDelegationForm() {
   const handleSpreadsheetChange = async (file: File | null) => {
     setSpreadsheetError(null)
     setSpreadsheetSuccess(null)
+    setIsValidatingSpreadsheet(false)
 
     if (!file) {
       setSpreadsheetFile(null)
@@ -159,8 +161,9 @@ export function SchoolDelegationForm() {
     }
 
     try {
-      await validateSpreadsheet(file)
       setSpreadsheetFile(file)
+      setIsValidatingSpreadsheet(true)
+      await validateSpreadsheet(file)
       setSpreadsheetSuccess("Template verified. All required columns are present.")
       setErrors((prev) => {
         if (!prev.spreadsheet) return prev
@@ -168,12 +171,13 @@ export function SchoolDelegationForm() {
         return rest
       })
     } catch (error: any) {
-      setSpreadsheetFile(null)
       setSpreadsheetError(error?.message ?? "Unable to validate the uploaded spreadsheet.")
       setErrors((prev) => ({
         ...prev,
         spreadsheet: error?.message ?? "Unable to validate the uploaded spreadsheet.",
       }))
+    } finally {
+      setIsValidatingSpreadsheet(false)
     }
   }
 
@@ -245,6 +249,7 @@ export function SchoolDelegationForm() {
     setSpreadsheetFile(null)
     setSpreadsheetError(null)
     setSpreadsheetSuccess(null)
+    setIsValidatingSpreadsheet(false)
     setErrors({})
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
@@ -593,6 +598,12 @@ export function SchoolDelegationForm() {
                   <p className="text-sm text-gray-700 break-all">Selected file: {spreadsheetFile.name}</p>
                 )}
               </div>
+              {isValidatingSpreadsheet && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Upload received. Verifying the spreadsheet template...</span>
+                </div>
+              )}
               {spreadsheetSuccess && (
                 <div className="flex items-start gap-2 text-sm text-green-700">
                   <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
