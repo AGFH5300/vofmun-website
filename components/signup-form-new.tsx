@@ -2122,7 +2122,7 @@ export function SignupFormNew() {
                 Have you already paid the conference fee? <span className="text-red-500">*</span>
               </Label>
               <RadioGroup
-                value={hasPaid || undefined}
+                value={hasPaid}
                 onValueChange={(value) => {
                   if (paymentProofTemporarilyDisabled) return
                   setHasPaid(value as "yes" | "no")
