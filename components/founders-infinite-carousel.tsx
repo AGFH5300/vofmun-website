@@ -14,7 +14,7 @@ const founders = [
   },
   {
     name: "Vihaan Shukla",
-    role: "Co-Founder, Head of Conference Affairs",
+    role: "Co-Founder, Director-General",
     image: "/founders/VihaanShukla_ConferenceAffairs.png",
   },
   {
