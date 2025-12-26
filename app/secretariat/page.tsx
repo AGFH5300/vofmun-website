@@ -51,12 +51,12 @@ As VOFMUN continues to grow, my hope is that it remains a space where young lead
   },
   {
     name: "Vihaan Shukla",
-    role: "<strong>Co-Founder <br/>Head of Conference Affairs & Operations</strong>",
-    department: "Conference Affairs",
+    role: "<strong>Co-Founder <br/>Director-General</strong>",
+    department: "Core ",
     image: "/founders/VihaanShukla_ConferenceAffairs.png",
     bio: "Co-founder overseeing conference operations, logistics, and delegate experience design.",
     linkedin: "https://www.linkedin.com/in/vihaanshukla",
-    writeup: `Hi, I’m Vihaan Shukla, Co-Founder and Head of Conference Affairs & Operations at VOFMUN 2026!
+    writeup: `Hi, I’m Vihaan Shukla, Co-Founder and Director General at VOFMUN 2026!
 
 I have participated in over 15 MUN conferences, earning more than 10 awards including Best Delegate and Best Research. I’ve also chaired 5 conferences, developing strong skills in debate, diplomacy, and communication.
 
@@ -243,7 +243,7 @@ const getDepartmentIcon = (department: string) => {
       return Users;
     case "Technology":
       return Cpu;
-    case "Conference Affairs":
+    case "Core ":
       return Workflow;
     case "Delegate Affairs":
       return Workflow;
@@ -281,7 +281,7 @@ const getDepartmentColor = (department: string) => {
         border: "border-green-500",
         badgeClass: "bg-green-600 text-white border-0",
       };
-    case "Conference Affairs":
+    case "Core ":
       return {
         bg: "bg-gradient-to-br from-teal-500 to-teal-700",
         text: "text-white",
