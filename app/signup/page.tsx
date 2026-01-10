@@ -7,10 +7,8 @@ import { PaymentDetails } from "@/components/payment-details"
 import { Button } from "@/components/ui/button"
 
 export default function SignupPage() {
-  const googleFormEmbedUrl = (process.env.NEXT_PUBLIC_GOOGLE_FORM_EMBED_URL ?? "").trim()
   const googleFormPublicUrl =
-    (process.env.NEXT_PUBLIC_GOOGLE_FORM_URL ?? "").trim() ||
-    (googleFormEmbedUrl ? googleFormEmbedUrl.replace("embedded=true", "viewform") : "")
+    (process.env.NEXT_PUBLIC_GOOGLE_FORM_URL ?? "").trim()
 
   return (
     <div className="min-h-screen">
@@ -26,35 +24,17 @@ export default function SignupPage() {
                 </p>
                 <h2 className="text-2xl sm:text-3xl font-serif text-gray-900">Register with the official Google Form</h2>
                 <p className="text-sm sm:text-base text-gray-600">
-                  Complete the registration form below if you prefer Google Forms. Submissions are synced directly into our
+                  Complete the registration form if you prefer Google Forms. Submissions are synced directly into our
                   database.
                 </p>
                 {googleFormPublicUrl && (
                   <Button asChild variant="outline" className="mt-2">
-                    <a href={googleFormPublicUrl} target="_blank" rel="noopener noreferrer">
-                      Open the form in a new tab
+                    <a href={googleFormPublicUrl} target="_blank" rel="noopener noreferrer" className="text-[#B22222] hover:underline">
+                      Open the form 
                     </a>
                   </Button>
                 )}
               </div>
-
-              {googleFormEmbedUrl ? (
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <div className="relative w-full pb-[140%] sm:pb-[110%] lg:pb-[90%]">
-                    <iframe
-                      title="VOFMUN Registration Google Form"
-                      src={googleFormEmbedUrl}
-                      className="absolute inset-0 h-full w-full"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                  The Google Form link has not been configured yet. Please contact the VOFMUN team for the latest signup
-                  link.
-                </div>
-              )}
             </div>
           </div>
         </section>
