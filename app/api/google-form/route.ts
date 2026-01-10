@@ -140,7 +140,7 @@ const normalizePaymentStatus = (value: string) => {
 
 const splitReferralCodes = (value: string) =>
   value
-    .split(/[,;/]/)
+    .split(/[\s,;\/]+/g)
     .map((code) => normalizeReferralCode(code))
     .filter(Boolean)
 
@@ -186,33 +186,92 @@ export async function POST(request: NextRequest) {
       pickAnswer(answers, ["Dietary Preferences", "Dietary Requirements", "Dietary Preference"]),
     )
     const dietaryOther = pickAnswer(answers, ["Dietary Other", "Other Dietary Requirements", "If other, please specify"])
-    const hasAllergies = normalizeYesNo(
-      pickAnswer(answers, ["Allergies", "Allergy", "Do you have any allergies?"]),
+    // --- Allergies (your Google Form uses free-text: "leave blank if none") ---
+    const allergiesDetailsFromForm = pickAnswer(answers, [
+      "Do you have any allergies VOFMUN should be aware of? If none, leave blank",
+      "Do you have any allergies VOFMUN should be aware of? If none, leave blank.",
+      "Allergy Details",
+      "Allergy information",
+      "If yes, specify allergies",
+      "Allergies",
+      "Allergy",
+    ])
+
+    const allergiesDetails = allergiesDetailsFromForm
+
+    // If you ALSO have a yes/no allergies question in the future, we’ll respect it.
+    // Otherwise derive yes/no from the free-text field.
+    const hasAllergiesFromYesNo = normalizeYesNo(
+      pickAnswer(answers, ["Do you have any allergies?", "Allergies (Yes/No)", "Allergies yes/no"]),
     )
-    const allergiesDetails = pickAnswer(answers, ["Allergy Details", "Allergy information", "If yes, specify allergies"])
+
+    const hasAllergies =
+      hasAllergiesFromYesNo ||
+      (allergiesDetailsFromForm.trim().length > 0 ? "yes" : "no")
+
     const emergencyContactName = pickAnswer(answers, ["Emergency Contact Name", "Emergency Contact"])
     const emergencyContactPhone = pickAnswer(answers, ["Emergency Contact Phone", "Emergency Contact Number"])
+
+    // --- Terms agreement (your Google Form uses a long statement as the question title) ---
     const agreeTerms = normalizeBoolean(
-      pickAnswer(answers, ["Agree to Terms", "I agree to the terms", "Terms & Conditions"]),
+      pickAnswer(answers, [
+        'By clicking "Yes" below, I agree to the VOFMUN terms and conditions, code of conduct, and conference rules.',
+        'By clicking "Yes" below, I agree to the VOFMUN terms and conditions, code of conduct, and conference rules',
+        "By clicking Yes below, I agree to the VOFMUN terms and conditions, code of conduct, and conference rules.",
+        "I agree to the VOFMUN terms and conditions, code of conduct, and conference rules.",
+        "Agree to Terms",
+        "I agree to the terms",
+        "Terms & Conditions",
+      ]),
     )
+
     const agreePhotos =
       normalizeBoolean(pickAnswer(answers, ["Photo consent", "Photo Release"])) ?? false
 
     const committee1 = normalizeCommittee(
-      pickAnswer(answers, ["Committee Choice 1", "Committee Preference 1", "First Committee Choice"]),
+      pickAnswer(answers, [
+        "First Choice",
+        "First choice",
+        "Committee Choice 1",
+        "Committee Preference 1",
+        "First Committee Choice",
+      ]),
     )
+
     const committee2 = normalizeCommittee(
-      pickAnswer(answers, ["Committee Choice 2", "Committee Preference 2", "Second Committee Choice"]),
+      pickAnswer(answers, [
+        "Second Choice",
+        "Second choice",
+        "Committee Choice 2",
+        "Committee Preference 2",
+        "Second Committee Choice",
+      ]),
     )
+
     const committee3 = normalizeCommittee(
-      pickAnswer(answers, ["Committee Choice 3", "Committee Preference 3", "Third Committee Choice"]),
+      pickAnswer(answers, [
+        "Third Choice",
+        "Third choice",
+        "Committee Choice 3",
+        "Committee Preference 3",
+        "Third Committee Choice",
+      ]),
     )
+
     const experience = normalizeExperience(
       pickAnswer(answers, ["MUN Experience", "Previous MUN Experience"]),
     )
-    const referralCodes = splitReferralCodes(
-      pickAnswer(answers, ["Referral Code", "Referral Codes", "Referral code"]),
-    )
+    const referralRaw = pickAnswer(answers, [
+      'Referral Code(s) (Optional)\nEnter one or more referral codes. You can separate multiple codes with commas, spaces, or new lines. Example: AB123, CD456',
+      'Referral Code(s) (Optional)\r\nEnter one or more referral codes. You can separate multiple codes with commas, spaces, or new lines. Example: AB123, CD456',
+      'Referral Code(s) (Optional) Enter one or more referral codes. You can separate multiple codes with commas, spaces, or new lines. Example: AB123, CD456',
+      "Referral Code(s) (Optional)",
+      "Referral Code",
+      "Referral Codes",
+      "Referral code",
+    ])
+
+    const referralCodes = splitReferralCodes(referralRaw)
 
     const paymentStatus = normalizePaymentStatus(
       pickAnswer(answers, ["Payment Status", "Payment", "Paid?"]),
@@ -275,9 +334,9 @@ export async function POST(request: NextRequest) {
 
     const delegateData = {
       experience: experience || "none",
-      committee1: committee1 || undefined,
-      committee2: committee2 || undefined,
-      committee3: committee3 || undefined,
+      committee1: committee1 || "",
+      committee2: committee2 || "",
+      committee3: committee3 || "",
     }
 
     const supabase = await createClient()
