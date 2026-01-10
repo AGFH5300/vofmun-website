@@ -14,7 +14,7 @@ export function CountdownSection() {
 
   useEffect(() => {
     // Set conference date (you can adjust this date)
-    const conferenceDate = new Date("2026-02-14T09:00:00")
+    const conferenceDate = new Date("2026-03-28T09:00:00")
 
     const timer = setInterval(() => {
       const now = new Date().getTime()
@@ -80,7 +80,7 @@ export function CountdownSection() {
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-serif font-semibold text-primary">Date</h3>
-                  <p className="text-sm sm:text-base text-foreground/70">February 14-15, 2026</p>
+                  <p className="text-sm sm:text-base text-foreground/70">March 28-29, 2026</p>
                 </div>
               </CardContent>
             </Card>

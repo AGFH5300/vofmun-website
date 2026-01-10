@@ -58,11 +58,6 @@ const founders = [
     image: "/founders/PranavVerma_Finance.jpg",
   },
   {
-    name: "Caelyn Harding",
-    role: "Deputy of Finance",
-    image: "/founders/CaelynHarding_Finance.png",
-  },
-  {
     name: "Noaf Qassem",
     role: "Deputy of Finance",
     image: "/founders/NoafQassem_Finance.png",
@@ -81,6 +76,11 @@ const founders = [
     name: "Tamara Moshawrab",
     role: "Deputy of Media & Marketing",
     image: "/founders/TamaraMoshawrab_Media.png",
+  },
+  {
+    name: "Reem Ghanayem",
+    role: "Deputy of Media & Marketing",
+    image: "/founders/ReemGhanayem_Media.jpg",
   },
   {
     name: "Hanxiao Yu",

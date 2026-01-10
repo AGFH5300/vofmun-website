@@ -36,19 +36,19 @@ export function SignupInfo() {
             <div className="text-gray-800 font-medium">Registration Deadlines:</div>
             <div className="grid grid-cols-1 gap-2 ml-4">
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Delegates: January 10th 2026</span>
+                <span className="text-gray-700">Delegates: February 28th 2026</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Chairs: January 1st 2026</span>
+                <span className="text-gray-700">Chairs: January 10th 2026</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Admin Staff: January 1st 2026</span>
+                <span className="text-gray-700">Admin Staff: February 28th 2026</span>
               </div>
             </div>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-gray-800"><strong>Conference Dates:</strong></span>
-            <span className="text-gray-600">February 14-15, 2026</span>
+            <span className="text-gray-600">March 28-29, 2026</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <span className="text-gray-800"><strong>Venue:</strong></span>
@@ -82,7 +82,7 @@ export function SignupInfo() {
             {[
               "Access to all committee sessions",
               "Welcome reception and networking events",
-              "Lunch and refreshments all three days",
+              "Food and refreshments on all days",
               "Conference materials and resources",
               "Certificate of participation",
               "Awards ceremony and recognition",
@@ -121,8 +121,12 @@ export function SignupInfo() {
           </div>
           <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
             <p className="text-sm text-gray-800">
-              <strong>Cancellation Policy:</strong> Refunds are available until February 1, 2026. After this date, no
-              refunds will be processed.
+              <strong>Cancellation Policy:</strong> All payments made are strictly non-refundable. Refunds will
+              only be considered in exceptional circumstances. Please refer to the {" "}
+              <Link href="pdfs/T&Cs.pdf" className="font-semibold text-[#B22222] underline-offset-4 hover:underline">
+                Terms & Conditions
+              </Link>{" "}
+                for further details.
             </p>
           </div>
           <div className="p-3 bg-red-50 rounded-lg border border-red-200">

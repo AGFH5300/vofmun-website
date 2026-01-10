@@ -73,7 +73,7 @@ export function PaymentDetails() {
                   <div className="mb-6 rounded-xl border border-[#e3ddff] bg-[#f4f2ff] p-4">
                     <p className="text-sm font-semibold text-[#362f78]">Pay instantly with Stripe</p>
                     <p className="text-sm text-[#362f78]">
-                      Use debit/credit cards or local payment methods with our secure Stripe checkout.
+                      Use Apple Pay, Google Pay, other digital wallets, or credit/debit card to complete the payment.
                     </p>
                     <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
                       <a

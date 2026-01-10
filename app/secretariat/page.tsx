@@ -45,7 +45,7 @@ VOFMUN all began as an abstract idea shared among friends. But with time, dedica
 
 Beyond my work with VOFMUN, I am an active member of my school's Digital Innovation and Technology team, have been deeply involved in Model United Nations for several years and have participated in over 15 Model United Nations conferences, with an extensive range of various awards. Moreover, I am the founder of my school’s STEM Society, where I lead workshops and projects to inspire students to explore science and innovation beyond the classroom. I also pursue my passions in sports, particularly basketball and kickboxing with MVP recognitions, which have both taught me the value of discipline, teamwork, and perseverance. Furthermore, I am deeply passionate about medicine and aspire to pursue it in the future.
 
-I hope to expand my horizons during the next academic year, working on initiatives such as GenAid, a youth-led nonprofit initiative dedicated to promoting dignity, hygiene, and health access in underserved communities, and on the first VOFMUN conference, taking place in February 2026. Through all my endeavors, I strive to foster positive change, empower others, and lead with integrity.
+I hope to expand my horizons during the next academic year, working on initiatives such as GenAid, a youth-led nonprofit initiative dedicated to promoting dignity, hygiene, and health access in underserved communities, and on the first VOFMUN conference, taking place in March 2026. Through all my endeavors, I strive to foster positive change, empower others, and lead with integrity.
 
 As VOFMUN continues to grow, my hope is that it remains a space where young leaders can find their voice, challenge their thinking, and leave inspired to shape a better world. VOFMUN strives to empower young people, cultivate leadership, and amplify every voice; the Voices of the Future. I'm incredibly proud of how far we've come - and even more excited for what's ahead. See you soon at VOFMUN 2026!`,
   },
@@ -170,6 +170,14 @@ As Deputy Head of Committees, I support the Co-Heads in managing committee quali
     writeup: `Hi I'm Aryan Shah, Deputy of Logistics for VOFMUN 2026! I have previously participated in 4 MUN conferences, and have received an honorable mention in one of them. I am currently a Year 11 student at Dubai International Academy. I am also Vice-President of my school's Cubing and AI club. Outside of school I have organised and hosted multiple internationally recognized and licensed Rubik's Cube Competitions that have attracted the attention of some of the best cubers in the MENA region. At VOFMUN my goal is to ensure that all the delegates have an amazing experience at VOFMUN by handling all committee-related matters that range from finalising topics to country allocation and communication with all delegates.`,
   },
   {
+    name: "Reem Ghanayem",
+    role: "<strong>Deputy of Media & Marketing</strong>",
+    department: "Media",
+    image: "/founders/ReemGhanayem_Media.jpg",
+    bio: "Helping deliver logistics planning, venue coordination, and delegate services.",
+    writeup: `Hello I'm Reem Ghanayem - one of the Deputies of Media for VOFMUN 2026! I have previously participated in the Emirates Literature Festival. I also am passionate about dance, play piano, have worked in marketing before, and enjoy public speaking. I speak Arabic and English.`,
+  },
+  {
     name: "Hanxiao Yu",
     role: "<strong>Deputy of Media & Marketing</strong>",
     department: "Media",
@@ -224,14 +232,6 @@ At VOFMUN, I aim to bring that same precision and initiative - ensuring every fi
 My future aspirations lie in either diplomacy or economics, and I believe that understanding the mechanics of both global policy and financial systems will prepare me to make a real impact in those fields. MUN has always been a space where I've been able to grow - not just as a speaker and thinker, but as a global citizen. I love the way it challenges me to think critically, communicate clearly, and collaborate with others to solve complex issues. Outside of academics, I am an ongoing track and field athlete, which helps shape my perspective on core life skills such as discipline, leadership, and respect.
 
 Being part of the VOFMUN team and this great journey has been incredibly exciting, and I'm committed to ensuring the financial planning behind the scenes helps make this conference as smooth, impactful, and unforgettable as possible. Can't wait to see what we accomplish together; hope to see you at VOFMUN 2026!`,
-  },
-  {
-    name: "Caelyn Harding",
-    role: "<strong>Deputy of Finance</strong>",
-    department: "Finance",
-    image: "/founders/CaelynHarding_Finance.png",
-    bio: "Championing resource planning that elevates every delegate experience.",
-    writeup: `Hey! My name is Caelyn. I go to GEMS Metropole School in Motor City, and I’m in Year 11. I’m currently enrolled in my school’s MUN and will be attending the next conference as a delegate. I’m also part of VOFMUN’s Finance Team! I love to debate, draw, and play the piano, but most importantly, I love helping people. I joined the Finance Team to improve everyone’s experience at VOFMUN while also considering the financial and organizational aspects. I hope to use my skills to benefit the team and make VOFMUN as memorable as possible!`,
   },
 ];
 
