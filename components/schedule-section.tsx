@@ -17,7 +17,7 @@ export function ScheduleSection() {
             </CardHeader>
             <CardContent className="space-y-3 text-center px-6 pb-8">
               <p className="text-sm sm:text-base text-gray-700">
-                We're finalizing an exciting two-day program for 14-15 February 2026. The full timetable, including committee
+                We're finalizing an exciting two-day program for 28-29 March 2026. The full timetable, including committee
                 sessions, workshops, and ceremonies, will be published shortly.
               </p>
               <p className="text-sm sm:text-base text-gray-700">

@@ -80,7 +80,7 @@ export default function HomePage() {
                 <div className="hidden sm:block w-px h-12 bg-white/50"></div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-white drop-shadow-lg" style={{fontFamily: 'var(--font-dm-sans), sans-serif'}}>
-                    14-15 Feb
+                    28-29 Mar
                   </div>
                   <div className="text-sm text-white/90 drop-shadow" style={{fontFamily: 'var(--font-dm-sans), sans-serif'}}>2026</div>
                 </div>

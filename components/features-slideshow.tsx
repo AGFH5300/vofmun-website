@@ -53,7 +53,7 @@ const ResolutionMockup = () => (
     <div className="bg-white rounded p-2 text-xs">
       <div className="flex items-center space-x-2 mb-1">
         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-        <span>Submitted: Feb 14 2026, 09:45</span>
+        <span>Submitted: Mar 28 2026, 09:45</span>
       </div>
       <div className="flex items-center space-x-2">
         <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
