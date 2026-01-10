@@ -18,6 +18,7 @@ import {
   isValidReferralCode,
   normalizeReferralCode,
 } from '@/lib/referral-codes'
+import { isChairSignupClosed } from '@/lib/registration-deadlines'
 import { z } from 'zod'
 
 export const runtime = 'nodejs'
@@ -40,6 +41,16 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const supabase = await createClient()
+
+    if (body?.selectedRole === 'chair' && isChairSignupClosed()) {
+      return NextResponse.json(
+        {
+          message: 'Chair applications are now closed.',
+          status: 'error',
+        },
+        { status: 403 },
+      )
+    }
     
     const rawPaymentStatus = typeof body.paymentStatus === 'string' ? body.paymentStatus : ''
     const normalizedPaymentStatus = rawPaymentStatus === 'yes' || rawPaymentStatus === 'pending' ? 'pending' : 'unpaid'

@@ -33,8 +33,11 @@ const dmSerifDisplay = DM_Serif_Display({
   weight: ["400"],
 });
 
+const metadataBase = new URL("https://vofmun.org")
+const ogImage = "/logo.svg"
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://vofmun.org"),
+  metadataBase,
   title: "VOFMUN - Voices of the Future Model United Nations",
   description:
     "Join VOFMUN - A youth-driven platform bringing together tomorrow's leaders to debate, collaborate, and create solutions for global challenges.",
@@ -58,9 +61,9 @@ export const metadata: Metadata = {
     siteName: "VOFMUN",
     images: [
       {
-        url: "https://vofmun.org/logo.svg",
-        width: 1200,
-        height: 630,
+        url: ogImage,
+        width: 512,
+        height: 512,
         alt: "VOFMUN logo",
       },
     ],
@@ -71,17 +74,19 @@ export const metadata: Metadata = {
     title: "VOFMUN - Voices of the Future Model United Nations",
     description:
       "Youth-driven platform empowering tomorrow's leaders to debate and collaborate on global solutions.",
-    images: ["https://vofmun.org/logo.svg"],
+    images: [ogImage],
   },
 
-  icons: [
-    { rel: "icon", url: "/favicons/favicon.ico" },
-    { rel: "icon", url: "/favicons/favicon-16x16.png", sizes: "16x16" },
-    { rel: "icon", url: "/favicons/favicon-32x32.png", sizes: "32x32" },
-    { rel: "apple-touch-icon", url: "/favicons/apple-touch-icon.png" },
-    { rel: "icon", url: "/favicons/android-chrome-192x192.png", sizes: "192x192" },
-    { rel: "icon", url: "/favicons/android-chrome-512x512.png", sizes: "512x512" },
-  ],
+  icons: {
+    icon: [
+      { url: "/favicons/favicon-16x16.png", sizes: "16x16" },
+      { url: "/favicons/favicon-32x32.png", sizes: "32x32" },
+      { url: "/favicons/android-chrome-192x192.png", sizes: "192x192" },
+      { url: "/favicons/android-chrome-512x512.png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/favicons/apple-touch-icon.png" }],
+    shortcut: "/favicons/favicon.ico",
+  },
   manifest: "/favicons/site.webmanifest",
 };
 
