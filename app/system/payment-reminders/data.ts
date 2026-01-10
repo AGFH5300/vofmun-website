@@ -36,7 +36,7 @@ export async function loadEligibleRecipients(existingClient?: SupabaseServerClie
     .from("users")
     .select("id, first_name, last_name, email, payment_status, payment_reminder_count, payment_reminder_last_sent_at")
     .eq("role", "delegate")
-    .or("payment_status.is.null,payment_status.eq.unpaid")
+    .or("payment_status.is.null,payment_status.eq.unpaid,payment_status.eq.pending")
 
   if (error) {
     console.error("Failed to load delegate records for reminders", error)
@@ -57,7 +57,7 @@ export async function getEligibleDelegateById(
     .select("id, first_name, last_name, email, payment_status, payment_reminder_count, payment_reminder_last_sent_at")
     .eq("id", recipientId)
     .eq("role", "delegate")
-    .or("payment_status.is.null,payment_status.eq.unpaid")
+    .or("payment_status.is.null,payment_status.eq.unpaid,payment_status.eq.pending")
     .maybeSingle()
 
   if (error) {
