@@ -516,7 +516,11 @@ function createUserFieldOptions(
           </SelectTrigger>
           <SelectContent className="text-sm">
             {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                className={applicationStatusOptionClassName(option.value)}
+              >
                 {option.label}
               </SelectItem>
             ))}
@@ -751,7 +755,11 @@ function createUserFieldOptions(
                 </SelectTrigger>
                 <SelectContent className="text-sm">
                   {delegateAllocationOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className={delegateAllocationOptionClassName(option.value)}
+                    >
                       {option.label}
                     </SelectItem>
                   ))}
@@ -975,6 +983,30 @@ const adminApplicationOptions: { value: AdminApplicationStatus; label: string }[
   { value: "accepted", label: "Accepted" },
   { value: "rejected", label: "Rejected" },
 ]
+
+const applicationStatusOptionClassName = (status: ApplicationStatusValue) => {
+  switch (status) {
+    case "accepted":
+      return "bg-emerald-700 text-white data-[highlighted]:bg-emerald-700 data-[highlighted]:text-white"
+    case "shortlisted":
+      return "bg-emerald-100 text-emerald-900 data-[highlighted]:bg-emerald-100 data-[highlighted]:text-emerald-900"
+    case "rejected":
+      return "bg-red-600 text-white data-[highlighted]:bg-red-600 data-[highlighted]:text-white"
+    default:
+      return undefined
+  }
+}
+
+const delegateAllocationOptionClassName = (status: DelegateAllocationStatus) => {
+  switch (status) {
+    case "allocated":
+      return "bg-emerald-600 text-white data-[highlighted]:bg-emerald-600 data-[highlighted]:text-white"
+    case "pending":
+      return "bg-red-600 text-white data-[highlighted]:bg-red-600 data-[highlighted]:text-white"
+    default:
+      return undefined
+  }
+}
 
 const formatPaymentStatus = (status: PaymentStatusValue | null) => {
   if (!status) return "Unpaid"
