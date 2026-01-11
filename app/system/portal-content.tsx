@@ -484,7 +484,7 @@ const SCHOOL_FIELD_OPTIONS: FieldOption<SchoolDelegationRecord>[] = [
 function createUserFieldOptions(
   handleStatusChange: (recordId: number, nextStatus: PaymentStatusValue) => Promise<void> | void,
   handleDelegateAllocationChange: (record: SignupRecord, nextStatus: DelegateAllocationStatus) => Promise<void> | void,
-  handleApplicationStatusChange: (recordId: number, nextStatus: ApplicationStatusValue) => Promise<void> | void,
+  handleApplicationStatusChange: (record: SignupRecord, nextStatus: ApplicationStatusValue) => Promise<void> | void,
   updatingId: number | null,
 ): Record<UserView, FieldOption<SignupRecord>[]> {
   const applicationStatusField: FieldOption<SignupRecord> = {
@@ -502,7 +502,7 @@ function createUserFieldOptions(
       return (
         <Select
           value={currentStatus}
-          onValueChange={(value) => void handleApplicationStatusChange(record.id, value as ApplicationStatusValue)}
+          onValueChange={(value) => void handleApplicationStatusChange(record, value as ApplicationStatusValue)}
           disabled={updatingId === record.id}
         >
           <SelectTrigger className="w-[190px] border-[#B22222]/40 text-left text-sm focus:ring-[#B22222]">
@@ -643,7 +643,7 @@ function createUserFieldOptions(
     {
       key: "registrationStatus",
       label: "Registration status",
-      render: (record) => <span className="text-slate-600">{record.registration_status ?? "—"}</span>,
+      render: (record) => <span className="text-slate-600">{getApplicationStatusLabel(record)}</span>,
     },
     {
       key: "submittedAt",
@@ -946,6 +946,8 @@ type AdminApplicationStatus = "pending" | "accepted" | "rejected"
 
 type ApplicationStatusValue = ChairApplicationStatus | AdminApplicationStatus
 
+type RegistrationStatusValue = "pending" | "approved" | "confirmed" | "rejected"
+
 const statusOptions: { value: PaymentStatusValue; label: string }[] = [
   { value: "paid", label: "Confirmed" },
   { value: "refunded", label: "Refunded" },
@@ -1028,31 +1030,61 @@ const getDelegateAllocationStatus = (record: SignupRecord): DelegateAllocationSt
   return record.delegate_data?.allocationStatus === "allocated" ? "allocated" : "pending"
 }
 
+const chairUiToDbStatus: Record<ChairApplicationStatus, RegistrationStatusValue> = {
+  pending: "pending",
+  shortlisted: "approved",
+  accepted: "confirmed",
+  rejected: "rejected",
+}
+
+const adminUiToDbStatus: Record<AdminApplicationStatus, RegistrationStatusValue> = {
+  pending: "pending",
+  accepted: "confirmed",
+  rejected: "rejected",
+}
+
+const chairDbToUiStatus: Record<RegistrationStatusValue, ChairApplicationStatus> = {
+  pending: "pending",
+  approved: "shortlisted",
+  confirmed: "accepted",
+  rejected: "rejected",
+}
+
+const adminDbToUiStatus: Record<RegistrationStatusValue, AdminApplicationStatus> = {
+  pending: "pending",
+  approved: "accepted",
+  confirmed: "accepted",
+  rejected: "rejected",
+}
+
 const getApplicationStatus = (record: SignupRecord): ApplicationStatusValue => {
+  const status = (record.registration_status ?? "pending") as RegistrationStatusValue
+
   if (record.role === "chair") {
-    switch (record.registration_status) {
-      case "shortlisted":
-      case "accepted":
-      case "rejected":
-      case "pending":
-        return record.registration_status
-      default:
-        return "pending"
-    }
+    return chairDbToUiStatus[status] ?? "pending"
   }
 
   if (record.role === "admin") {
-    switch (record.registration_status) {
-      case "accepted":
-      case "rejected":
-      case "pending":
-        return record.registration_status
-      default:
-        return "pending"
-    }
+    return adminDbToUiStatus[status] ?? "pending"
   }
 
   return "pending"
+}
+
+const getApplicationStatusLabel = (record: SignupRecord) => {
+  if (record.role !== "chair" && record.role !== "admin") {
+    return "—"
+  }
+
+  return formatStatusLabel(getApplicationStatus(record))
+}
+
+const getRegistrationStatusForUpdate = (record: SignupRecord, nextStatus: ApplicationStatusValue) => {
+  if (record.role === "chair") {
+    return chairUiToDbStatus[nextStatus as ChairApplicationStatus] ?? "pending"
+  }
+
+  return adminUiToDbStatus[nextStatus as AdminApplicationStatus] ?? "pending"
 }
 
 const formatStatusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1)
@@ -1289,15 +1321,49 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
 
     const usersChannel = supabase
       .channel("system-users")
-      .on("postgres_changes", { event: "*", schema: "public", table: "users" }, () => {
-        void fetchRecords()
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "users" }, (payload) => {
+        const nextRecord = payload.new as SignupRecord
+        setRecords((previous) => {
+          if (previous.some((record) => record.id === nextRecord.id)) {
+            return previous
+          }
+          return [nextRecord, ...previous]
+        })
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "users" }, (payload) => {
+        const nextRecord = payload.new as SignupRecord
+        setRecords((previous) =>
+          previous.map((record) => (record.id === nextRecord.id ? { ...record, ...nextRecord } : record)),
+        )
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "users" }, (payload) => {
+        const removedId = (payload.old as SignupRecord | null)?.id
+        if (!removedId) return
+        setRecords((previous) => previous.filter((record) => record.id !== removedId))
       })
       .subscribe()
 
     const delegationsChannel = supabase
       .channel("system-school-delegations")
-      .on("postgres_changes", { event: "*", schema: "public", table: "school_delegations" }, () => {
-        void fetchSchoolDelegations()
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "school_delegations" }, (payload) => {
+        const nextRecord = payload.new as SchoolDelegationRecord
+        setSchoolDelegations((previous) => {
+          if (previous.some((record) => record.id === nextRecord.id)) {
+            return previous
+          }
+          return [nextRecord, ...previous]
+        })
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "school_delegations" }, (payload) => {
+        const nextRecord = payload.new as SchoolDelegationRecord
+        setSchoolDelegations((previous) =>
+          previous.map((record) => (record.id === nextRecord.id ? { ...record, ...nextRecord } : record)),
+        )
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "school_delegations" }, (payload) => {
+        const removedId = (payload.old as SchoolDelegationRecord | null)?.id
+        if (!removedId) return
+        setSchoolDelegations((previous) => previous.filter((record) => record.id !== removedId))
       })
       .subscribe()
 
@@ -1445,15 +1511,17 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   )
 
   const handleApplicationStatusChange = useCallback(
-    async (recordId: number, nextStatus: ApplicationStatusValue) => {
+    async (record: SignupRecord, nextStatus: ApplicationStatusValue) => {
       setUpdateError(null)
-      setUpdatingId(recordId)
+      setUpdatingId(record.id)
+
+      const nextDbStatus = getRegistrationStatusForUpdate(record, nextStatus)
 
       try {
         const { error: updateError } = await supabase
           .from("users")
-          .update({ registration_status: nextStatus })
-          .eq("id", recordId)
+          .update({ registration_status: nextDbStatus })
+          .eq("id", record.id)
 
         if (updateError) {
           setUpdateError("Unable to update application status. Please try again.")
@@ -1461,8 +1529,8 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
         }
 
         setRecords((previous) =>
-          previous.map((record) =>
-            record.id === recordId ? { ...record, registration_status: nextStatus } : record,
+          previous.map((entry) =>
+            entry.id === record.id ? { ...entry, registration_status: nextDbStatus } : entry,
           ),
         )
       } catch (cause) {
@@ -1500,7 +1568,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       DelegationAllocationStatus:
         record.role === "delegate" ? formatStatusLabel(getDelegateAllocationStatus(record)) : "",
       ApplicationStatus:
-        record.role === "chair" || record.role === "admin" ? formatStatusLabel(getApplicationStatus(record)) : "",
+        record.role === "chair" || record.role === "admin" ? getApplicationStatusLabel(record) : "",
       ProofFileName: record.payment_proof_file_name ?? "",
       ProofUrl: record.payment_proof_url ?? "",
       SubmittedAt: new Date(record.created_at).toLocaleString(),
