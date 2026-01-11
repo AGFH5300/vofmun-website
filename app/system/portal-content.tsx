@@ -519,9 +519,11 @@ function createUserFieldOptions(
               <SelectItem
                 key={option.value}
                 value={option.value}
-                className={applicationStatusOptionClassName(option.value)}
+                className="group py-1.5 data-[highlighted]:bg-transparent"
               >
-                {option.label}
+                <span className={applicationStatusPillClassName(option.value)}>
+                  {option.label}
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
@@ -758,9 +760,11 @@ function createUserFieldOptions(
                     <SelectItem
                       key={option.value}
                       value={option.value}
-                      className={delegateAllocationOptionClassName(option.value)}
+                      className="group py-1.5 data-[highlighted]:bg-transparent"
                     >
-                      {option.label}
+                      <span className={delegateAllocationPillClassName(option.value)}>
+                        {option.label}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -984,29 +988,31 @@ const adminApplicationOptions: { value: AdminApplicationStatus; label: string }[
   { value: "rejected", label: "Rejected" },
 ]
 
-const applicationStatusOptionClassName = (status: ApplicationStatusValue) => {
+const statusPillBase =
+  "inline-flex w-fit items-center rounded-full px-3 py-1 text-sm font-medium leading-none";
+
+const applicationStatusPillClassName = (status: ApplicationStatusValue) => {
   switch (status) {
     case "accepted":
-      return "bg-emerald-700 text-white data-[highlighted]:bg-emerald-700 data-[highlighted]:text-white"
+      return `${statusPillBase} bg-emerald-600 text-white group-data-[highlighted]:bg-emerald-700`;
     case "shortlisted":
-      return "bg-emerald-100 text-emerald-900 data-[highlighted]:bg-emerald-100 data-[highlighted]:text-emerald-900"
+      return `${statusPillBase} bg-emerald-100 text-emerald-900 group-data-[highlighted]:bg-emerald-200`;
     case "rejected":
-      return "bg-red-600 text-white data-[highlighted]:bg-red-600 data-[highlighted]:text-white"
-    default:
-      return undefined
+      return `${statusPillBase} bg-red-600 text-white group-data-[highlighted]:bg-red-700`;
+    default: // pending
+      return `${statusPillBase} bg-slate-200 text-slate-900 group-data-[highlighted]:bg-slate-300`;
   }
-}
+};
 
-const delegateAllocationOptionClassName = (status: DelegateAllocationStatus) => {
+const delegateAllocationPillClassName = (status: DelegateAllocationStatus) => {
   switch (status) {
     case "allocated":
-      return "bg-emerald-600 text-white data-[highlighted]:bg-emerald-600 data-[highlighted]:text-white"
+      return `${statusPillBase} bg-emerald-600 text-white group-data-[highlighted]:bg-emerald-700`;
     case "pending":
-      return "bg-red-600 text-white data-[highlighted]:bg-red-600 data-[highlighted]:text-white"
     default:
-      return undefined
+      return `${statusPillBase} bg-amber-200 text-amber-950 group-data-[highlighted]:bg-amber-300`;
   }
-}
+};
 
 const formatPaymentStatus = (status: PaymentStatusValue | null) => {
   if (!status) return "Unpaid"
