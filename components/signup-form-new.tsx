@@ -1108,7 +1108,7 @@ export function SignupFormNew() {
             <Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-900">
               <AlertTitle>Chair applications are closed</AlertTitle>
               <AlertDescription>
-                Chair applications closed on {CHAIR_SIGNUP_CUTOFF_DISPLAY}. If you have any questions, please contact us at {" "} 
+                Chair applications closed on {CHAIR_SIGNUP_CUTOFF_DISPLAY}. For any queries regarding signups and applications, please contact us at {" "} 
                 <a href="mailto:conference@vofmun.org" className="font-semibold text-[#B22222] underline-offset-4 hover:underline">
                   conference@vofmun.org
                 </a>
