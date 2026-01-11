@@ -1,3 +1,8 @@
+"use client"
+
+import { useState } from "react"
+import { Check, Copy } from "lucide-react"
+
 import { EnhancedNavigation } from "@/components/enhanced-navigation"
 import { Footer } from "@/components/footer"
 import { SignupHero } from "@/components/signup-hero"
@@ -9,6 +14,22 @@ import { Button } from "@/components/ui/button"
 export default function SignupPage() {
   const googleFormPublicUrl =
     (process.env.NEXT_PUBLIC_GOOGLE_FORM_URL ?? "").trim()
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    if (!navigator?.clipboard) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(googleFormPublicUrl)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      console.error("Failed to copy Google Form URL", error)
+      setCopied(false)
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -28,11 +49,43 @@ export default function SignupPage() {
                   database.
                 </p>
                 {googleFormPublicUrl && (
-                  <Button asChild variant="outline" className="mt-2">
-                    <a href={googleFormPublicUrl} target="_blank" rel="noopener noreferrer" className="text-[#B22222] hover:underline">
-                      Open the form 
-                    </a>
-                  </Button>
+                  <div className="mt-4 flex flex-col items-center gap-4">
+                    <Button
+                      asChild
+                      className="bg-red-600 text-white hover:bg-red-700 px-10 py-5 text-lg font-semibold shadow-lg"
+                    >
+                      <a
+                        href={googleFormPublicUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Open the form
+                      </a>
+                    </Button>
+                    <div className="flex flex-col sm:flex-row items-center gap-3 rounded-lg bg-white/80 px-4 py-3 text-sm text-gray-600 shadow-sm">
+                      <span className="max-w-[28rem] break-all font-medium text-gray-700">
+                        {googleFormPublicUrl}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-red-200 text-red-700 hover:bg-red-50"
+                        onClick={handleCopy}
+                      >
+                        {copied ? (
+                          <span className="flex items-center gap-2">
+                            <Check className="size-4" />
+                            Copied
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <Copy className="size-4" />
+                            Copy link
+                          </span>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
