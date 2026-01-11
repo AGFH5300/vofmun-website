@@ -52,7 +52,7 @@ export default function HomePage() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in-delay-2">
               <Link href="/signup">
-                <Button className="bg-white text-[#B22222] hover:bg-gray-100 px-8 py-4 rounded-lg font-bold text-lg transition-all hover:scale-105 shadow-xl">
+                <Button className="bg-white text-[#B22222] hover:bg-gray-100 px-10 py-5 rounded-lg font-bold text-xl transition-all hover:scale-105 shadow-xl">
                   Register Now
                 </Button>
               </Link>
