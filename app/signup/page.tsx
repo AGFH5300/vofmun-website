@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Copy } from "lucide-react"
+import Link from "next/link"
+import { Check, Copy, LinkIcon, } from "lucide-react"
 
 import { EnhancedNavigation } from "@/components/enhanced-navigation"
 import { Footer } from "@/components/footer"
@@ -52,7 +53,7 @@ export default function SignupPage() {
                   <div className="mt-4 flex flex-col items-center gap-4">
                     <Button
                       asChild
-                      className="bg-red-600 text-white hover:bg-red-700 px-10 py-5 text-lg font-semibold shadow-lg"
+                      className="bg-red-700 text-white hover:bg-red-800 px-10 py-5 text-lg font-semibold shadow-lg"
                     >
                       <a
                         href={googleFormPublicUrl}
@@ -63,8 +64,11 @@ export default function SignupPage() {
                       </a>
                     </Button>
                     <div className="flex flex-col sm:flex-row items-center gap-3 rounded-lg bg-white/80 px-4 py-3 text-sm text-gray-600 shadow-sm">
-                      <span className="max-w-[28rem] break-all font-medium text-gray-700">
-                        {googleFormPublicUrl}
+                      <span className="max-w-[28rem] break-all font-medium font-semibold text-[#B22222] underline-offset-4 hover:underline">
+                        <LinkIcon className="mr-2 inline-block size-4" />
+                        <a href={googleFormPublicUrl} target="_blank" rel="noopener noreferrer">
+                          {googleFormPublicUrl}
+                        </a>
                       </span>
                       <Button
                         type="button"
