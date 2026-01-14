@@ -87,6 +87,11 @@ const founders = [
     role: "Deputy of Media & Marketing",
     image: "/founders/HanxiaoYu_Media.jpg",
   },
+  {
+    name: "Saira Shirvaikar",
+    role: "Deputy of Media & Marketing",
+    image: "/founders/SairaShirvaikar_Media.jpeg",
+  },
 ]
 
 export function FoundersInfiniteCarousel() {
