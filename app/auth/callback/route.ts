@@ -11,6 +11,5 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code)
   }
 
-  // Always redirect to a safe internal path
   return NextResponse.redirect(new URL(next, url.origin))
 }
