@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 export default function SystemGoogleLogin() {
   const signIn = async () => {
     const supabase = createClient()
+
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
