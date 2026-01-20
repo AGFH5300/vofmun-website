@@ -6,9 +6,11 @@ import { Footer } from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { CountryMatrixDialog } from "@/components/country-matrix-dialog"
 import Link from "next/link"
-import { ArrowLeft, Heart, FileText, Users, Calendar, ExternalLink, ChevronRight } from "lucide-react"
+import { ArrowLeft, Heart, FileText, Calendar, ExternalLink, ChevronRight } from "lucide-react"
 import Image from "next/image"
+import whoMatrix from "@/lib/country-matrix/who.json"
 
 export function WHOPage() {
   return (
@@ -170,16 +172,11 @@ export function WHOPage() {
                         Background Guide
                       </Link>
                     </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
-                      asChild
-                    >
-                      <Link href="#">
-                        <Users className="h-4 w-4 mr-2" />
-                        Country Matrix
-                      </Link>
-                    </Button>
+                    <CountryMatrixDialog
+                      committeeName="WHO"
+                      matrix={whoMatrix}
+                      buttonClassName="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                    />
                     <Button
                       variant="outline"
                       className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
