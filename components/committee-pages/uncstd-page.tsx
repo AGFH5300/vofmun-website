@@ -6,9 +6,11 @@ import { Footer } from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { CountryMatrixDialog } from "@/components/country-matrix-dialog"
 import Link from "next/link"
-import { ArrowLeft, Shield, FileText, Users, Calendar, ExternalLink, ChevronRight } from "lucide-react"
+import { ArrowLeft, Shield, FileText, Calendar, ExternalLink, ChevronRight } from "lucide-react"
 import Image from "next/image"
+import uncstdMatrix from "@/lib/country-matrix/uncstd.json"
 
 export function UNCSTDPage() {
   return (
@@ -170,16 +172,11 @@ export function UNCSTDPage() {
                         Background Guide
                       </Link>
                     </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
-                      asChild
-                    >
-                      <Link href="#">
-                        <Users className="h-4 w-4 mr-2" />
-                        Country Matrix
-                      </Link>
-                    </Button>
+                    <CountryMatrixDialog
+                      committeeName="UNCSTD"
+                      matrix={uncstdMatrix}
+                      buttonClassName="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                    />
                     <Button
                       variant="outline"
                       className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
