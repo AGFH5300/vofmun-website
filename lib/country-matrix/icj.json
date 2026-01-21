@@ -1,5 +1,22 @@
 {
-  "headers": ["Country", "Allocation"],
-  "rows": [],
-  "updated": ""
+  "headers": ["Country / Role", "Allocation"],
+  "rows": [
+    ["China Advocate 1", "Pending allocation"],
+    ["China Advocate 2", "Pending allocation"],
+    ["China Advocate 3", "Pending allocation"],
+    ["Philippines Advocate 1", "Pending allocation"],
+    ["Philippines Advocate 2", "Pending allocation"],
+    ["Philippines Advocate 3", "Pending allocation"],
+    ["Republic of China (Taiwan)", "Pending allocation"],
+    ["Brunei Darussalam", "Pending allocation"],
+    ["Federation of Malaysia", "Pending allocation"],
+    ["Socialist Republic of Vietnam", "Pending allocation"],
+    ["United States of America", "Pending allocation"],
+    ["Russian Federation", "Pending allocation"],
+    ["Japan", "Pending allocation"],
+    ["Republic of Indonesia", "Pending allocation"],
+    ["Kingdom of Thailand", "Pending allocation"],
+    ["Kingdom of Cambodia", "Pending allocation"]
+  ],
+  "updated": "2026-01-21"
 }
