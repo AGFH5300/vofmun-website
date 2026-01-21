@@ -12,6 +12,17 @@ export const REFERRAL_CODES: ReferralCodeEntry[] = [
   { code: 'AS831', owner: 'Armaghan Siddiqui' },
   { code: 'VP804', owner: 'Vyom Patel' },
   { code: 'VK245', owner: 'Vidur Aravind Kumar' },
+  
+  { code: 'AS696', owner: 'Arsh Saxena' },
+  { code: 'AS812', owner: 'Aryan Shah' },
+  { code: 'RG511', owner: 'Reem Ghanayem' },
+  { code: 'HY123', owner: 'Hanxiao Yu' },
+  { code: 'SRS14', owner: 'Saira Shirvaikar' },
+  { code: 'PS123', owner: 'Prakhar Sinha' },
+  { code: 'JS111', owner: 'Jaden Shibu' },
+  { code: 'TM123', owner: 'Tamara Moshawrab' },
+  { code: 'PV556', owner: 'Pranav Verma' },
+  { code: 'NQ123', owner: 'Noaf Qassem' },
 ]
 
 const normalizedLookup = new Map(
