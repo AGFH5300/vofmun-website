@@ -1,5 +1,27 @@
 {
   "headers": ["Country", "Allocation"],
-  "rows": [],
-  "updated": ""
+  "rows": [
+    ["United States of America", "Pending allocation"],
+    ["Russian Federation", "Pending allocation"],
+    ["Ukraine", "Pending allocation"],
+    ["People's Republic of China", "Pending allocation"],
+    ["United Kingdom", "Pending allocation"],
+    ["Vostograd Union of Republics", "Pending allocation"],
+    ["Federal Republic of Germany", "Pending allocation"],
+    ["Commonwealth of Australia", "Pending allocation"],
+    ["French Republic", "Pending allocation"],
+    ["Republic of India", "Pending allocation"],
+    ["Japan", "Pending allocation"],
+    ["Republic of South Africa", "Pending allocation"],
+    ["Federative Republic of Brazil", "Pending allocation"],
+    ["Republic of Singapore", "Pending allocation"],
+    ["Republic of Iraq", "Pending allocation"],
+    ["Islamic Republic of Iran", "Pending allocation"],
+    ["State of Israel", "Pending allocation"],
+    ["State of Palestine", "Pending allocation"],
+    ["Arab Republic of Egypt", "Pending allocation"],
+    ["Kingdom of Saudi Arabia", "Pending allocation"],
+    ["Federal Republic of Nigeria", "Pending allocation"]
+  ],
+  "updated": "2026-01-21"
 }
