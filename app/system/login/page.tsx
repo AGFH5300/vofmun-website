@@ -1,4 +1,4 @@
-import SystemGoogleLogin from "./system-google-login"
+import SystemGoogleLogin from "../system-google-login"
 
 export default function SystemLoginPage() {
   return (
