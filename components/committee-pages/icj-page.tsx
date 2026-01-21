@@ -6,6 +6,7 @@ import { Footer } from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ComingSoonDialog } from "@/components/coming-soon-dialog"
 import Link from "next/link"
 import { ArrowLeft, Gavel, FileText, Users, Calendar, ExternalLink, ChevronRight } from "lucide-react"
 import Image from "next/image"
@@ -151,36 +152,33 @@ export function ICJPage() {
                     <CardTitle className="text-lg text-[#B22222]">Resources</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
-                      asChild
-                    >
-                      <Link href="#">
+                    <ComingSoonDialog label="Case Documents">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                      >
                         <FileText className="h-4 w-4 mr-2" />
                         Case Documents
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
-                      asChild
-                    >
-                      <Link href="#">
+                      </Button>
+                    </ComingSoonDialog>
+                    <ComingSoonDialog label="Legal Precedents">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                      >
                         <Users className="h-4 w-4 mr-2" />
                         Legal Precedents
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
-                      asChild
-                    >
-                      <Link href="#">
+                      </Button>
+                    </ComingSoonDialog>
+                    <ComingSoonDialog label="Procedure Guide">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                      >
                         <Calendar className="h-4 w-4 mr-2" />
                         Procedure Guide
-                      </Link>
-                    </Button>
+                      </Button>
+                    </ComingSoonDialog>
                   </CardContent>
                 </Card>
 
