@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ComingSoonDialog } from "@/components/coming-soon-dialog"
 import Link from "next/link"
 import { ArrowLeft, Shield, FileText, Users, Calendar, ExternalLink, AlertTriangle, ChevronRight } from "lucide-react"
 import Image from "next/image"
@@ -156,36 +157,33 @@ export function ICRCCPage() {
                     <CardTitle className="text-lg text-[#B22222]">Resources</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
-                      asChild
-                    >
-                      <Link href="#">
+                    <ComingSoonDialog label="Crisis Guide">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                      >
                         <FileText className="h-4 w-4 mr-2" />
                         Crisis Guide
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
-                      asChild
-                    >
-                      <Link href="#">
+                      </Button>
+                    </ComingSoonDialog>
+                    <ComingSoonDialog label="Portfolio Powers">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                      >
                         <Users className="h-4 w-4 mr-2" />
                         Portfolio Powers
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
-                      asChild
-                    >
-                      <Link href="#">
+                      </Button>
+                    </ComingSoonDialog>
+                    <ComingSoonDialog label="Crisis Procedures">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                      >
                         <Calendar className="h-4 w-4 mr-2" />
                         Crisis Procedures
-                      </Link>
-                    </Button>
+                      </Button>
+                    </ComingSoonDialog>
                   </CardContent>
                 </Card>
 
