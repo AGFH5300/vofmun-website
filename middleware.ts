@@ -23,13 +23,10 @@ export async function middleware(request: NextRequest) {
     },
   )
 
-  // IMPORTANT: do not remove — this refreshes the session if needed
   await supabase.auth.getUser()
-
   return response
 }
 
-// Run middleware on all routes except static assets
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)"],
 }
