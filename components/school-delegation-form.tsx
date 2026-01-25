@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -15,29 +15,15 @@ import { PhoneInput } from "@/components/phone-input"
 import { toast } from "sonner"
 import {
   AlertCircle,
-  CheckCircle2,
   Download,
   Loader2,
   UploadCloud,
   XCircle,
   Building2,
   FileSpreadsheet,
-  Info,
 } from "lucide-react"
 
-const REQUIRED_COLUMNS = [
-  "Delegate Full Name",
-  "Delegate Email",
-  "Delegate Nationality",
-  "Delegate Phone Number (with country code)",
-  "Delegate Year (Drop down 6-->13)",
-  "Delegate MUN Experience (number)",
-  "Dietary Preference (Veg, Non-Veg, Other - please specify)",
-] as const
-
 const TEMPLATE_PATH = "/templates/School Delegate Application Template - VOFMUN I 2026.xlsx"
-const SPREADSHEET_SIZE_LIMIT_MB = 5
-const SPREADSHEET_SIZE_LIMIT_BYTES = SPREADSHEET_SIZE_LIMIT_MB * 1024 * 1024
 
 const initialFormState = {
   schoolName: "",
@@ -69,12 +55,7 @@ export function SchoolDelegationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [spreadsheetFile, setSpreadsheetFile] = useState<File | null>(null)
-  const [spreadsheetError, setSpreadsheetError] = useState<string | null>(null)
-  const [spreadsheetSuccess, setSpreadsheetSuccess] = useState<string | null>(null)
-  const [isValidatingSpreadsheet, setIsValidatingSpreadsheet] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const validationRequestIdRef = useRef(0)
-  const validationWorkerRef = useRef<Worker | null>(null)
 
   const handleInputChange = (field: keyof FormState, value: string | boolean) => {
     setFormData((prev) => ({
@@ -88,47 +69,7 @@ export function SchoolDelegationForm() {
     })
   }
 
-  const stopSpreadsheetWorker = () => {
-    if (validationWorkerRef.current) {
-      validationWorkerRef.current.terminate()
-      validationWorkerRef.current = null
-    }
-  }
-
-  const validateSpreadsheetInWorker = (file: File, requiredColumns: readonly string[]) =>
-    new Promise<{ ok: true } | { ok: false; error: string }>((resolve, reject) => {
-      stopSpreadsheetWorker()
-      const worker = new Worker(new URL("./workers/spreadsheet-validator.worker.ts", import.meta.url), {
-        type: "module",
-      })
-      validationWorkerRef.current = worker
-
-      const cleanup = () => {
-        worker.terminate()
-        if (validationWorkerRef.current === worker) {
-          validationWorkerRef.current = null
-        }
-      }
-
-      worker.onmessage = (event) => {
-        cleanup()
-        resolve(event.data)
-      }
-      worker.onerror = (event) => {
-        cleanup()
-        reject(event)
-      }
-
-      worker.postMessage({ file, requiredColumns })
-    })
-
-  const handleSpreadsheetChange = async (file: File | null) => {
-    validationRequestIdRef.current += 1
-    const requestId = validationRequestIdRef.current
-    stopSpreadsheetWorker()
-    setSpreadsheetError(null)
-    setSpreadsheetSuccess(null)
-    setIsValidatingSpreadsheet(false)
+  const handleSpreadsheetChange = (file: File | null) => {
     setErrors((prev) => {
       if (!prev.spreadsheet) return prev
       const { spreadsheet, ...rest } = prev
@@ -139,50 +80,12 @@ export function SchoolDelegationForm() {
       setSpreadsheetFile(null)
       return
     }
-
-    try {
-      setSpreadsheetFile(file)
-      if (!file.name.toLowerCase().endsWith(".xlsx")) {
-        throw new Error("Please upload an .xlsx Excel spreadsheet using the official template.")
-      }
-      if (file.size > SPREADSHEET_SIZE_LIMIT_BYTES) {
-        throw new Error(`The uploaded spreadsheet is too large. Please upload a file smaller than ${SPREADSHEET_SIZE_LIMIT_MB} MB.`)
-      }
-      setIsValidatingSpreadsheet(true)
-      const result = await validateSpreadsheetInWorker(file, REQUIRED_COLUMNS)
-      if (validationRequestIdRef.current !== requestId) {
-        return
-      }
-      if (!result.ok) {
-        throw new Error(result.error)
-      }
-      setSpreadsheetSuccess("Template verified. All required columns are present.")
-      setErrors((prev) => {
-        if (!prev.spreadsheet) return prev
-        const { spreadsheet, ...rest } = prev
-        return rest
-      })
-    } catch (error: any) {
-      if (validationRequestIdRef.current !== requestId) {
-        return
-      }
-      setSpreadsheetFile(null)
-      const message = error?.message ?? "Unable to validate the uploaded spreadsheet."
-      setSpreadsheetError(message)
-      setErrors((prev) => ({
-        ...prev,
-        spreadsheet: message,
-      }))
-    } finally {
-      if (validationRequestIdRef.current === requestId) {
-        setIsValidatingSpreadsheet(false)
-      }
-    }
+    setSpreadsheetFile(file)
   }
 
-  const handleSpreadsheetSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSpreadsheetSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null
-    await handleSpreadsheetChange(file)
+    handleSpreadsheetChange(file)
   }
 
   const fileToDataUrl = (file: File) =>
@@ -231,10 +134,7 @@ export function SchoolDelegationForm() {
 
     if (!spreadsheetFile) {
       newErrors.spreadsheet = "Please upload the completed delegate spreadsheet"
-    } else if (spreadsheetError) {
-      newErrors.spreadsheet = spreadsheetError
     }
-
     if (!formData.termsAccepted) {
       newErrors.termsAccepted = "You must confirm that you agree to the terms"
     }
@@ -246,21 +146,11 @@ export function SchoolDelegationForm() {
   const resetForm = () => {
     setFormData(initialFormState)
     setSpreadsheetFile(null)
-    setSpreadsheetError(null)
-    setSpreadsheetSuccess(null)
-    setIsValidatingSpreadsheet(false)
     setErrors({})
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
-    stopSpreadsheetWorker()
   }
-
-  useEffect(() => {
-    return () => {
-      stopSpreadsheetWorker()
-    }
-  }, [])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -339,7 +229,7 @@ export function SchoolDelegationForm() {
           School Delegation Signup
         </CardTitle>
         <CardDescription className="text-gray-600 text-sm sm:text-base">
-          Provide your school's details and upload the delegate spreadsheet using our official template.
+          Provide your school's details and upload the delegate spreadsheet.
         </CardDescription>
         <Alert className="bg-red-50 border-red-200 text-red-900">
           <Building2 className="h-5 w-5" />
@@ -347,9 +237,8 @@ export function SchoolDelegationForm() {
           <AlertDescription className="space-y-3 text-red-800">
             <p>Please download the school delegation spreadsheet from here!</p>
             <p>
-              Download the official Excel sheet from here and fill it in with the complete details of all students from your
-              delegations. Please leave the column names unchanged or the Excel sheet will not be recognised/accepted by the
-              submission form.
+              Download the latest Excel sheet from here and fill it in with the complete details of all students from your
+              delegations.
             </p>
             <Button asChild variant="outline" size="sm" className="border-red-300 text-red-800 hover:bg-red-100">
               <Link href={TEMPLATE_PATH} download>
@@ -563,16 +452,12 @@ export function SchoolDelegationForm() {
             <h3 className="text-lg sm:text-xl font-serif font-semibold text-primary">Delegate Spreadsheet</h3>
             <div className="space-y-3 sm:space-y-4">
               <div
-                className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center gap-3 ${
-                  spreadsheetError ? "border-red-300 bg-red-50" : spreadsheetSuccess ? "border-green-300 bg-green-50" : "border-gray-200 bg-gray-50"
-                }`}
+                className="border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center gap-3 border-gray-200 bg-gray-50"
               >
-                <FileSpreadsheet className={`h-10 w-10 ${spreadsheetError ? "text-red-500" : spreadsheetSuccess ? "text-green-600" : "text-gray-500"}`} />
+                <FileSpreadsheet className="h-10 w-10 text-gray-500" />
                 <div className="space-y-1">
                   <p className="font-medium text-gray-800">Upload completed delegate spreadsheet (.xlsx)</p>
-                  <p className="text-sm text-gray-600">
-                    Ensure the column names remain exactly as provided in the official template.
-                  </p>
+                  <p className="text-sm text-gray-600">Attach the spreadsheet that includes all delegate details.</p>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <Button type="button" onClick={() => fileInputRef.current?.click()} className="bg-[#B22222] hover:bg-[#8B0000] text-white">
@@ -600,40 +485,9 @@ export function SchoolDelegationForm() {
                   className="hidden"
                   onChange={handleSpreadsheetSelect}
                 />
-                {spreadsheetFile && !spreadsheetError && (
-                  <p className="text-sm text-gray-700 break-all">Selected file: {spreadsheetFile.name}</p>
-                )}
+                {spreadsheetFile && <p className="text-sm text-gray-700 break-all">Selected file: {spreadsheetFile.name}</p>}
               </div>
-              {isValidatingSpreadsheet && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Upload received. Verifying the spreadsheet template...</span>
-                </div>
-              )}
-              {spreadsheetSuccess && (
-                <div className="flex items-start gap-2 text-sm text-green-700">
-                  <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
-                  <span>{spreadsheetSuccess}</span>
-                </div>
-              )}
-              {spreadsheetError && (
-                <div className="flex items-start gap-2 text-sm text-red-600">
-                  <XCircle className="h-5 w-5 flex-shrink-0" />
-                  <span>{spreadsheetError}</span>
-                </div>
-              )}
-              {errors.spreadsheet && !spreadsheetError && (
-                <p className="text-sm text-red-600">{errors.spreadsheet}</p>
-              )}
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 flex items-start gap-3">
-                <Info className="h-5 w-5 flex-shrink-0" />
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Important</p>
-                  <p className="text-sm">
-                    Please ensure all delegate details are complete and that column names remain unchanged before submitting the spreadsheet.
-                  </p>
-                </div>
-              </div>
+              {errors.spreadsheet && <p className="text-sm text-red-600">{errors.spreadsheet}</p>}
             </div>
           </div>
 
