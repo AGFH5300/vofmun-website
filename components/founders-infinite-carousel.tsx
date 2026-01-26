@@ -68,24 +68,9 @@ const founders = [
     image: "/founders/GibranMalaeb_Media.jpg",
   },
   {
-    name: "Jaden Shibu",
-    role: "Deputy of Media & Marketing",
-    image: "/founders/JadenShibu_Media.jpg",
-  },
-  {
     name: "Tamara Moshawrab",
     role: "Deputy of Media & Marketing",
     image: "/founders/TamaraMoshawrab_Media.png",
-  },
-  {
-    name: "Reem Ghanayem",
-    role: "Deputy of Media & Marketing",
-    image: "/founders/ReemGhanayem_Media.jpg",
-  },
-  {
-    name: "Hanxiao Yu",
-    role: "Deputy of Media & Marketing",
-    image: "/founders/HanxiaoYu_Media.jpg",
   },
   {
     name: "Saira Shirvaikar",
