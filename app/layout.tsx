@@ -6,10 +6,6 @@ import "./globals.css"
 import { ScrollRestoration } from "@/components/scroll-restoration"
 import { Toaster } from "@/components/ui/sonner"
 
-/* -------------------------------------------------------------------------- */
-/*                                   Fonts                                    */
-/* -------------------------------------------------------------------------- */
-
 const lato = Lato({
   subsets: ["latin"],
   variable: "--font-lato",
@@ -38,10 +34,6 @@ const dmSerifDisplay = DM_Serif_Display({
   weight: ["400"],
 })
 
-/* -------------------------------------------------------------------------- */
-/*                               Metadata Setup                               */
-/* -------------------------------------------------------------------------- */
-
 const metadataBase = new URL("https://vofmun.org")
 const ogImage = "/og-image.png"
 
@@ -67,8 +59,6 @@ export const metadata: Metadata = {
     canonical: "/",
   },
 
-  /* ----------------------------- Open Graph -------------------------------- */
-
   openGraph: {
     title: "VOFMUN – Voices of the Future Model United Nations",
     description:
@@ -87,8 +77,6 @@ export const metadata: Metadata = {
     ],
   },
 
-  /* -------------------------------- Twitter -------------------------------- */
-
   twitter: {
     card: "summary_large_image",
     title: "VOFMUN – Voices of the Future Model United Nations",
@@ -96,9 +84,7 @@ export const metadata: Metadata = {
       "A global, youth-driven Model United Nations platform empowering tomorrow’s leaders.",
     images: [ogImage],
   },
-
-  /* --------------------------------- Icons --------------------------------- */
-
+  
   icons: {
     icon: [
       { url: "/favicons/favicon-16x16.png", sizes: "16x16" },
@@ -113,15 +99,9 @@ export const metadata: Metadata = {
   manifest: "/favicons/site.webmanifest",
 }
 
-/* ------------------------------- Viewport ---------------------------------- */
-
 export const viewport: Viewport = {
   themeColor: "#ffffff",
 }
-
-/* -------------------------------------------------------------------------- */
-/*                                 Layout                                     */
-/* -------------------------------------------------------------------------- */
 
 export default function RootLayout({
   children,
