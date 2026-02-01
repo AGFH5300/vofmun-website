@@ -36,8 +36,34 @@ export default function SignupPage() {
     <div className="min-h-screen">
       <EnhancedNavigation />
       <main className="pt-16">
-        <SignupHero />
-        <section className="py-16 bg-slate-50">
+        <section id="overview" className="scroll-mt-28">
+          <SignupHero />
+        </section>
+        <nav
+          aria-label="Signup quick links"
+          className="sticky top-16 z-30 border-y border-slate-200/70 bg-white/95 backdrop-blur"
+        >
+          <div className="container mx-auto px-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm font-semibold text-slate-600">
+              <span className="uppercase tracking-wide text-xs text-slate-500">On this page</span>
+              <div className="flex flex-wrap gap-3">
+                <Link className="hover:text-[#B22222] transition-colors" href="#overview">
+                  Overview
+                </Link>
+                <Link className="hover:text-[#B22222] transition-colors" href="#google-form">
+                  Google Form
+                </Link>
+                <Link className="hover:text-[#B22222] transition-colors" href="#registration">
+                  Registration
+                </Link>
+                <Link className="hover:text-[#B22222] transition-colors" href="#payment">
+                  Payment
+                </Link>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <section id="google-form" className="scroll-mt-28 py-16 bg-slate-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto space-y-6">
               <div className="space-y-3 text-center">
@@ -95,7 +121,7 @@ export default function SignupPage() {
             </div>
           </div>
         </section>
-        <div className="py-20 bg-background">
+        <div id="registration" className="scroll-mt-28 py-20 bg-background">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
               <SignupFormNew />
@@ -103,7 +129,7 @@ export default function SignupPage() {
             </div>
           </div>
         </div>
-        <PaymentDetails />
+        <PaymentDetails id="payment" />
       </main>
       <Footer />
     </div>
