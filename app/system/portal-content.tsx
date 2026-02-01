@@ -485,6 +485,8 @@ function createUserFieldOptions(
   handleStatusChange: (recordId: number, nextStatus: PaymentStatusValue) => Promise<void> | void,
   handleDelegateAllocationChange: (record: SignupRecord, nextStatus: DelegateAllocationStatus) => Promise<void> | void,
   handleApplicationStatusChange: (record: SignupRecord, nextStatus: ApplicationStatusValue) => Promise<void> | void,
+  handlePaymentStatusFilterChange: (status: PaymentStatusValue) => void,
+  paymentStatusFilter: PaymentStatusValue | null,
   updatingId: number | null,
 ): Record<UserView, FieldOption<SignupRecord>[]> {
   const applicationStatusField: FieldOption<SignupRecord> = {
@@ -593,14 +595,33 @@ function createUserFieldOptions(
     {
       key: "paymentStatus",
       label: "Payment status",
-      render: (record) => (
-        <Badge
-          variant={badgeVariantForStatus(record.payment_status)}
-          className={badgeClassNameForStatus(record.payment_status)}
-        >
-          {formatPaymentStatus(record.payment_status)}
-        </Badge>
-      ),
+      render: (record) => {
+        const normalizedStatus = normalizePaymentStatus(record.payment_status)
+        const isActive = paymentStatusFilter === normalizedStatus
+        const baseClassName = badgeClassNameForStatus(record.payment_status)
+
+        return (
+          <button
+            type="button"
+            onClick={() => handlePaymentStatusFilterChange(normalizedStatus)}
+            aria-pressed={isActive}
+            className="inline-flex items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B22222]/50"
+          >
+            <Badge
+              variant={badgeVariantForStatus(record.payment_status)}
+              className={[
+                baseClassName,
+                "transition",
+                isActive ? "ring-2 ring-[#B22222]/30" : "hover:ring-1 hover:ring-[#B22222]/20",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {formatPaymentStatus(record.payment_status)}
+            </Badge>
+          </button>
+        )
+      },
     },
     {
       key: "paymentProof",
@@ -1014,6 +1035,8 @@ const delegateAllocationPillClassName = (status: DelegateAllocationStatus) => {
   }
 };
 
+const normalizePaymentStatus = (status: PaymentStatusValue | null) => status ?? "unpaid"
+
 const formatPaymentStatus = (status: PaymentStatusValue | null) => {
   if (!status) return "Unpaid"
 
@@ -1142,6 +1165,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const [activeView, setActiveView] = useState<RegistrationView>("all")
   const [selectedUserFields, setSelectedUserFields] = useState<Record<UserView, string[]>>(buildDefaultUserFieldSelection)
   const [selectedSchoolFields, setSelectedSchoolFields] = useState<string[]>(buildDefaultSchoolFieldSelection)
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState<PaymentStatusValue | null>(null)
   const [preferencesHydrated, setPreferencesHydrated] = useState(false)
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
   const [schoolColumnWidths, setSchoolColumnWidths] = useState<Record<string, number>>({})
@@ -1483,6 +1507,14 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     setSelectedSchoolFields(buildDefaultSchoolFieldSelection())
   }, [])
 
+  const handlePaymentStatusFilterChange = useCallback((status: PaymentStatusValue) => {
+    setPaymentStatusFilter((current) => (current === status ? null : status))
+  }, [])
+
+  const clearPaymentStatusFilter = useCallback(() => {
+    setPaymentStatusFilter(null)
+  }, [])
+
   const handleStatusChange = useCallback(
     async (recordId: number, nextStatus: PaymentStatusValue) => {
       setUpdateError(null)
@@ -1587,9 +1619,18 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
         handleStatusChange,
         handleDelegateAllocationChange,
         handleApplicationStatusChange,
+        handlePaymentStatusFilterChange,
+        paymentStatusFilter,
         updatingId,
       ),
-    [handleStatusChange, handleDelegateAllocationChange, handleApplicationStatusChange, updatingId],
+    [
+      handleStatusChange,
+      handleDelegateAllocationChange,
+      handleApplicationStatusChange,
+      handlePaymentStatusFilterChange,
+      paymentStatusFilter,
+      updatingId,
+    ],
   )
 
   const exportToXlsx = useCallback(async () => {
@@ -1653,6 +1694,21 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       return <div className="px-6 py-10 text-center text-sm text-slate-500">{emptyMessage}</div>
     }
 
+    const filteredRecords = paymentStatusFilter
+      ? recordsToDisplay.filter(
+          (record) => normalizePaymentStatus(record.payment_status) === paymentStatusFilter,
+        )
+      : recordsToDisplay
+    const filterLabel = paymentStatusFilter ? formatPaymentStatus(paymentStatusFilter) : null
+
+    if (filteredRecords.length === 0) {
+      return (
+        <div className="px-6 py-10 text-center text-sm text-slate-500">
+          No registrations with {filterLabel} payment status.
+        </div>
+      )
+    }
+
     const availableFields = userFieldOptions[view] ?? []
     const selectedFields = selectedUserFields[view] ?? []
     const visibleFields = availableFields.filter((field) => selectedFields.includes(field.key))
@@ -1666,57 +1722,79 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     }
 
     return (
-      <Table className="min-w-full text-slate-900">
-        <TableHeader>
-          <TableRow className="border-slate-200/90">
-            {visibleFields.map((field) => {
-              const columnStyle = getColumnStyle(field.key, "user")
-
-              return (
-                <TableHead
-                  key={field.key}
-                  style={columnStyle}
-                  className="group relative whitespace-normal text-slate-700"
-                  title={field.description ?? undefined}
-                >
-                  <div className="flex items-start gap-2 pr-3">
-                    <span className="truncate text-[11px] font-semibold tracking-wide text-slate-700">
-                      {field.label}
-                    </span>
-                    {field.description ? (
-                      <span className="text-[10px] font-normal leading-snug text-slate-400">{field.description}</span>
-                    ) : null}
-                  </div>
-                  <span
-                    aria-hidden
-                    onMouseDown={(event) => handleResizeStart(field.key, event, "user")}
-                    className="absolute right-0 top-0 h-full w-2 cursor-col-resize select-none bg-transparent transition-colors group-hover:bg-[#B22222]/15"
-                  />
-                </TableHead>
-              )
-            })}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {recordsToDisplay.map((record) => (
-            <TableRow key={record.id} className="border-slate-200/80 odd:bg-white even:bg-slate-50/50">
+      <div className="space-y-3">
+        {paymentStatusFilter ? (
+          <div className="flex flex-wrap items-center gap-2 px-6 text-xs text-slate-600">
+            <span>Filtered by payment status:</span>
+            <Badge
+              variant={badgeVariantForStatus(paymentStatusFilter)}
+              className={badgeClassNameForStatus(paymentStatusFilter)}
+            >
+              {filterLabel}
+            </Badge>
+            <button
+              type="button"
+              onClick={clearPaymentStatusFilter}
+              className="text-[#B22222] underline-offset-2 hover:underline"
+            >
+              Clear filter
+            </button>
+          </div>
+        ) : null}
+        <Table className="min-w-full text-slate-900">
+          <TableHeader>
+            <TableRow className="border-slate-200/90">
               {visibleFields.map((field) => {
                 const columnStyle = getColumnStyle(field.key, "user")
 
                 return (
-                  <TableCell
-                    key={`${record.id}-${field.key}`}
+                  <TableHead
+                    key={field.key}
                     style={columnStyle}
-                    className="align-top text-slate-800"
+                    className="group relative whitespace-normal text-slate-700"
+                    title={field.description ?? undefined}
                   >
-                    {field.render(record)}
-                  </TableCell>
+                    <div className="flex items-start gap-2 pr-3">
+                      <span className="truncate text-[11px] font-semibold tracking-wide text-slate-700">
+                        {field.label}
+                      </span>
+                      {field.description ? (
+                        <span className="text-[10px] font-normal leading-snug text-slate-400">
+                          {field.description}
+                        </span>
+                      ) : null}
+                    </div>
+                    <span
+                      aria-hidden
+                      onMouseDown={(event) => handleResizeStart(field.key, event, "user")}
+                      className="absolute right-0 top-0 h-full w-2 cursor-col-resize select-none bg-transparent transition-colors group-hover:bg-[#B22222]/15"
+                    />
+                  </TableHead>
                 )
               })}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {filteredRecords.map((record) => (
+              <TableRow key={record.id} className="border-slate-200/80 odd:bg-white even:bg-slate-50/50">
+                {visibleFields.map((field) => {
+                  const columnStyle = getColumnStyle(field.key, "user")
+
+                  return (
+                    <TableCell
+                      key={`${record.id}-${field.key}`}
+                      style={columnStyle}
+                      className="align-top text-slate-800"
+                    >
+                      {field.render(record)}
+                    </TableCell>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     )
   }
 
