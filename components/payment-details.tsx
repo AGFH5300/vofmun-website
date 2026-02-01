@@ -55,7 +55,11 @@ function GooglePayLogo() {
   )
 }
 
-export function PaymentDetails() {
+type PaymentDetailsProps = {
+  id?: string
+}
+
+export function PaymentDetails({ id }: PaymentDetailsProps) {
   const [copiedLabel, setCopiedLabel] = useState<string | null>(null)
   const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -82,7 +86,7 @@ export function PaymentDetails() {
   }
 
   return (
-    <section className="bg-[#fff8f7] border-y border-[#f7c6c7]/60">
+    <section id={id} className="scroll-mt-28 bg-[#fff8f7] border-y border-[#f7c6c7]/60">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
