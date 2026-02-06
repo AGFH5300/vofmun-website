@@ -1,8 +1,9 @@
 const getDefaultChairCutoff = () => {
   const now = new Date()
   const year = now.getUTCFullYear()
-  const month = now.getUTCMonth()
-  const cutoffUtc = new Date(Date.UTC(year, month, 10, 19, 59, 59))
+
+  // Jan = month 0
+  const cutoffUtc = new Date(Date.UTC(year, 0, 10, 19, 59, 59))
   return cutoffUtc.toISOString()
 }
 
@@ -15,6 +16,7 @@ const getChairCutoffTimestamp = () => {
     DEFAULT_CHAIR_SIGNUP_CUTOFF_GST
 
   const parsed = new Date(rawCutoff)
+
   if (Number.isNaN(parsed.getTime())) {
     return new Date(DEFAULT_CHAIR_SIGNUP_CUTOFF_GST)
   }
