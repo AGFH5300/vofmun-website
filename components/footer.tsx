@@ -83,9 +83,6 @@ export const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-white/50 text-sm">
-            © {new Date().getFullYear()} Model World Economic Forum. All rights reserved.
-          </p>
           <div className="flex items-center gap-6 text-sm">
             <Link to="/privacy" className="text-white/50 hover:text-white transition-colors">
               Privacy Policy
@@ -96,6 +93,9 @@ export const Footer = () => {
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8 text-center">
+          <p className="text-gray-400 text-xs sm:text-sm">
+            © {new Date().getFullYear()} Model World Economic Forum. All rights reserved.
+          </p>
           <p className="text-xs sm:text-sm">
             Made by <a href="https://anshgupta.site" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Ansh Gupta</a>
           </p>
