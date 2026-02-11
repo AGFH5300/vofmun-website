@@ -14,7 +14,7 @@ const founders = [
   {
     name: "Vihaan Shukla",
     role: "Co-Founder & Director General",
-    image: "/founders/VihaanShukla_ConferenceAffairs.png",
+    image: "/founders/VihaanShukla_DG.png",
   },
   {
     name: "Ansh Gupta",
@@ -75,6 +75,11 @@ const founders = [
     name: "Saira Shirvaikar",
     role: "Deputy of Media & Marketing",
     image: "/founders/SairaShirvaikar_Media.jpeg",
+  },
+  {
+    name: "Prakhar Sinha",
+    role: "Deputy of Media & Marketing",
+    image: "/founders/PrakharSinha_Media.jpeg",
   },
 ]
 

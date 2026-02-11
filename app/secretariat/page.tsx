@@ -53,7 +53,7 @@ As VOFMUN continues to grow, my hope is that it remains a space where young lead
     name: "Vihaan Shukla",
     role: "<strong>Co-Founder <br/>Director-General</strong>",
     department: "Core ",
-    image: "/founders/VihaanShukla_ConferenceAffairs.png",
+    image: "/founders/VihaanShukla_DG.png",
     bio: "Co-founder overseeing conference operations, logistics, and delegate experience design.",
     linkedin: "https://www.linkedin.com/in/vihaanshukla",
     writeup: `Hi, I’m Vihaan Shukla, Co-Founder and Director General at VOFMUN 2026!
@@ -177,6 +177,15 @@ As Deputy Head of Committees, I support the Co-Heads in managing committee quali
     bio: "Amplifying VOFMUN's mission through multilingual media and outreach efforts.",
     linkedin: "https://www.linkedin.com/in/saira-shirvaikar-49839431b",
     writeup: `Hi, I’m Saira Shirvaikar, the Deputy Head of Media and Marketing for VOFMUN 2026. I am a Year 12 student at Jumeirah College and currently serve as Deputy Head of Media for JCMUN. I have also participated in F1 in Schools, working as a Graphic Designer in 2024, where I supported my team in winning the national Best Marketing award, and as a Business Manager in 2025, achieving a second-place national finish.`,
+  },
+  {
+    name: "Prakhar Sinha",
+    role: "<strong>Deputy of Media & Marketing</strong>",
+    department: "Media",
+    image: "/founders/PrakharSinha_Media.jpeg",
+    bio: "Amplifying VOFMUN's mission through multilingual media and outreach efforts.",
+    linkedin: "https://www.linkedin.com/in/prakhar-sinha-5b00b23a7/",
+    writeup: `I’m Prakhar Sinha, a Grade 11 student at Bright Riders School, Abu Dhabi, and a member of the Media Team for VOFMUN. I’ve gained extensive prior experience in marketing through internships, managing my school’s Student Council social media page, and working with multiple non-profit organizations. Through these experiences, I’ve grown a genuine interest in communication, design, and using media to create impact. These experiences have also helped strengthen my teamwork, organization, and leadership abilities. I’m excited to be part of the VOFMUN Media Team and contribute by capturing the moments and atmosphere that make the conference memorable.`,
   },
   {
     name: "Tamara Moshawrab",
