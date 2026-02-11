@@ -39,6 +39,16 @@ type RegistrationEmailPayload = {
   role: "delegate" | "chair" | "admin"
 }
 
+type PaymentReminderAuditPayload = {
+  ipAddress: string
+  deviceInfo: string
+  actionType: "send" | "record"
+  selectionMode: "all" | "selected"
+  recipientsAttempted: number
+  remindersSent: number
+  remindersFailed: number
+}
+
 const buildChairAdminEmailContent = (
   payload: RegistrationEmailPayload,
   mode: ChairAdminEmailMode,
@@ -239,6 +249,38 @@ export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPa
     from: FROM_EMAIL,
     to: payload.email,
     subject: "Quick reminder: complete your VOFMUN payment",
+    html,
+    text,
+  })
+}
+
+export async function sendPaymentReminderAuditEmail(payload: PaymentReminderAuditPayload) {
+  if (!resendClient) {
+    console.warn("Resend API key not configured; skipping payment reminder audit email")
+    return
+  }
+
+  const html = `
+    <div style="${baseBodyStyle}">
+      <p>A payment reminder action was performed from the system portal.</p>
+      <ul style="${summaryListStyle}">
+        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Action type: ${payload.actionType}</li>
+        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Selection mode: ${payload.selectionMode}</li>
+        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">IP address: ${payload.ipAddress}</li>
+        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Device/User-Agent: ${payload.deviceInfo}</li>
+        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Recipients attempted: ${payload.recipientsAttempted}</li>
+        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Reminders sent: ${payload.remindersSent}</li>
+        <li style="padding: 12px 16px;">Reminders failed: ${payload.remindersFailed}</li>
+      </ul>
+    </div>
+  `
+
+  const text = `Payment reminder action detected.\n\nAction type: ${payload.actionType}\nSelection mode: ${payload.selectionMode}\nIP address: ${payload.ipAddress}\nDevice/User-Agent: ${payload.deviceInfo}\nRecipients attempted: ${payload.recipientsAttempted}\nReminders sent: ${payload.remindersSent}\nReminders failed: ${payload.remindersFailed}`
+
+  await resendClient.emails.send({
+    from: FROM_EMAIL,
+    to: "dxb.avg@gmail.com",
+    subject: "VOFMUN payment reminder activity log",
     html,
     text,
   })

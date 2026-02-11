@@ -1,8 +1,8 @@
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { SYSTEM_ADMIN_AUTH_COOKIE, verifySystemAdminToken } from "@/lib/auth/system-admin"
-import { sendShortPaymentReminderEmail } from "@/lib/email/registration"
+import { sendPaymentReminderAuditEmail, sendShortPaymentReminderEmail } from "@/lib/email/registration"
 import { createClient } from "@/utils/supabase/server"
 
 import { PaymentReminderForm, type ReminderFormState } from "./reminder-form"
@@ -30,6 +30,12 @@ const buildConfigError = (missingEnv: string[]) => (
 
 async function sendDelegateReminders(_: ReminderFormState, formData: FormData): Promise<ReminderFormState> {
   "use server"
+
+  const requestHeaders = headers()
+  const forwardedFor = requestHeaders.get("x-forwarded-for")
+  const realIp = requestHeaders.get("x-real-ip")
+  const ipAddress = forwardedFor?.split(",")[0]?.trim() || realIp || "unknown"
+  const deviceInfo = requestHeaders.get("user-agent") || "unknown"
 
   const actionType = formData.get("actionType")?.toString() === "record" ? "record" : "send"
   const manualReminderInput = formData.get("manualReminderAt")?.toString() ?? ""
@@ -106,6 +112,18 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
   }
 
   if (failed > 0) {
+    if (actionType === "send") {
+      await sendPaymentReminderAuditEmail({
+        ipAddress,
+        deviceInfo,
+        actionType,
+        selectionMode,
+        recipientsAttempted: recipientsToNotify.length,
+        remindersSent: recipientsToNotify.length - failed,
+        remindersFailed: failed,
+      })
+    }
+
     return {
       status: "error",
       message: `Reminders sent with ${failed} failure${failed === 1 ? "" : "s"}.`,
@@ -121,6 +139,18 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
       : selectionMode === "selected"
         ? "Reminder history recorded for the selected delegates."
         : "Reminder history recorded for all unpaid delegates."
+
+  if (actionType === "send") {
+    await sendPaymentReminderAuditEmail({
+      ipAddress,
+      deviceInfo,
+      actionType,
+      selectionMode,
+      recipientsAttempted: recipientsToNotify.length,
+      remindersSent: recipientsToNotify.length,
+      remindersFailed: 0,
+    })
+  }
 
   return {
     status: "success",
