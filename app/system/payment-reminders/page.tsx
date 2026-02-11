@@ -31,7 +31,7 @@ const buildConfigError = (missingEnv: string[]) => (
 async function sendDelegateReminders(_: ReminderFormState, formData: FormData): Promise<ReminderFormState> {
   "use server"
 
-  const requestHeaders = headers()
+  const requestHeaders = await headers()
   const forwardedFor = requestHeaders.get("x-forwarded-for")
   const realIp = requestHeaders.get("x-real-ip")
   const ipAddress = forwardedFor?.split(",")[0]?.trim() || realIp || "unknown"
@@ -113,15 +113,19 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
 
   if (failed > 0) {
     if (actionType === "send") {
-      await sendPaymentReminderAuditEmail({
-        ipAddress,
-        deviceInfo,
-        actionType,
-        selectionMode,
-        recipientsAttempted: recipientsToNotify.length,
-        remindersSent: recipientsToNotify.length - failed,
-        remindersFailed: failed,
-      })
+      try {
+        await sendPaymentReminderAuditEmail({
+          ipAddress,
+          deviceInfo,
+          actionType,
+          selectionMode,
+          recipientsAttempted: recipientsToNotify.length,
+          remindersSent: recipientsToNotify.length - failed,
+          remindersFailed: failed,
+        })
+      } catch (cause) {
+        console.error("Failed to send reminder audit email", { cause })
+      }
     }
 
     return {
@@ -141,15 +145,19 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
         : "Reminder history recorded for all unpaid delegates."
 
   if (actionType === "send") {
-    await sendPaymentReminderAuditEmail({
-      ipAddress,
-      deviceInfo,
-      actionType,
-      selectionMode,
-      recipientsAttempted: recipientsToNotify.length,
-      remindersSent: recipientsToNotify.length,
-      remindersFailed: 0,
-    })
+    try {
+      await sendPaymentReminderAuditEmail({
+        ipAddress,
+        deviceInfo,
+        actionType,
+        selectionMode,
+        recipientsAttempted: recipientsToNotify.length,
+        remindersSent: recipientsToNotify.length,
+        remindersFailed: 0,
+      })
+    } catch (cause) {
+      console.error("Failed to send reminder audit email", { cause })
+    }
   }
 
   return {
