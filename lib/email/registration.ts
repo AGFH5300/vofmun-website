@@ -206,13 +206,18 @@ export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPa
   if (payload.role === "chair" || payload.role === "admin") {
     const content = buildChairAdminEmailContent(payload, "unpaid")
 
-    await resendClient.emails.send({
+    const response = await resendClient.emails.send({
       from: FROM_EMAIL,
       to: payload.email,
       subject: content.subject,
       html: content.html,
       text: content.text,
     })
+
+    if (response.error) {
+      throw new Error(`Failed to send reminder email: ${response.error.message}`)
+    }
+
     return
   }
 
@@ -245,13 +250,17 @@ export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPa
     renderStripeCtaText() ? `\n${renderStripeCtaText()}\n` : ""
   }\n${renderPaymentDetailsText()}\n\nUpload proof: ${proofLink}\n\nIf you’ve already paid, you can ignore this message.\nWarm regards,\nVOFMUN Secretariat`
 
-  await resendClient.emails.send({
+  const response = await resendClient.emails.send({
     from: FROM_EMAIL,
     to: payload.email,
     subject: "Quick reminder: complete your VOFMUN payment",
     html,
     text,
   })
+
+  if (response.error) {
+    throw new Error(`Failed to send reminder email: ${response.error.message}`)
+  }
 }
 
 export async function sendPaymentReminderAuditEmail(payload: PaymentReminderAuditPayload) {
@@ -277,11 +286,15 @@ export async function sendPaymentReminderAuditEmail(payload: PaymentReminderAudi
 
   const text = `Payment reminder action detected.\n\nAction type: ${payload.actionType}\nSelection mode: ${payload.selectionMode}\nIP address: ${payload.ipAddress}\nDevice/User-Agent: ${payload.deviceInfo}\nRecipients attempted: ${payload.recipientsAttempted}\nReminders sent: ${payload.remindersSent}\nReminders failed: ${payload.remindersFailed}`
 
-  await resendClient.emails.send({
+  const response = await resendClient.emails.send({
     from: FROM_EMAIL,
     to: "dxb.avg@gmail.com",
     subject: "VOFMUN payment reminder activity log",
     html,
     text,
   })
+
+  if (response.error) {
+    throw new Error(`Failed to send payment reminder audit email: ${response.error.message}`)
+  }
 }
