@@ -37,6 +37,7 @@ export type ReminderFormState = {
   status: "idle" | "success" | "error"
   message?: string
   sentCount?: number
+  failedEmails?: string[]
 }
 
 type ReminderFormProps = {
@@ -166,6 +167,14 @@ export function PaymentReminderForm({ action, eligibleCount, recipients, resendC
               {typeof formState.sentCount === "number" && formState.sentCount > 0
                 ? ` (${formState.sentCount} email${formState.sentCount === 1 ? "" : "s"} sent)`
                 : null}
+              {formState.failedEmails && formState.failedEmails.length > 0 ? (
+                <>
+                  <br />
+                  <span className="mt-2 inline-block font-medium text-[#7a1414]">
+                    Failed emails: {formState.failedEmails.join(", ")}
+                  </span>
+                </>
+              ) : null}
             </AlertDescription>
           </Alert>
         )}
