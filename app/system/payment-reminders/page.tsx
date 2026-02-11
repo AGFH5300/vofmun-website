@@ -28,6 +28,30 @@ const buildConfigError = (missingEnv: string[]) => (
   </main>
 )
 
+const parseAllowList = (value: string | undefined) =>
+  (value ?? "")
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean)
+
+async function hasSystemPortalAccess() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return false
+
+  const allowedEmails = parseAllowList(process.env.SYSTEM_ADMIN_EMAILS)
+  const userEmail = (user.email ?? "").toLowerCase()
+
+  if (allowedEmails.length === 0) {
+    return Boolean(userEmail)
+  }
+
+  return Boolean(userEmail) && allowedEmails.includes(userEmail)
+}
+
 async function sendDelegateReminders(_: ReminderFormState, formData: FormData): Promise<ReminderFormState> {
   "use server"
 
@@ -183,8 +207,9 @@ export default async function PaymentRemindersPage() {
   const cookieStore = await cookies()
   const existingToken = cookieStore.get(SYSTEM_ADMIN_AUTH_COOKIE)?.value
   const verifiedToken = existingToken ? verifySystemAdminToken(existingToken) : null
+  const hasPortalAccess = await hasSystemPortalAccess()
 
-  if (!verifiedToken) {
+  if (!verifiedToken && !hasPortalAccess) {
     redirect("/system")
   }
 
