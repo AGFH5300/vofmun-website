@@ -11,6 +11,11 @@ import {
 const resendApiKey = process.env.RESEND_API_KEY
 const resendClient = resendApiKey ? new Resend(resendApiKey) : null
 const FROM_EMAIL = "no-reply@vofmun.org"
+const RESEND_RATE_LIMIT_MS = 550
+const MAX_RATE_LIMIT_RETRIES = 4
+
+let emailSendQueue: Promise<void> = Promise.resolve()
+let lastEmailSentAt = 0
 
 const baseBodyStyle =
   "font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #111827; line-height: 1.7; font-size: 15px;"
@@ -47,6 +52,70 @@ type PaymentReminderAuditPayload = {
   recipientsAttempted: number
   remindersSent: number
   remindersFailed: number
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+function isRateLimitError(message: string) {
+  const normalized = message.toLowerCase()
+  return normalized.includes("too many requests") || normalized.includes("rate limit")
+}
+
+async function withEmailSendQueue<T>(task: () => Promise<T>): Promise<T> {
+  const previousTask = emailSendQueue
+  let releaseQueue!: () => void
+
+  emailSendQueue = new Promise<void>((resolve) => {
+    releaseQueue = resolve
+  })
+
+  await previousTask
+
+  try {
+    const now = Date.now()
+    const waitMs = Math.max(0, RESEND_RATE_LIMIT_MS - (now - lastEmailSentAt))
+    if (waitMs > 0) {
+      await sleep(waitMs)
+    }
+
+    const result = await task()
+    lastEmailSentAt = Date.now()
+    return result
+  } finally {
+    releaseQueue()
+  }
+}
+
+type SendEmailArgs = Parameters<NonNullable<typeof resendClient>["emails"]["send"]>[0]
+
+async function sendEmailWithRateLimitHandling(args: SendEmailArgs) {
+  if (!resendClient) {
+    throw new Error("RESEND_API_KEY is not configured")
+  }
+
+  return withEmailSendQueue(async () => {
+    let attempt = 0
+
+    while (attempt <= MAX_RATE_LIMIT_RETRIES) {
+      const response = await resendClient.emails.send(args)
+
+      if (!response.error) {
+        return response
+      }
+
+      const errorMessage = response.error.message || "Unknown email provider error"
+
+      if (!isRateLimitError(errorMessage) || attempt === MAX_RATE_LIMIT_RETRIES) {
+        throw new Error(errorMessage)
+      }
+
+      const retryDelayMs = RESEND_RATE_LIMIT_MS * (attempt + 1)
+      await sleep(retryDelayMs)
+      attempt += 1
+    }
+
+    throw new Error("Exceeded retry attempts while sending email")
+  })
 }
 
 const buildChairAdminEmailContent = (
@@ -206,7 +275,7 @@ export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPa
   if (payload.role === "chair" || payload.role === "admin") {
     const content = buildChairAdminEmailContent(payload, "unpaid")
 
-    const response = await resendClient.emails.send({
+    const response = await sendEmailWithRateLimitHandling({
       from: FROM_EMAIL,
       to: payload.email,
       subject: content.subject,
@@ -250,7 +319,7 @@ export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPa
     renderStripeCtaText() ? `\n${renderStripeCtaText()}\n` : ""
   }\n${renderPaymentDetailsText()}\n\nUpload proof: ${proofLink}\n\nIf you’ve already paid, you can ignore this message.\nWarm regards,\nVOFMUN Secretariat`
 
-  const response = await resendClient.emails.send({
+  const response = await sendEmailWithRateLimitHandling({
     from: FROM_EMAIL,
     to: payload.email,
     subject: "Quick reminder: complete your VOFMUN payment",
@@ -286,7 +355,7 @@ export async function sendPaymentReminderAuditEmail(payload: PaymentReminderAudi
 
   const text = `Payment reminder action detected.\n\nAction type: ${payload.actionType}\nSelection mode: ${payload.selectionMode}\nIP address: ${payload.ipAddress}\nDevice/User-Agent: ${payload.deviceInfo}\nRecipients attempted: ${payload.recipientsAttempted}\nReminders sent: ${payload.remindersSent}\nReminders failed: ${payload.remindersFailed}`
 
-  const response = await resendClient.emails.send({
+  const response = await sendEmailWithRateLimitHandling({
     from: FROM_EMAIL,
     to: "dxb.avg@gmail.com",
     subject: "VOFMUN payment reminder activity log",
