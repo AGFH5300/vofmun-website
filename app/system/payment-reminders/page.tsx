@@ -102,6 +102,7 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
   }
 
   let failed = 0
+  const failedEmails: string[] = []
 
   for (const record of recipientsToNotify) {
     try {
@@ -131,7 +132,13 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
       }
     } catch (cause) {
       failed += 1
-      console.error("Failed to send reminder", { recordId: record.id, cause })
+      const emailLabel = record.email?.trim() ? record.email : `${record.name} (missing email)`
+      failedEmails.push(emailLabel)
+      console.error("Failed to send reminder", {
+        recordId: record.id,
+        email: record.email,
+        cause,
+      })
     }
   }
 
@@ -156,6 +163,7 @@ async function sendDelegateReminders(_: ReminderFormState, formData: FormData): 
       status: "error",
       message: `Reminders sent with ${failed} failure${failed === 1 ? "" : "s"}.`,
       sentCount: recipientsToNotify.length - failed,
+      failedEmails,
     }
   }
 
