@@ -88,6 +88,38 @@ async function withEmailSendQueue<T>(task: () => Promise<T>): Promise<T> {
 
 type SendEmailArgs = Parameters<NonNullable<typeof resendClient>["emails"]["send"]>[0]
 
+type EmailLogContext = {
+  category: "payment-confirmed" | "payment-reminder" | "payment-reminder-short" | "payment-reminder-audit"
+  recipient: string
+}
+
+async function sendEmailAndLog(args: SendEmailArgs, context: EmailLogContext) {
+  try {
+    const response = await sendEmailWithRateLimitHandling(args)
+
+    if (response.error) {
+      throw new Error(response.error.message || "Unknown email provider error")
+    }
+
+    console.info("[email] Sent", {
+      category: context.category,
+      recipient: context.recipient,
+      subject: args.subject,
+      messageId: response.data?.id ?? null,
+    })
+
+    return response
+  } catch (error) {
+    console.error("[email] Failed", {
+      category: context.category,
+      recipient: context.recipient,
+      subject: args.subject,
+      error,
+    })
+    throw error
+  }
+}
+
 async function sendEmailWithRateLimitHandling(args: SendEmailArgs) {
   if (!resendClient) {
     throw new Error("RESEND_API_KEY is not configured")
@@ -165,13 +197,13 @@ export async function sendPaymentConfirmedEmail(
   if (payload.role === "chair" || payload.role === "admin") {
     const content = buildChairAdminEmailContent(payload, "paid")
 
-    await resendClient.emails.send({
+    await sendEmailAndLog({
       from: FROM_EMAIL,
       to: payload.email,
       subject: content.subject,
       html: content.html,
       text: content.text,
-    })
+    }, { category: "payment-confirmed", recipient: payload.email })
     return
   }
 
@@ -198,13 +230,13 @@ export async function sendPaymentConfirmedEmail(
 
   const text = `Hi ${nameForGreeting},\n\nThank you for registering for VOFMUN 2026. We received your ${payload.role} application and your proof of payment.\n\nRegistration summary:\n- Full name: ${fullName}\n- Role: ${payload.role}\n\nWe'll be in touch soon with next steps.\n\nVOFMUN Secretariat`
 
-  await resendClient.emails.send({
+  await sendEmailAndLog({
     from: FROM_EMAIL,
     to: payload.email,
     subject: "VOFMUN registration & payment received",
     html,
     text,
-  })
+  }, { category: "payment-confirmed", recipient: payload.email })
 }
 
 export async function sendPaymentReminderEmail(payload: RegistrationEmailPayload) {
@@ -216,13 +248,13 @@ export async function sendPaymentReminderEmail(payload: RegistrationEmailPayload
   if (payload.role === "chair" || payload.role === "admin") {
     const content = buildChairAdminEmailContent(payload, "unpaid")
 
-    await resendClient.emails.send({
+    await sendEmailAndLog({
       from: FROM_EMAIL,
       to: payload.email,
       subject: content.subject,
       html: content.html,
       text: content.text,
-    })
+    }, { category: "payment-reminder", recipient: payload.email })
     return
   }
 
@@ -257,13 +289,13 @@ export async function sendPaymentReminderEmail(payload: RegistrationEmailPayload
 
   const text = `Hi ${nameForGreeting},\n\nThanks for registering for VOFMUN 2026 as a ${payload.role}! You mentioned you still need to pay.\n${renderStripeCtaText() ? `\n${renderStripeCtaText()}\n` : ""}\n${renderPaymentDetailsText()}\n\nUpload proof: ${proofLink}\n\nIf you've already completed the transfer, send us the receipt using the link above so we can confirm it.\n\nVOFMUN Secretariat`
 
-  await resendClient.emails.send({
+  await sendEmailAndLog({
     from: FROM_EMAIL,
     to: payload.email,
     subject: "Complete your VOFMUN payment",
     html,
     text,
-  })
+  }, { category: "payment-reminder", recipient: payload.email })
 }
 
 export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPayload) {
@@ -275,13 +307,13 @@ export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPa
   if (payload.role === "chair" || payload.role === "admin") {
     const content = buildChairAdminEmailContent(payload, "unpaid")
 
-    const response = await sendEmailWithRateLimitHandling({
+    const response = await sendEmailAndLog({
       from: FROM_EMAIL,
       to: payload.email,
       subject: content.subject,
       html: content.html,
       text: content.text,
-    })
+    }, { category: "payment-reminder-short", recipient: payload.email })
 
     if (response.error) {
       throw new Error(`Failed to send reminder email: ${response.error.message}`)
@@ -319,13 +351,13 @@ export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPa
     renderStripeCtaText() ? `\n${renderStripeCtaText()}\n` : ""
   }\n${renderPaymentDetailsText()}\n\nUpload proof: ${proofLink}\n\nIf you’ve already paid, you can ignore this message.\nWarm regards,\nVOFMUN Secretariat`
 
-  const response = await sendEmailWithRateLimitHandling({
+  const response = await sendEmailAndLog({
     from: FROM_EMAIL,
     to: payload.email,
     subject: "Quick reminder: complete your VOFMUN payment",
     html,
     text,
-  })
+  }, { category: "payment-reminder-short", recipient: payload.email })
 
   if (response.error) {
     throw new Error(`Failed to send reminder email: ${response.error.message}`)
@@ -355,13 +387,13 @@ export async function sendPaymentReminderAuditEmail(payload: PaymentReminderAudi
 
   const text = `Payment reminder action detected.\n\nAction type: ${payload.actionType}\nSelection mode: ${payload.selectionMode}\nIP address: ${payload.ipAddress}\nDevice/User-Agent: ${payload.deviceInfo}\nRecipients attempted: ${payload.recipientsAttempted}\nReminders sent: ${payload.remindersSent}\nReminders failed: ${payload.remindersFailed}`
 
-  const response = await sendEmailWithRateLimitHandling({
+  const response = await sendEmailAndLog({
     from: FROM_EMAIL,
     to: "dxb.avg@gmail.com",
     subject: "VOFMUN payment reminder activity log",
     html,
     text,
-  })
+  }, { category: "payment-reminder-audit", recipient: "dxb.avg@gmail.com" })
 
   if (response.error) {
     throw new Error(`Failed to send payment reminder audit email: ${response.error.message}`)
