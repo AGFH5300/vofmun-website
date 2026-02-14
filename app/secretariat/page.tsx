@@ -33,23 +33,6 @@ const DEFAULT_LINKEDIN = "https://www.linkedin.com/company/vofmun";
 
 const foundingSecretariat: SecretariatMember[] = [
   {
-    name: "Tala Swaidan",
-    role: "<strong>Founder <br/>Secretary-General</strong>",
-    department: "Core",
-    image: "/founders/TalaSwaidan_SG.jpg",
-    bio: "Co-founder guiding VOFMUN's vision for inclusive and empowering youth diplomacy.",
-    linkedin: "https://www.linkedin.com/in/tala-swaidan-401547216",
-    writeup: `Hello! My name is Tala Swaidan, and I have the great honor and privilege of serving as the Founder and Secretary-General of Voices of the Future Model United Nations (VOFMUN) alongside my fantastic founding secretariat team. 
-
-VOFMUN all began as an abstract idea shared among friends. But with time, dedication, and great effort, it grew into something far more meaningful: a platform for courageous MUN delegates to engage in diplomacy, express their perspectives, and take on global issues with confidence and purpose.
-
-Beyond my work with VOFMUN, I am an active member of my school's Digital Innovation and Technology team, have been deeply involved in Model United Nations for several years and have participated in over 15 Model United Nations conferences, with an extensive range of various awards. Moreover, I am the founder of my school’s STEM Society, where I lead workshops and projects to inspire students to explore science and innovation beyond the classroom. I also pursue my passions in sports, particularly basketball and kickboxing with MVP recognitions, which have both taught me the value of discipline, teamwork, and perseverance. Furthermore, I am deeply passionate about medicine and aspire to pursue it in the future.
-
-I hope to expand my horizons during the next academic year, working on initiatives such as GenAid, a youth-led nonprofit initiative dedicated to promoting dignity, hygiene, and health access in underserved communities, and on the first VOFMUN conference, taking place in March 2026. Through all my endeavors, I strive to foster positive change, empower others, and lead with integrity.
-
-As VOFMUN continues to grow, my hope is that it remains a space where young leaders can find their voice, challenge their thinking, and leave inspired to shape a better world. VOFMUN strives to empower young people, cultivate leadership, and amplify every voice; the Voices of the Future. I'm incredibly proud of how far we've come - and even more excited for what's ahead. See you soon at VOFMUN 2026!`,
-  },
-  {
     name: "Vihaan Shukla",
     role: "<strong>Co-Founder <br/>Director-General</strong>",
     department: "Core ",
@@ -66,17 +49,14 @@ Beyond VOFMUN, I am the Founder of YouthPropel, a youth-led initiative dedicated
 
 At VOFMUN, I oversee conference operations, logistics, and committee affairs, ensuring a seamless and engaging delegate experience. My goal is to design a dynamic, career-focused conference that bridges global relevance with meaningful academic enrichment for all participants.`,
   },
-];
-
-const leadershipTeam: SecretariatMember[] = [
   {
     name: "Ansh Gupta",
-    role: "<strong>Head of Technology</strong>",
-    department: "Technology",
+    role: "<strong>Co-Founder <br/>Head of Technology</strong>",
+    department: "Core",
     image: "/founders/AnshGupta_Tech.png",
-    bio: "Building and maintaining the digital platforms that power every VOFMUN experience.",
+    bio: "Co-founder leading VOFMUN's technology and digital experience across the conference.",
     linkedin: "https://www.linkedin.com/in/anshvg",
-    writeup: `Hi, I’m Ansh Gupta, a Year 11 student at Dubai International Academy Emirates Hills and a self-taught web developer who loves turning ideas into clean, useful digital products. I work across the stack with HTML, CSS, JavaScript, React, TypeScript, and PHP, and I’m always experimenting with new tools to improve performance, reliability, and user experience.
+    writeup: `Hi, I’m Ansh Gupta, Co-Founder and Head of Technology at VOFMUN 2026. I’m a Year 11 student at Dubai International Academy Emirates Hills and a self-taught web developer who loves turning ideas into clean, useful digital products. I work across the stack with HTML, CSS, JavaScript, React, TypeScript, and PHP, and I’m always experimenting with new tools to improve performance, reliability, and user experience.
 
 Beyond coding, I enjoy leading tech initiatives across school clubs and events, mentoring peers, and collaborating on projects that blend design, data, and problem-solving. I’m multilingual (English, Hindi, and Chinese with HSK certifications) and actively involved in academic and tech competitions, which has shaped my approach to teamwork, communication, and creative thinking.
 
@@ -85,6 +65,9 @@ For VOFMUN, I serve as Head of Technology, where I keep things running smoothly 
 See more on my website: `,
     websiteLink: "https://www.anshgupta.site",
   },
+];
+
+const leadershipTeam: SecretariatMember[] = [
   {
     name: "Vaibhav Kiran Mundanat",
     role: "<strong>Co-Head of Committees</strong>",
@@ -498,7 +481,7 @@ export default function SecretariatPage() {
               Founders
             </h2>
             <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-              VOFMUN was co-founded by Tala Swaidan and Vihaan Shukla, whose shared vision continues to guide the
+              VOFMUN was co-founded by Vihaan Shukla and Ansh Gupta, whose shared vision continues to guide the
               conference forward.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
