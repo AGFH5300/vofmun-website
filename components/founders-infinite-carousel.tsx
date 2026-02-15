@@ -60,7 +60,7 @@ const founders = [
   {
     name: "Gibran Malaeb",
     role: "Head of Media & Marketing",
-    image: "/founders/GibranMalaeb_Media.jpg",
+    image: "/founders/GibranMalaeb_Media.jpeg",
   },
   {
     name: "Tamara Moshawrab",
