@@ -110,7 +110,7 @@ I hope to see all of you at VOFMUN 2026 because it is an incredible experience f
     name: "Gibran Malaeb",
     role: "<strong>Head of Media & Marketing</strong>",
     department: "Media",
-    image: "/founders/GibranMalaeb_Media.jpg",
+    image: "/founders/GibranMalaeb_Media.jpeg",
     bio: "Leading media initiatives that highlight VOFMUN’s community and impact.",
     linkedin: "https://www.linkedin.com/in/gibran-m-a99153298",
     writeup: `Hello everyone! My name is Gibran and I am a Year 10 student at GEMS Metropole School Motor City, passionate about STEM, especially mathematics and computer science. As Co-Head of Media at Voices of the Future MUN, I keep the Media team organized and focused, helping maintain a strong media presence. I am enthusiastic about Model UN and look forward to taking on more active roles in future conferences.
