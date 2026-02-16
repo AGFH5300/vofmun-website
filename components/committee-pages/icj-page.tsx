@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ComingSoonDialog } from "@/components/coming-soon-dialog"
+import { CountryMatrixDialog } from "@/components/country-matrix-dialog"
 import Link from "next/link"
-import { ArrowLeft, Gavel, FileText, Users, Calendar, ExternalLink, ChevronRight } from "lucide-react"
+import { ArrowLeft, Gavel, FileText, Calendar, ExternalLink, ChevronRight } from "lucide-react"
 import Image from "next/image"
+import icjMatrix from "@/lib/country-matrix/icj.json"
 
 export function ICJPage() {
   return (
@@ -161,15 +163,11 @@ export function ICJPage() {
                         Case Documents
                       </Button>
                     </ComingSoonDialog>
-                    <ComingSoonDialog label="Legal Precedents">
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
-                      >
-                        <Users className="h-4 w-4 mr-2" />
-                        Legal Precedents
-                      </Button>
-                    </ComingSoonDialog>
+                    <CountryMatrixDialog
+                      committeeName="ICJ"
+                      matrix={icjMatrix}
+                      buttonClassName="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                    />
                     <ComingSoonDialog label="Procedure Guide">
                       <Button
                         variant="outline"
