@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ComingSoonDialog } from "@/components/coming-soon-dialog"
+import { CountryMatrixDialog } from "@/components/country-matrix-dialog"
 import Link from "next/link"
-import { ArrowLeft, Shield, FileText, Users, Calendar, ExternalLink, AlertTriangle, ChevronRight } from "lucide-react"
+import { ArrowLeft, Shield, FileText, Calendar, ExternalLink, AlertTriangle, ChevronRight } from "lucide-react"
 import Image from "next/image"
+import icrccMatrix from "@/lib/country-matrix/icrcc.json"
 
 export function ICRCCPage() {
   return (
@@ -166,15 +168,11 @@ export function ICRCCPage() {
                         Crisis Guide
                       </Button>
                     </ComingSoonDialog>
-                    <ComingSoonDialog label="Portfolio Powers">
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
-                      >
-                        <Users className="h-4 w-4 mr-2" />
-                        Portfolio Powers
-                      </Button>
-                    </ComingSoonDialog>
+                    <CountryMatrixDialog
+                      committeeName="ICRCC"
+                      matrix={icrccMatrix}
+                      buttonClassName="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                    />
                     <ComingSoonDialog label="Crisis Procedures">
                       <Button
                         variant="outline"
