@@ -94,6 +94,7 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
   )
 
   const progressPercent = progress.total > 0 ? Math.round((progress.processed / progress.total) * 100) : 0
+  const isCompletedRun = !isSending && progress.total > 0 && !progress.isActive && formState.status !== "idle"
 
   const toggleRecipient = (recipientId: number, checked: boolean | "indeterminate") => {
     if (checked) {
@@ -257,17 +258,34 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
         )}
 
         {(isSending || progress.total > 0) && (
-          <div className="overflow-hidden rounded-xl border border-[#B22222]/20 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 p-4">
+          <div
+            className={`overflow-hidden rounded-xl border p-4 ${
+              isCompletedRun && formState.status === "success"
+                ? "border-emerald-200 bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50"
+                : "border-[#B22222]/20 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50"
+            }`}
+          >
             <div className="mb-3 flex items-center justify-between gap-2">
               <p className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                Live email delivery
+                {isCompletedRun && formState.status === "success" ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    Email delivery complete
+                  </>
+                ) : (
+                  "Live email delivery"
+                )}
               </p>
-              <span className="text-xs font-semibold text-slate-700">{progressPercent}% complete</span>
+              <span className="text-xs font-semibold text-slate-700">{isCompletedRun ? "Complete" : `${progressPercent}% complete`}</span>
             </div>
             <div className="h-3 overflow-hidden rounded-full bg-white/80 shadow-inner">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#B22222] via-orange-500 to-amber-400 transition-all duration-500 ease-out"
-                style={{ width: `${progressPercent}%` }}
+                className={`h-full rounded-full transition-all duration-500 ease-out ${
+                  isCompletedRun && formState.status === "success"
+                    ? "bg-gradient-to-r from-emerald-500 via-green-500 to-teal-400"
+                    : "bg-gradient-to-r from-[#B22222] via-orange-500 to-amber-400"
+                }`}
+                style={{ width: `${isCompletedRun ? 100 : progressPercent}%` }}
               />
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-700 sm:grid-cols-4">
@@ -283,10 +301,27 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
                 {progress.latest.error ? ` (${progress.latest.error})` : ""}
               </p>
             ) : null}
+
+            {isCompletedRun && formState.message ? (
+              <div className="mt-3 rounded-lg border border-white/70 bg-white/80 p-3 text-sm text-slate-700">
+                <p className="font-medium text-slate-900">{formState.message}</p>
+                {typeof formState.sentCount === "number" && formState.sentCount > 0
+                  ? ` (${formState.sentCount} email${formState.sentCount === 1 ? "" : "s"} sent)`
+                  : null}
+                {formState.failedEmails && formState.failedEmails.length > 0 ? (
+                  <>
+                    <br />
+                    <span className="mt-2 inline-block font-medium text-[#7a1414]">
+                      Failed emails: {formState.failedEmails.join(", ")}
+                    </span>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         )}
 
-        {formState.message && (
+        {formState.message && progress.total === 0 && (
           <Alert variant={formState.status === "success" ? "default" : "destructive"}>
             {formState.status === "success" ? (
               <CheckCircle2 className="h-5 w-5 text-emerald-600" />
