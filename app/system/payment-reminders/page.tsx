@@ -1,11 +1,10 @@
-import { cookies, headers } from "next/headers"
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { SYSTEM_ADMIN_AUTH_COOKIE, verifySystemAdminToken } from "@/lib/auth/system-admin"
-import { sendPaymentReminderAuditEmail, sendShortPaymentReminderEmail } from "@/lib/email/registration"
 import { createClient } from "@/utils/supabase/server"
 
-import { PaymentReminderForm, type ReminderFormState } from "./reminder-form"
+import { PaymentReminderForm } from "./reminder-form"
 import { loadEligibleRecipients } from "./data"
 
 const buildConfigError = (missingEnv: string[]) => (
@@ -50,153 +49,6 @@ async function hasSystemPortalAccess() {
   }
 
   return Boolean(userEmail) && allowedEmails.includes(userEmail)
-}
-
-async function sendDelegateReminders(_: ReminderFormState, formData: FormData): Promise<ReminderFormState> {
-  "use server"
-
-  const requestHeaders = await headers()
-  const forwardedFor = requestHeaders.get("x-forwarded-for")
-  const realIp = requestHeaders.get("x-real-ip")
-  const ipAddress = forwardedFor?.split(",")[0]?.trim() || realIp || "unknown"
-  const deviceInfo = requestHeaders.get("user-agent") || "unknown"
-
-  const actionType = formData.get("actionType")?.toString() === "record" ? "record" : "send"
-  const manualReminderInput = formData.get("manualReminderAt")?.toString() ?? ""
-  const parsedManualReminder = manualReminderInput ? new Date(manualReminderInput) : null
-  const manualReminderTimestamp =
-    actionType === "record" && parsedManualReminder && !Number.isNaN(parsedManualReminder.getTime())
-      ? parsedManualReminder
-      : null
-
-  if (actionType === "send" && !process.env.RESEND_API_KEY) {
-    return {
-      status: "error",
-      message: "RESEND_API_KEY is not configured; cannot send reminders.",
-    }
-  }
-
-  const supabase = await createClient()
-  const recipients = await loadEligibleRecipients(supabase)
-  const selectedIds = formData.getAll("recipient").map((value) => Number(value)).filter(Boolean)
-  const selectionMode = formData.get("selectionMode")?.toString() === "selected" ? "selected" : "all"
-
-  const recipientsInScope =
-    selectionMode === "selected"
-      ? recipients.filter((record) => selectedIds.includes(record.id))
-      : recipients
-
-  const emailReadyRecipients = recipientsInScope.filter((record) => Boolean(record.email))
-  const recipientsToNotify = actionType === "send" ? emailReadyRecipients : recipientsInScope
-
-  if (recipientsToNotify.length === 0) {
-    return {
-      status: "idle",
-      message:
-        selectionMode === "selected"
-          ? "Select at least one recipient to update."
-          : actionType === "send"
-            ? "No unpaid delegates with valid emails found to notify."
-            : "No unpaid delegates found to update.",
-    }
-  }
-
-  let failed = 0
-  const failedEmails: string[] = []
-
-  for (const record of recipientsToNotify) {
-    try {
-      if (actionType === "send") {
-        await sendShortPaymentReminderEmail({
-          firstName: record.firstName,
-          lastName: record.lastName,
-          email: record.email!,
-          role: "delegate",
-        })
-      }
-
-      const nextCount = record.reminderCount + 1
-      const recordedAt = (manualReminderTimestamp ?? new Date()).toISOString()
-
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({
-          payment_reminder_count: nextCount,
-          payment_reminder_last_sent_at: recordedAt,
-        })
-        .eq("id", record.id)
-        .select("id")
-
-      if (updateError) {
-        console.error("Failed to update reminder metadata", { recordId: record.id, updateError })
-      }
-    } catch (cause) {
-      failed += 1
-      const emailLabel = record.email?.trim() ? record.email : `${record.name} (missing email)`
-      failedEmails.push(emailLabel)
-      console.error("Failed to send reminder", {
-        recordId: record.id,
-        email: record.email,
-        cause,
-      })
-    }
-  }
-
-  if (failed > 0) {
-    if (actionType === "send") {
-      try {
-        await sendPaymentReminderAuditEmail({
-          ipAddress,
-          deviceInfo,
-          actionType,
-          selectionMode,
-          recipientsAttempted: recipientsToNotify.length,
-          remindersSent: recipientsToNotify.length - failed,
-          remindersFailed: failed,
-        })
-      } catch (cause) {
-        console.error("Failed to send reminder audit email", { cause })
-      }
-    }
-
-    return {
-      status: "error",
-      message: `Reminders sent with ${failed} failure${failed === 1 ? "" : "s"}.`,
-      sentCount: recipientsToNotify.length - failed,
-      failedEmails,
-    }
-  }
-
-  const successMessage =
-    actionType === "send"
-      ? selectionMode === "selected"
-        ? "Payment reminders sent to the selected delegates."
-        : "Payment reminders sent to all unpaid delegates."
-      : selectionMode === "selected"
-        ? "Reminder history recorded for the selected delegates."
-        : "Reminder history recorded for all unpaid delegates."
-
-  if (actionType === "send") {
-    try {
-      await sendPaymentReminderAuditEmail({
-        ipAddress,
-        deviceInfo,
-        actionType,
-        selectionMode,
-        recipientsAttempted: recipientsToNotify.length,
-        remindersSent: recipientsToNotify.length,
-        remindersFailed: 0,
-      })
-    } catch (cause) {
-      console.error("Failed to send reminder audit email", { cause })
-    }
-  }
-
-  return {
-    status: "success",
-    message: successMessage,
-    sentCount: recipientsToNotify.length,
-  }
 }
 
 export default async function PaymentRemindersPage() {
@@ -244,12 +96,7 @@ export default async function PaymentRemindersPage() {
         </div>
 
         <div className="mx-auto">
-          <PaymentReminderForm
-            action={sendDelegateReminders}
-            eligibleCount={eligibleCount}
-            resendConfigured={Boolean(process.env.RESEND_API_KEY)}
-            recipients={eligibleRecipients}
-          />
+          <PaymentReminderForm eligibleCount={eligibleCount} resendConfigured={Boolean(process.env.RESEND_API_KEY)} recipients={eligibleRecipients} />
         </div>
       </div>
     </main>
