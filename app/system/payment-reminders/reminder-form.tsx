@@ -1,7 +1,7 @@
 "use client"
 
 import { type FormEvent, useEffect, useMemo, useState } from "react"
-import { AlertCircle, CheckCircle2, Loader2, MailWarning, Send, Sparkles } from "lucide-react"
+import { AlertCircle, CheckCircle2, Loader2, MailWarning, Send } from "lucide-react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -59,7 +59,6 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
   const [selectedIds, setSelectedIds] = useState<number[]>(() => recipients.map((recipient) => recipient.id))
   const [recipientList, setRecipientList] = useState<EligibleRecipient[]>(recipients)
   const [isSending, setIsSending] = useState(false)
-  const [activityFeed, setActivityFeed] = useState<string[]>([])
   const [progress, setProgress] = useState<ProgressState>({
     isActive: false,
     total: 0,
@@ -112,15 +111,10 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
     }
   }
 
-  const addActivity = (message: string) => {
-    setActivityFeed((prev) => [message, ...prev].slice(0, 8))
-  }
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     setFormState({ status: "idle" })
-    setActivityFeed([])
     setIsSending(true)
     setProgress({ isActive: true, total: 0, processed: 0, sent: 0, failed: 0, skipped: 0 })
 
@@ -183,7 +177,6 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
 
           if (payload.type === "start") {
             setProgress((prev) => ({ ...prev, total: payload.total, isActive: true }))
-            addActivity(payload.message)
           }
 
           if (payload.type === "progress") {
@@ -202,11 +195,6 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
               },
             })
 
-            const statusEmoji = payload.status === "sent" ? "✅" : payload.status === "failed" ? "❌" : "⚠️"
-            addActivity(
-              `${statusEmoji} ${payload.recipient.name} (${payload.recipient.email ?? "no email"}) — ${payload.status}` +
-                (payload.error ? `: ${payload.error}` : ""),
-            )
           }
 
           if (payload.type === "complete") {
@@ -272,7 +260,6 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
           <div className="overflow-hidden rounded-xl border border-[#B22222]/20 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
               <p className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                <Sparkles className="h-4 w-4 text-[#B22222]" />
                 Live email delivery
               </p>
               <span className="text-xs font-semibold text-slate-700">{progressPercent}% complete</span>
@@ -296,17 +283,6 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
                 {progress.latest.error ? ` (${progress.latest.error})` : ""}
               </p>
             ) : null}
-          </div>
-        )}
-
-        {activityFeed.length > 0 && (
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Live activity</p>
-            <ul className="space-y-1 text-xs text-slate-700">
-              {activityFeed.map((entry, index) => (
-                <li key={`${entry}-${index}`} className="animate-in fade-in-50 duration-300">{entry}</li>
-              ))}
-            </ul>
           </div>
         )}
 
