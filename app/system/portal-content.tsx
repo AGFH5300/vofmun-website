@@ -137,6 +137,8 @@ type RegistrationView = "all" | "delegates" | "chairs" | "admins" | "school"
 
 type UserView = Exclude<RegistrationView, "school">
 
+type UserSortOption = "created_desc" | "created_asc" | "name_asc" | "name_desc"
+
 type FieldOption<RecordType> = {
   key: string
   label: string
@@ -1150,6 +1152,52 @@ const getRegistrationStatusForUpdate = (record: SignupRecord, nextStatus: Applic
 
 const formatStatusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1)
 
+const getCommitteePreferences = (record: SignupRecord) => {
+  if (record.role === "delegate") {
+    return {
+      first: record.delegate_data?.committee1 ?? null,
+      second: record.delegate_data?.committee2 ?? null,
+      third: record.delegate_data?.committee3 ?? null,
+    }
+  }
+
+  if (record.role === "chair") {
+    return {
+      first: record.chair_data?.committee1 ?? null,
+      second: record.chair_data?.committee2 ?? null,
+      third: record.chair_data?.committee3 ?? null,
+    }
+  }
+
+  return { first: null, second: null, third: null }
+}
+
+const sortUserRecords = (records: SignupRecord[], sortOption: UserSortOption) => {
+  const sorted = [...records]
+
+  if (sortOption === "name_asc" || sortOption === "name_desc") {
+    sorted.sort((a, b) => {
+      const byLastName = a.last_name.localeCompare(b.last_name, undefined, { sensitivity: "base" })
+      if (byLastName !== 0) {
+        return sortOption === "name_asc" ? byLastName : byLastName * -1
+      }
+
+      const byFirstName = a.first_name.localeCompare(b.first_name, undefined, { sensitivity: "base" })
+      return sortOption === "name_asc" ? byFirstName : byFirstName * -1
+    })
+
+    return sorted
+  }
+
+  sorted.sort((a, b) => {
+    const aTime = new Date(a.created_at).getTime()
+    const bTime = new Date(b.created_at).getTime()
+    return sortOption === "created_asc" ? aTime - bTime : bTime - aTime
+  })
+
+  return sorted
+}
+
 export function PortalContent({ onSignOut }: PortalContentProps) {
   const supabase = useMemo(() => createClient(), [])
   const [records, setRecords] = useState<SignupRecord[]>([])
@@ -1166,6 +1214,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const [selectedUserFields, setSelectedUserFields] = useState<Record<UserView, string[]>>(buildDefaultUserFieldSelection)
   const [selectedSchoolFields, setSelectedSchoolFields] = useState<string[]>(buildDefaultSchoolFieldSelection)
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<PaymentStatusValue | null>(null)
+  const [userSort, setUserSort] = useState<UserSortOption>("created_desc")
   const [preferencesHydrated, setPreferencesHydrated] = useState(false)
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
   const [schoolColumnWidths, setSchoolColumnWidths] = useState<Record<string, number>>({})
@@ -1515,6 +1564,21 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     setPaymentStatusFilter(null)
   }, [])
 
+  const activeUserRecords = useMemo(() => {
+    if (activeView === "delegates") return delegateRegistrations
+    if (activeView === "chairs") return chairRegistrations
+    if (activeView === "admins") return adminRegistrations
+    return records
+  }, [activeView, adminRegistrations, chairRegistrations, delegateRegistrations, records])
+
+  const activeFilteredSortedRecords = useMemo(() => {
+    const filtered = paymentStatusFilter
+      ? activeUserRecords.filter((record) => normalizePaymentStatus(record.payment_status) === paymentStatusFilter)
+      : activeUserRecords
+
+    return sortUserRecords(filtered, userSort)
+  }, [activeUserRecords, paymentStatusFilter, userSort])
+
   const handleStatusChange = useCallback(
     async (recordId: number, nextStatus: PaymentStatusValue) => {
       setUpdateError(null)
@@ -1634,24 +1698,69 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   )
 
   const exportToXlsx = useCallback(async () => {
-    if (!records.length) return
+    if (activeView === "school") {
+      if (!schoolDelegations.length) return
 
-    const rows = records.map((record) => ({
+      const ExcelJS = await import("exceljs")
+      const workbook = new ExcelJS.Workbook()
+      const worksheet = workbook.addWorksheet("School Delegations")
+
+      const rows = schoolDelegations.map((record) => ({
+        SchoolName: record.school_name,
+        SchoolEmail: record.school_email,
+        SchoolCountry: record.school_country,
+        DirectorName: record.director_name,
+        DirectorEmail: record.director_email,
+        DirectorPhone: record.director_phone,
+        Delegates: record.num_delegates,
+        Faculty: record.num_faculty,
+        SpreadsheetUrl: record.spreadsheet_url ?? "",
+        SubmittedAt: new Date(record.created_at).toLocaleString(),
+      }))
+
+      const headers = Object.keys(rows[0] ?? {})
+      worksheet.columns = headers.map((header) => ({ header, key: header }))
+      worksheet.addRows(rows)
+
+      const dateStamp = new Date().toISOString().split("T")[0]
+      const buffer = await workbook.xlsx.writeBuffer()
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `vofmun-school-delegations-${dateStamp}.xlsx`
+      link.click()
+      URL.revokeObjectURL(url)
+      return
+    }
+
+    if (!activeFilteredSortedRecords.length) return
+
+    const rows = activeFilteredSortedRecords.map((record) => {
+      const committeePreferences = getCommitteePreferences(record)
+
+      return {
       Name: `${record.first_name} ${record.last_name}`.trim(),
       Email: record.email,
       Phone: record.phone,
       School: record.school ?? "",
       Role: record.role,
-      CommitteePreference1: getPrimaryCommitteePreference(record) ?? "",
+      CommitteePreference1: committeePreferences.first ?? "",
+      CommitteePreference2: committeePreferences.second ?? "",
+      CommitteePreference3: committeePreferences.third ?? "",
       PaymentStatus: formatPaymentStatus(record.payment_status),
       DelegationAllocationStatus:
         record.role === "delegate" ? formatStatusLabel(getDelegateAllocationStatus(record)) : "",
       ApplicationStatus:
         record.role === "chair" || record.role === "admin" ? getApplicationStatusLabel(record) : "",
+      ChairCvUrl: record.chair_data?.cvUrl ?? record.chair_cv_url ?? "",
       ProofFileName: record.payment_proof_file_name ?? "",
       ProofUrl: record.payment_proof_url ?? "",
       SubmittedAt: new Date(record.created_at).toLocaleString(),
-    }))
+      }
+    })
 
     const ExcelJS = await import("exceljs")
     const workbook = new ExcelJS.Workbook()
@@ -1668,10 +1777,10 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.href = url
-    link.download = `vofmun-registrations-${dateStamp}.xlsx`
+    link.download = `vofmun-${activeView}-signups-${dateStamp}.xlsx`
     link.click()
     URL.revokeObjectURL(url)
-  }, [records])
+  }, [activeFilteredSortedRecords, activeView, schoolDelegations])
 
   const renderUserTab = (recordsToDisplay: SignupRecord[], emptyMessage: string, view: UserView) => {
     if (loading) {
@@ -1699,6 +1808,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
           (record) => normalizePaymentStatus(record.payment_status) === paymentStatusFilter,
         )
       : recordsToDisplay
+    const sortedRecords = sortUserRecords(filteredRecords, userSort)
     const filterLabel = paymentStatusFilter ? formatPaymentStatus(paymentStatusFilter) : null
 
     if (filteredRecords.length === 0) {
@@ -1775,7 +1885,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredRecords.map((record) => (
+            {sortedRecords.map((record) => (
               <TableRow key={record.id} className="border-slate-200/80 odd:bg-white even:bg-slate-50/50">
                 {visibleFields.map((field) => {
                   const columnStyle = getColumnStyle(field.key, "user")
@@ -1948,10 +2058,23 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
               variant="outline"
               className="inline-flex items-center gap-1 border-[#B22222]/30 text-xs text-[#B22222] hover:bg-[#B22222]/10"
               onClick={() => exportToXlsx()}
-              disabled={records.length === 0}
+              disabled={activeView === "school" ? schoolDelegations.length === 0 : activeFilteredSortedRecords.length === 0}
             >
               <Download className="h-3.5 w-3.5" /> Export XLSX
             </Button>
+            {activeView !== "school" ? (
+              <Select value={userSort} onValueChange={(value) => setUserSort(value as UserSortOption)}>
+                <SelectTrigger className="h-8 w-[200px] border-[#B22222]/30 text-xs text-[#B22222]">
+                  <SelectValue placeholder="Sort signups" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="created_desc">Newest first</SelectItem>
+                  <SelectItem value="created_asc">Oldest first</SelectItem>
+                  <SelectItem value="name_asc">Name (A–Z)</SelectItem>
+                  <SelectItem value="name_desc">Name (Z–A)</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : null}
             {displayedLastUpdated && (
               <span className="text-xs text-slate-500">
                 Updated {displayedLastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
