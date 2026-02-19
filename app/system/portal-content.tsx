@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
-import { ChevronDown, Columns3, Download, Loader2, LogOut, MailWarning, RefreshCw } from "lucide-react"
+import { ChevronDown, ChevronUp, Columns3, Download, Loader2, LogOut, MailWarning, RefreshCw } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -1883,9 +1883,11 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                           className="inline-flex items-center rounded-sm text-slate-500 transition hover:text-[#B22222]"
                           title={isNameSortActive ? `Sorting by name (${userSort === "name_asc" ? "A–Z" : "Z–A"})` : "Sort by name"}
                         >
-                          <ChevronDown
-                            className={`h-3.5 w-3.5 transition-transform ${userSort === "name_asc" ? "rotate-180" : ""} ${isNameSortActive ? "text-[#B22222]" : ""}`}
-                          />
+                          {userSort === "name_asc" ? (
+                            <ChevronUp className={`h-3.5 w-3.5 ${isNameSortActive ? "text-[#B22222]" : ""}`} />
+                          ) : (
+                            <ChevronDown className={`h-3.5 w-3.5 ${isNameSortActive ? "text-[#B22222]" : ""}`} />
+                          )}
                         </button>
                       ) : null}
                       {field.description ? (
