@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
-import { Columns3, Download, Loader2, LogOut, MailWarning, RefreshCw } from "lucide-react"
+import { ChevronDown, Columns3, Download, Loader2, LogOut, MailWarning, RefreshCw } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -1177,13 +1177,13 @@ const sortUserRecords = (records: SignupRecord[], sortOption: UserSortOption) =>
 
   if (sortOption === "name_asc" || sortOption === "name_desc") {
     sorted.sort((a, b) => {
-      const byLastName = a.last_name.localeCompare(b.last_name, undefined, { sensitivity: "base" })
-      if (byLastName !== 0) {
-        return sortOption === "name_asc" ? byLastName : byLastName * -1
+      const byFirstName = a.first_name.localeCompare(b.first_name, undefined, { sensitivity: "base" })
+      if (byFirstName !== 0) {
+        return sortOption === "name_asc" ? byFirstName : byFirstName * -1
       }
 
-      const byFirstName = a.first_name.localeCompare(b.first_name, undefined, { sensitivity: "base" })
-      return sortOption === "name_asc" ? byFirstName : byFirstName * -1
+      const byLastName = a.last_name.localeCompare(b.last_name, undefined, { sensitivity: "base" })
+      return sortOption === "name_asc" ? byLastName : byLastName * -1
     })
 
     return sorted
@@ -1215,6 +1215,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const [selectedSchoolFields, setSelectedSchoolFields] = useState<string[]>(buildDefaultSchoolFieldSelection)
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<PaymentStatusValue | null>(null)
   const [userSort, setUserSort] = useState<UserSortOption>("created_desc")
+  const isNameSortActive = userSort === "name_asc" || userSort === "name_desc"
   const [preferencesHydrated, setPreferencesHydrated] = useState(false)
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
   const [schoolColumnWidths, setSchoolColumnWidths] = useState<Record<string, number>>({})
@@ -1560,6 +1561,13 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     setPaymentStatusFilter((current) => (current === status ? null : status))
   }, [])
 
+  const toggleNameSort = useCallback(() => {
+    setUserSort((current) => {
+      if (current === "name_asc") return "name_desc"
+      return "name_asc"
+    })
+  }, [])
+
   const clearPaymentStatusFilter = useCallback(() => {
     setPaymentStatusFilter(null)
   }, [])
@@ -1868,6 +1876,18 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                       <span className="truncate text-[11px] font-semibold tracking-wide text-slate-700">
                         {field.label}
                       </span>
+                      {field.key === "name" ? (
+                        <button
+                          type="button"
+                          onClick={toggleNameSort}
+                          className="inline-flex items-center rounded-sm text-slate-500 transition hover:text-[#B22222]"
+                          title={isNameSortActive ? `Sorting by name (${userSort === "name_asc" ? "A–Z" : "Z–A"})` : "Sort by name"}
+                        >
+                          <ChevronDown
+                            className={`h-3.5 w-3.5 transition-transform ${userSort === "name_asc" ? "rotate-180" : ""} ${isNameSortActive ? "text-[#B22222]" : ""}`}
+                          />
+                        </button>
+                      ) : null}
                       {field.description ? (
                         <span className="text-[10px] font-normal leading-snug text-slate-400">
                           {field.description}
