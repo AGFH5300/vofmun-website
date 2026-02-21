@@ -1,3 +1,6 @@
+// © 2026 Ansh Gupta. All rights reserved.
+// Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
+
 // app/api/parse-experience/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";

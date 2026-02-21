@@ -1,3 +1,6 @@
+// © 2026 Ansh Gupta. All rights reserved.
+// Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
+
 import { EnhancedNavigation } from "@/components/enhanced-navigation"
 import { Footer } from "@/components/footer"
 import { SignupHero } from "@/components/signup-hero"
