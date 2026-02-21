@@ -1,3 +1,6 @@
+// © 2026 Ansh Gupta. All rights reserved.
+// Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
+
 import { cookies } from "next/headers"
 
 import { SYSTEM_ADMIN_AUTH_COOKIE, verifySystemAdminToken } from "@/lib/auth/system-admin"
