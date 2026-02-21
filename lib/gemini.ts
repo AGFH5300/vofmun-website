@@ -1,3 +1,6 @@
+// © 2026 Ansh Gupta. All rights reserved.
+// Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
+
 export const DEFAULT_GEMINI_MODEL_ID = "gemini-2.5-flash";
 
 export const GEMINI_MODEL_ID =

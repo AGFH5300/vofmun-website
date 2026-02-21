@@ -1,3 +1,6 @@
+// © 2026 Ansh Gupta. All rights reserved.
+// Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
+
 import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { DM_Sans, DM_Serif_Display, Lato, Poppins } from "next/font/google"

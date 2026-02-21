@@ -1,3 +1,6 @@
+// © 2026 Ansh Gupta. All rights reserved.
+// Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
+
 export const STRIPE_PAYMENT_URL =
   (process.env.NEXT_PUBLIC_STRIPE_PAYMENT_URL ?? "").trim() ||
   "https://buy.stripe.com/cNiaEWba42k75iw83lcAo01"
