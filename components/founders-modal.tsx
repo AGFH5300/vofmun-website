@@ -36,13 +36,13 @@ const founders = [
   },
   {
     name: "Vyom Patel",
-    role: "Head of Logistics",
+    role: "Co-Head of Logistics",
     image: "/founders/VyomPatel_Logistics.png",
   },
   {
     name: "Aryan Shah",
-    role: "Deputy of Logistics",
-    image: "/founders/AryanShah_Committees.jpg",
+    role: "Co-Head of Logistics",
+    image: "/founders/AryanShah_Logistics.jpg",
   },
   {
     name: "Armaghan Siddiqui",
