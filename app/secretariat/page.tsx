@@ -95,7 +95,7 @@ As Co-Head of Committees at VOFMUN 2026, I oversee committee quality, background
   },
   {
     name: "Vyom Patel",
-    role: "<strong>Head of Logistics</strong>",
+    role: "<strong>Co-Head of Logistics</strong>",
     department: "Logistics",
     image: "/founders/VyomPatel_Logistics.png",
     bio: "Leading logistics planning to deliver a smooth and engaging conference experience.",
@@ -108,6 +108,14 @@ I study at Gems Founders School Al Barsha in year 10 and I am 14 years old. some
 Beyond MUNs, I enjoy public speaking as a whole. I am the president of the JLT Gavel Club, a forum for people to develop their public speaking skills from ages 8-18. I have also participated in various debate competitions hosted by schools while even judging some and I am part of the GFSMUN Secretariat team. I am part of the sustainability council and one of the leaders of the HPL team in my school. 
 
 I hope to see all of you at VOFMUN 2026 because it is an incredible experience for delegate, chair or admin alike. I, along with the entire team, look forward to making this conference a huge success.`,
+  },
+  {
+    name: "Aryan Shah",
+    role: "<strong>Co-Head of Logistics</strong>",
+    department: "Logistics",
+    image: "/founders/AryanShah_Logistics.jpg",
+    bio: "Supporting logistical planning, coordination, and on-site readiness for VOFMUN.",
+    writeup: `Hi I'm Aryan Shah, Co-Head of Logistics for VOFMUN 2026! I have previously participated in 2 MUN conferences, and have received an honorable mention in one of them. I am currently a Year 11 student at Dubai International Academy. I am also Vice-President of my school's Cubing and AI club. Outside of school I have organised and hosted multiple internationally recognized and licensed Rubik's Cube Competitions that have attracted the attention of some of the best cubers in the MENA region. At VOFMUN my goal is to ensure that all the delegates have an amazing experience at VOFMUN by handling all committee-related matters that range from finalising topics to country allocation and communication with all delegates.`,
   },
   {
     name: "Gibran Malaeb",
@@ -146,14 +154,6 @@ const deputies: SecretariatMember[] = [
 Beyond my formal roles, I’ve built a rep for being that person who keeps things moving — whether it’s helping streamline planning, stepping in to fix last-minute issues, or supporting teams when the workload hits. I like bringing order to chaos, staying organised under pressure, and making sure everyone feels confident in what they’re doing.
 
 As Deputy Head of Committees, I support the Co-Heads in managing committee quality, coordinating background guide development, and ensuring each chairing team is aligned and prepared. I help oversee logistics, communication, and the overall delegate experience, making sure committees run smoothly from prep to conference day. My aim is to create a well-structured, fair, and engaging environment where delegates can genuinely grow — in research, diplomacy, and public speaking.`,
-  },
-  {
-    name: "Aryan Shah",
-    role: "<strong>Deputy of Logistics</strong>",
-    department: "Logistics",
-    image: "/founders/AryanShah_Committees.jpg",
-    bio: "Supporting logistical planning, coordination, and on-site readiness for VOFMUN.",
-    writeup: `Hi I'm Aryan Shah, Deputy of Logistics for VOFMUN 2026! I have previously participated in 4 MUN conferences, and have received an honorable mention in one of them. I am currently a Year 11 student at Dubai International Academy. I am also Vice-President of my school's Cubing and AI club. Outside of school I have organised and hosted multiple internationally recognized and licensed Rubik's Cube Competitions that have attracted the attention of some of the best cubers in the MENA region. At VOFMUN my goal is to ensure that all the delegates have an amazing experience at VOFMUN by handling all committee-related matters that range from finalising topics to country allocation and communication with all delegates.`,
   },
   {
     name: "Saira Shirvaikar",
