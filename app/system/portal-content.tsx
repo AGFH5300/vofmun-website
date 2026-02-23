@@ -2113,6 +2113,60 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
         </div>
       </div>
 
+      <Card className="max-w-xl border-[#B22222]/30 bg-white text-slate-900 shadow-md">
+        <CardHeader className="border-b border-[#B22222]/20 px-4 py-4 sm:px-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <CardTitle className="text-lg font-semibold text-[#B22222]">Referral Leaderboard</CardTitle>
+              <p className="mt-1 text-xs text-slate-600">Top usage counts from submitted referral codes.</p>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="gap-2 border-[#B22222]/30 text-xs text-[#B22222] hover:bg-[#B22222]/10"
+              onClick={() => void handleCopyReferralLeaderboard()}
+              disabled={referralLeaderboard.length === 0}
+            >
+              {copiedLeaderboard ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copiedLeaderboard ? "Copied" : "Copy"}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="px-4 py-3 sm:px-5">
+          {referralLeaderboard.length === 0 ? (
+            <div className="py-4 text-sm text-slate-500">No referral code usage has been recorded yet.</div>
+          ) : (
+            <div className="overflow-x-auto rounded-md border border-[#B22222]/15">
+              <Table className="text-sm text-slate-900">
+                <TableHeader>
+                  <TableRow className="border-[#B22222]/10">
+                    <TableHead className="w-12 py-2 text-xs text-slate-500">#</TableHead>
+                    <TableHead className="py-2 text-xs text-slate-500">Owner</TableHead>
+                    <TableHead className="py-2 text-xs text-slate-500">Codes</TableHead>
+                    <TableHead className="py-2 text-right text-xs text-slate-500">Uses</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {referralLeaderboard.map((entry, index) => (
+                    <TableRow key={entry.owner} className="border-[#B22222]/10">
+                      <TableCell className="py-2 text-xs font-semibold text-slate-500">{index + 1}</TableCell>
+                      <TableCell className="max-w-[160px] truncate py-2 font-medium text-slate-900">{entry.owner}</TableCell>
+                      <TableCell className="max-w-[180px] truncate py-2 font-mono text-xs text-slate-500">
+                        {entry.codes.length > 0 ? entry.codes.join(", ") : "-"}
+                      </TableCell>
+                      <TableCell className="py-2 text-right">
+                        <Badge variant="default">{entry.totalUses}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Card className="border-[#B22222]/30 bg-white text-slate-900 shadow-xl">
         <CardHeader className="flex flex-col gap-2 border-b border-[#B22222]/20 px-6 py-6">
           <CardTitle className="text-xl font-semibold text-[#B22222]">Registration Snapshot</CardTitle>
@@ -2283,52 +2337,6 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
         </CardContent>
       </Card>
 
-      <Card className="max-w-2xl border-[#B22222]/30 bg-white text-slate-900 shadow-md">
-        <CardHeader className="border-b border-[#B22222]/20 px-6 py-6">
-          <CardTitle className="text-xl font-semibold text-[#B22222]">Referral Leaderboard</CardTitle>
-          <p className="text-sm text-slate-600">
-            Tracks how often each referral owner&apos;s code appears across all signup submissions.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4 px-6 py-5">
-          {referralLeaderboard.length === 0 ? (
-            <div className="px-6 py-8 text-sm text-slate-500">No referral code usage has been recorded yet.</div>
-          ) : (
-            <>
-              <div className="space-y-2">
-                {referralLeaderboard.map((entry, index) => (
-                  <div
-                    key={entry.owner}
-                    className="grid grid-cols-[auto,1fr,auto] items-center gap-3 rounded-md border border-[#B22222]/15 bg-[#B22222]/[0.03] px-3 py-2"
-                  >
-                    <span className="text-xs font-semibold text-slate-500">#{index + 1}</span>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-900">{entry.owner}</p>
-                      <p className="truncate font-mono text-xs text-slate-500">
-                        Code: {entry.codes.length > 0 ? entry.codes.join(", ") : "-"}
-                      </p>
-                    </div>
-                    <Badge variant="default">{entry.totalUses} uses</Badge>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center justify-between gap-3 border-t border-[#B22222]/10 pt-2">
-                <p className="text-xs text-slate-500">Copy leaderboard as plain text.</p>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  className="gap-2 border-[#B22222]/30 text-xs text-[#B22222] hover:bg-[#B22222]/10"
-                  onClick={() => void handleCopyReferralLeaderboard()}
-                >
-                  {copiedLeaderboard ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copiedLeaderboard ? "Copied" : "Copy results"}
-                </Button>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
     </div>
   )
 }
