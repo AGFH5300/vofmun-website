@@ -1230,6 +1230,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
   const [schoolColumnWidths, setSchoolColumnWidths] = useState<Record<string, number>>({})
   const [copiedLeaderboard, setCopiedLeaderboard] = useState(false)
+  const [showReferralLeaderboard, setShowReferralLeaderboard] = useState(false)
   const resizeState = useRef<{
     key: string
     startX: number
@@ -2115,51 +2116,66 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
 
       <Card className="w-fit border-none bg-transparent p-0 text-slate-900 shadow-none">
         <CardContent className="p-0">
-          {referralLeaderboard.length === 0 ? (
-            <div className="py-4 text-sm text-slate-500">No referral code usage has been recorded yet.</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <div className="mb-1 flex justify-end">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 gap-1 px-2 text-[11px] text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                  onClick={() => void handleCopyReferralLeaderboard()}
-                  disabled={referralLeaderboard.length === 0}
-                >
-                  {copiedLeaderboard ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                  {copiedLeaderboard ? "Copied" : "Copy"}
-                </Button>
-              </div>
-              <Table className="w-auto text-xs text-slate-900">
-                <TableHeader>
-                  <TableRow className="border-none">
-                    <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">#</TableHead>
-                    <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Owner</TableHead>
-                    <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Codes</TableHead>
-                    <TableHead className="h-auto px-2 py-1 text-right text-[11px] font-medium text-slate-500">Uses</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {referralLeaderboard.map((entry, index) => (
-                    <TableRow key={entry.owner} className="border-none">
-                      <TableCell className="px-2 py-1 align-middle text-[11px] text-slate-500">{index + 1}</TableCell>
-                      <TableCell className="max-w-[120px] truncate px-2 py-1 align-middle text-xs text-slate-900">
-                        {entry.owner}
-                      </TableCell>
-                      <TableCell className="max-w-[150px] truncate px-2 py-1 align-middle font-mono text-[11px] text-slate-500">
-                        {entry.codes.length > 0 ? entry.codes.join(", ") : "-"}
-                      </TableCell>
-                      <TableCell className="px-2 py-1 text-right align-middle text-xs font-semibold text-slate-900">
-                        {entry.totalUses}
-                      </TableCell>
+          <div className="mb-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-7 gap-1.5 border-slate-300 px-2.5 text-[11px] text-slate-700 hover:bg-slate-100"
+              onClick={() => setShowReferralLeaderboard((current) => !current)}
+            >
+              {showReferralLeaderboard ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              {showReferralLeaderboard ? "Hide referral leaderboard" : "Show referral leaderboard"}
+            </Button>
+          </div>
+
+          {showReferralLeaderboard ? (
+            referralLeaderboard.length === 0 ? (
+              <div className="py-4 text-sm text-slate-500">No referral code usage has been recorded yet.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <div className="mb-1 flex justify-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 gap-1 px-2 text-[11px] text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    onClick={() => void handleCopyReferralLeaderboard()}
+                    disabled={referralLeaderboard.length === 0}
+                  >
+                    {copiedLeaderboard ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                    {copiedLeaderboard ? "Copied" : "Copy"}
+                  </Button>
+                </div>
+                <Table className="w-auto text-xs text-slate-900">
+                  <TableHeader>
+                    <TableRow className="border-none">
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">#</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Owner</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Codes</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-right text-[11px] font-medium text-slate-500">Uses</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                  </TableHeader>
+                  <TableBody>
+                    {referralLeaderboard.map((entry, index) => (
+                      <TableRow key={entry.owner} className="border-none">
+                        <TableCell className="px-2 py-1 align-middle text-[11px] text-slate-500">{index + 1}</TableCell>
+                        <TableCell className="max-w-[120px] truncate px-2 py-1 align-middle text-xs text-slate-900">
+                          {entry.owner}
+                        </TableCell>
+                        <TableCell className="max-w-[150px] truncate px-2 py-1 align-middle font-mono text-[11px] text-slate-500">
+                          {entry.codes.length > 0 ? entry.codes.join(", ") : "-"}
+                        </TableCell>
+                        <TableCell className="px-2 py-1 text-right align-middle text-xs font-semibold text-slate-900">
+                          {entry.totalUses}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )
+          ) : null}
         </CardContent>
       </Card>
 
