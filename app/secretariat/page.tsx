@@ -156,6 +156,18 @@ Beyond my formal roles, I’ve built a rep for being that person who keeps thing
 As Deputy Head of Committees, I support the Co-Heads in managing committee quality, coordinating background guide development, and ensuring each chairing team is aligned and prepared. I help oversee logistics, communication, and the overall delegate experience, making sure committees run smoothly from prep to conference day. My aim is to create a well-structured, fair, and engaging environment where delegates can genuinely grow — in research, diplomacy, and public speaking.`,
   },
   {
+    name: "Vihaan Harrison",
+    role: "<strong>Deputy of Logistics</strong>",
+    department: "Logistics",
+    image: "/founders/VihaanHarrison_Logistics.jpeg",
+    bio: "Supporting logistics operations to deliver a structured, high-impact delegate experience.",
+    writeup: `Hi, I’m Vihaan Harrison, a debater, public speaker, and Secretariat member at VOFMUN 2026. Since beginning my MUN journey in January 2024, I’ve participated in 20+ conferences across the UAE, earning multiple Best Delegate awards along with distinctions such as Best Researcher, Runner-Up Best Delegate, and Honourable Mention.
+
+Beyond delegating, leadership is where I’ve grown the most. I currently serve in senior Secretariat roles including Head of Outreach, Head of Crisis, and USG of Committees across various conferences. These experiences have strengthened my ability to manage teams, oversee academic standards, and handle high-pressure committee environments with structure and clarity. I’ve also chaired committees such as UNHRC and UNODC, focusing on maintaining competitive yet respectful debate.
+
+I’m a Grade 10 student at Delhi Private School, Sharjah, and I approach MUN with strategic thinking, strong research, and composed diplomacy. At VOFMUN 2026, my goal is to help design a conference that challenges delegates, sharpens their skills, and creates an environment where serious debate and meaningful growth go hand in hand. Get to know me more at vihaanharrison.lovable.app.`,
+  },
+  {
     name: "Saira Shirvaikar",
     role: "<strong>Deputy of Media & Marketing</strong>",
     department: "Media",
