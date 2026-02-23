@@ -45,6 +45,11 @@ const founders = [
     image: "/founders/AryanShah_Logistics.jpg",
   },
   {
+    name: "Vihaan Harrison",
+    role: "Deputy of Logistics",
+    image: "/founders/VihaanHarrison_Logistics.jpeg",
+  },
+  {
     name: "Armaghan Siddiqui",
     role: "Head of Finance",
     image: "/founders/MuhammadArmaghanSiddiqui_Finance.png",
