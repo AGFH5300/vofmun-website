@@ -540,9 +540,6 @@ label {
   color: inherit;
 }
 
-.signup-form label:contains("*") {
-  color: inherit;
-}
 
 /* Alternative approach using CSS to style asterisks */
 label {
