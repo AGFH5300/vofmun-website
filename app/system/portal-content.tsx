@@ -22,6 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { REFERRAL_CODES, normalizeReferralCode } from "@/lib/referral-codes"
 import { createClient } from "@/utils/supabase/client"
 
 export type SignupRecord = {
@@ -141,6 +142,13 @@ type RegistrationView = "all" | "delegates" | "chairs" | "admins" | "school"
 type UserView = Exclude<RegistrationView, "school">
 
 type UserSortOption = "created_desc" | "created_asc" | "name_asc" | "name_desc"
+
+type ReferralLeaderboardEntry = {
+  owner: string
+  totalUses: number
+  uniqueCodesUsed: number
+  codes: string[]
+}
 
 type FieldOption<RecordType> = {
   key: string
@@ -1505,6 +1513,46 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   )
   const schoolDelegationTotal = schoolDelegations.length
 
+  const referralLeaderboard = useMemo<ReferralLeaderboardEntry[]>(() => {
+    const ownerUsage = new Map<string, { totalUses: number; codes: Set<string> }>()
+
+    for (const referral of REFERRAL_CODES) {
+      ownerUsage.set(referral.owner, { totalUses: 0, codes: new Set() })
+    }
+
+    for (const record of records) {
+      const normalizedCodes = new Set((record.referral_codes ?? []).map((code) => normalizeReferralCode(code)))
+
+      for (const code of normalizedCodes) {
+        if (!code) continue
+
+        const referralOwner = REFERRAL_CODES.find((entry) => entry.code === code)?.owner
+        if (!referralOwner) continue
+
+        const ownerRecord = ownerUsage.get(referralOwner)
+        if (!ownerRecord) continue
+
+        ownerRecord.totalUses += 1
+        ownerRecord.codes.add(code)
+      }
+    }
+
+    return Array.from(ownerUsage.entries())
+      .map(([owner, usage]) => ({
+        owner,
+        totalUses: usage.totalUses,
+        uniqueCodesUsed: usage.codes.size,
+        codes: Array.from(usage.codes.values()).sort(),
+      }))
+      .sort((a, b) => {
+        if (a.totalUses !== b.totalUses) {
+          return b.totalUses - a.totalUses
+        }
+
+        return a.owner.localeCompare(b.owner)
+      })
+  }, [records])
+
   const displayedLastUpdated = activeView === "school" ? schoolLastUpdated : lastUpdated
 
   const handleRefresh = useCallback(() => {
@@ -2213,6 +2261,49 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
               {renderSchoolTab()}
             </TabsContent>
           </Tabs>
+        </CardContent>
+      </Card>
+
+      <Card className="border-[#B22222]/30 bg-white text-slate-900 shadow-xl">
+        <CardHeader className="border-b border-[#B22222]/20 px-6 py-6">
+          <CardTitle className="text-xl font-semibold text-[#B22222]">Referral Leaderboard</CardTitle>
+          <p className="text-sm text-slate-600">
+            Tracks how often each referral owner&apos;s code appears across all signup submissions.
+          </p>
+        </CardHeader>
+        <CardContent className="px-0 py-0">
+          {referralLeaderboard.every((entry) => entry.totalUses === 0) ? (
+            <div className="px-6 py-8 text-sm text-slate-500">No referral code usage has been recorded yet.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-[#B22222]/5">
+                  <TableRow>
+                    <TableHead className="w-[80px] text-xs uppercase tracking-[0.2em] text-[#B22222]">Rank</TableHead>
+                    <TableHead className="text-xs uppercase tracking-[0.2em] text-[#B22222]">Owner</TableHead>
+                    <TableHead className="text-xs uppercase tracking-[0.2em] text-[#B22222]">Uses</TableHead>
+                    <TableHead className="text-xs uppercase tracking-[0.2em] text-[#B22222]">Unique codes used</TableHead>
+                    <TableHead className="text-xs uppercase tracking-[0.2em] text-[#B22222]">Codes</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {referralLeaderboard.map((entry, index) => (
+                    <TableRow key={entry.owner} className={entry.totalUses > 0 ? "" : "opacity-60"}>
+                      <TableCell className="font-semibold text-slate-700">#{index + 1}</TableCell>
+                      <TableCell className="font-medium text-slate-900">{entry.owner}</TableCell>
+                      <TableCell>
+                        <Badge variant={entry.totalUses > 0 ? "default" : "secondary"}>{entry.totalUses}</Badge>
+                      </TableCell>
+                      <TableCell className="text-slate-600">{entry.uniqueCodesUsed}</TableCell>
+                      <TableCell className="font-mono text-xs text-slate-500">
+                        {entry.codes.length > 0 ? entry.codes.join(", ") : "—"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
