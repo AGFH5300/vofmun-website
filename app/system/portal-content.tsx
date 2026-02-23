@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
-import { ChevronDown, ChevronUp, Columns3, Download, Loader2, LogOut, MailWarning, RefreshCw } from "lucide-react"
+import { Check, ChevronDown, ChevronUp, Columns3, Copy, Download, Loader2, LogOut, MailWarning, RefreshCw } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -146,7 +146,6 @@ type UserSortOption = "created_desc" | "created_asc" | "name_asc" | "name_desc"
 type ReferralLeaderboardEntry = {
   owner: string
   totalUses: number
-  uniqueCodesUsed: number
   codes: string[]
 }
 
@@ -1230,6 +1229,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const [preferencesHydrated, setPreferencesHydrated] = useState(false)
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
   const [schoolColumnWidths, setSchoolColumnWidths] = useState<Record<string, number>>({})
+  const [copiedLeaderboard, setCopiedLeaderboard] = useState(false)
   const resizeState = useRef<{
     key: string
     startX: number
@@ -1541,9 +1541,9 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       .map(([owner, usage]) => ({
         owner,
         totalUses: usage.totalUses,
-        uniqueCodesUsed: usage.codes.size,
         codes: Array.from(usage.codes.values()).sort(),
       }))
+      .filter((entry) => entry.totalUses > 0)
       .sort((a, b) => {
         if (a.totalUses !== b.totalUses) {
           return b.totalUses - a.totalUses
@@ -1559,6 +1559,25 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     void fetchRecords()
     void fetchSchoolDelegations()
   }, [fetchRecords, fetchSchoolDelegations])
+
+  const handleCopyReferralLeaderboard = useCallback(async () => {
+    if (typeof window === "undefined" || referralLeaderboard.length === 0) return
+
+    const content = referralLeaderboard
+      .map((entry, index) => {
+        const codeValue = entry.codes.length > 0 ? entry.codes.join(", ") : "-"
+        return `${index + 1}. ${entry.owner} | Uses: ${entry.totalUses} | Code: ${codeValue}`
+      })
+      .join("\n")
+
+    try {
+      await window.navigator.clipboard.writeText(content)
+      setCopiedLeaderboard(true)
+      window.setTimeout(() => setCopiedLeaderboard(false), 2000)
+    } catch (cause) {
+      console.error("Failed to copy referral leaderboard", cause)
+    }
+  }, [referralLeaderboard])
 
   const handleUserFieldToggle = useCallback((view: UserView, fieldKey: string, isChecked: boolean) => {
     setSelectedUserFields((previous) => {
@@ -2264,45 +2283,49 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
         </CardContent>
       </Card>
 
-      <Card className="border-[#B22222]/30 bg-white text-slate-900 shadow-xl">
+      <Card className="max-w-2xl border-[#B22222]/30 bg-white text-slate-900 shadow-md">
         <CardHeader className="border-b border-[#B22222]/20 px-6 py-6">
           <CardTitle className="text-xl font-semibold text-[#B22222]">Referral Leaderboard</CardTitle>
           <p className="text-sm text-slate-600">
             Tracks how often each referral owner&apos;s code appears across all signup submissions.
           </p>
         </CardHeader>
-        <CardContent className="px-0 py-0">
-          {referralLeaderboard.every((entry) => entry.totalUses === 0) ? (
+        <CardContent className="space-y-4 px-6 py-5">
+          {referralLeaderboard.length === 0 ? (
             <div className="px-6 py-8 text-sm text-slate-500">No referral code usage has been recorded yet.</div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-[#B22222]/5">
-                  <TableRow>
-                    <TableHead className="w-[80px] text-xs uppercase tracking-[0.2em] text-[#B22222]">Rank</TableHead>
-                    <TableHead className="text-xs uppercase tracking-[0.2em] text-[#B22222]">Owner</TableHead>
-                    <TableHead className="text-xs uppercase tracking-[0.2em] text-[#B22222]">Uses</TableHead>
-                    <TableHead className="text-xs uppercase tracking-[0.2em] text-[#B22222]">Unique codes used</TableHead>
-                    <TableHead className="text-xs uppercase tracking-[0.2em] text-[#B22222]">Codes</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {referralLeaderboard.map((entry, index) => (
-                    <TableRow key={entry.owner} className={entry.totalUses > 0 ? "" : "opacity-60"}>
-                      <TableCell className="font-semibold text-slate-700">#{index + 1}</TableCell>
-                      <TableCell className="font-medium text-slate-900">{entry.owner}</TableCell>
-                      <TableCell>
-                        <Badge variant={entry.totalUses > 0 ? "default" : "secondary"}>{entry.totalUses}</Badge>
-                      </TableCell>
-                      <TableCell className="text-slate-600">{entry.uniqueCodesUsed}</TableCell>
-                      <TableCell className="font-mono text-xs text-slate-500">
-                        {entry.codes.length > 0 ? entry.codes.join(", ") : "—"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <>
+              <div className="space-y-2">
+                {referralLeaderboard.map((entry, index) => (
+                  <div
+                    key={entry.owner}
+                    className="grid grid-cols-[auto,1fr,auto] items-center gap-3 rounded-md border border-[#B22222]/15 bg-[#B22222]/[0.03] px-3 py-2"
+                  >
+                    <span className="text-xs font-semibold text-slate-500">#{index + 1}</span>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-slate-900">{entry.owner}</p>
+                      <p className="truncate font-mono text-xs text-slate-500">
+                        Code: {entry.codes.length > 0 ? entry.codes.join(", ") : "-"}
+                      </p>
+                    </div>
+                    <Badge variant="default">{entry.totalUses} uses</Badge>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-between gap-3 border-t border-[#B22222]/10 pt-2">
+                <p className="text-xs text-slate-500">Copy leaderboard as plain text.</p>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="gap-2 border-[#B22222]/30 text-xs text-[#B22222] hover:bg-[#B22222]/10"
+                  onClick={() => void handleCopyReferralLeaderboard()}
+                >
+                  {copiedLeaderboard ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copiedLeaderboard ? "Copied" : "Copy results"}
+                </Button>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
