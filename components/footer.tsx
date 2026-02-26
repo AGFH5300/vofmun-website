@@ -5,6 +5,34 @@ import Link from "next/link"
 import Image from "next/image"
 import { Linkedin, Instagram } from "lucide-react"
 
+const partners = [
+  {
+    title: "Venue Partner",
+    name: "Arcadia Global School Dubai",
+    logo: "/partners/arcadia-global-school-dubai.svg",
+  },
+  {
+    title: "Event Partner",
+    name: "Summit of Diplomacy",
+    logo: "/partners/summit-of-diplomacy.svg",
+  },
+  {
+    title: "Delegate Experience Partner",
+    name: "UniHawk",
+    logo: "/partners/unihawk.svg",
+  },
+  {
+    title: "Partner",
+    name: "ReModelUN",
+    logo: "/partners/remodelun.svg",
+  },
+  {
+    title: "Conference Sponsor",
+    name: "Transmak Dewatering",
+    logo: "/partners/transmak-dewatering.svg",
+  },
+]
+
 export function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
@@ -119,6 +147,22 @@ export function Footer() {
             </ul>
           </div>
         </div>
+
+        <div className="mt-10 border-t border-gray-800 pt-8">
+          <h3 className="text-sm sm:text-base font-semibold tracking-wide text-gray-200 mb-4">Partners</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {partners.map((partner) => (
+              <div key={partner.name} className="rounded-xl border border-gray-800 bg-gray-950/60 p-3">
+                <div className="relative h-14 w-full mb-2">
+                  <Image src={partner.logo} alt={`${partner.name} logo`} fill className="object-contain object-left" />
+                </div>
+                <p className="text-xs text-gray-400">{partner.title}</p>
+                <p className="text-sm text-white font-medium">{partner.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Bottom */}
         <div className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8 text-center">
           <p className="text-gray-400 text-xs sm:text-sm">
