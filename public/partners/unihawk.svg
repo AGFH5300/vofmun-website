@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="96" viewBox="0 0 320 96" role="img" aria-label="UniHawk logo">
+  <rect width="320" height="96" rx="16" fill="#1f2937"/>
+  <path d="M28 52c14-2 20-12 30-20-3 10-4 20 8 30-14-2-24 4-32 10 2-8 1-14-6-20z" fill="#60a5fa"/>
+  <text x="72" y="54" fill="#ffffff" font-size="22" font-family="Arial, Helvetica, sans-serif" font-weight="700">UniHawk</text>
+</svg>
