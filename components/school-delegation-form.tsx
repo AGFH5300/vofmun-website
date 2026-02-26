@@ -3,7 +3,7 @@
 
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -60,6 +60,10 @@ export function SchoolDelegationForm() {
   const [spreadsheetFile, setSpreadsheetFile] = useState<File | null>(null)
   const [isSpreadsheetDragActive, setIsSpreadsheetDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const dragDepthRef = useRef(0)
+
+  const isFileDrag = (event: DragEvent | React.DragEvent<HTMLElement>) =>
+    Array.from(event.dataTransfer?.types ?? []).includes("Files")
 
   const handleInputChange = (field: keyof FormState, value: string | boolean) => {
     setFormData((prev) => ({
@@ -93,6 +97,9 @@ export function SchoolDelegationForm() {
   }
 
   const handleSpreadsheetDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isFileDrag(event)) {
+      return
+    }
     event.preventDefault()
     event.stopPropagation()
     if (!isSpreadsheetDragActive) {
@@ -101,6 +108,9 @@ export function SchoolDelegationForm() {
   }
 
   const handleSpreadsheetDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isFileDrag(event)) {
+      return
+    }
     event.preventDefault()
     event.stopPropagation()
     if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
@@ -110,12 +120,69 @@ export function SchoolDelegationForm() {
   }
 
   const handleSpreadsheetDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isFileDrag(event)) {
+      return
+    }
     event.preventDefault()
     event.stopPropagation()
+    dragDepthRef.current = 0
     setIsSpreadsheetDragActive(false)
     const file = event.dataTransfer.files?.[0] ?? null
     handleSpreadsheetChange(file)
   }
+
+  useEffect(() => {
+    const onDragEnter = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      dragDepthRef.current += 1
+      setIsSpreadsheetDragActive(true)
+    }
+
+    const onDragOver = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      setIsSpreadsheetDragActive(true)
+    }
+
+    const onDragLeave = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      dragDepthRef.current = Math.max(dragDepthRef.current - 1, 0)
+      if (dragDepthRef.current === 0) {
+        setIsSpreadsheetDragActive(false)
+      }
+    }
+
+    const onDrop = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      dragDepthRef.current = 0
+      setIsSpreadsheetDragActive(false)
+      const file = event.dataTransfer?.files?.[0] ?? null
+      handleSpreadsheetChange(file)
+    }
+
+    window.addEventListener("dragenter", onDragEnter)
+    window.addEventListener("dragover", onDragOver)
+    window.addEventListener("dragleave", onDragLeave)
+    window.addEventListener("drop", onDrop)
+
+    return () => {
+      window.removeEventListener("dragenter", onDragEnter)
+      window.removeEventListener("dragover", onDragOver)
+      window.removeEventListener("dragleave", onDragLeave)
+      window.removeEventListener("drop", onDrop)
+    }
+  }, [])
 
   const fileToDataUrl = (file: File) =>
     new Promise<string>((resolve, reject) => {
