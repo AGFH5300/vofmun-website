@@ -172,6 +172,7 @@ export function SignupFormNew() {
   const [activeDropTarget, setActiveDropTarget] = useState<"paymentProof" | "chairCv" | null>(null)
   const [hasEditedFullName, setHasEditedFullName] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const dragDepthRef = useRef(0)
   const [lastPaymentStatus, setLastPaymentStatus] = useState<"yes" | "no" | null>(null)
   const paymentProofTemporarilyDisabled = selectedRole === "chair" || selectedRole === "admin"
 
@@ -194,6 +195,22 @@ export function SignupFormNew() {
     { key: "committee2" as const, label: "Second Choice", required: false },
     { key: "committee3" as const, label: "Third Choice", required: false },
   ]
+
+
+  const isFileDrag = (event: DragEvent | React.DragEvent<HTMLElement>) =>
+    Array.from(event.dataTransfer?.types ?? []).includes("Files")
+
+  const resolveGlobalDropTarget = (): "paymentProof" | "chairCv" | null => {
+    if (selectedRole === "chair") {
+      return "chairCv"
+    }
+
+    if (!paymentProofTemporarilyDisabled && hasPaid === "yes") {
+      return "paymentProof"
+    }
+
+    return null
+  }
 
   const paymentProofIsPdf =
     !!paymentProofFile &&
@@ -352,6 +369,9 @@ export function SignupFormNew() {
   }
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>, target: "paymentProof" | "chairCv") => {
+    if (!isFileDrag(event)) {
+      return
+    }
     event.preventDefault()
     event.stopPropagation()
     if (activeDropTarget !== target) {
@@ -360,6 +380,9 @@ export function SignupFormNew() {
   }
 
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>, target: "paymentProof" | "chairCv") => {
+    if (!isFileDrag(event)) {
+      return
+    }
     event.preventDefault()
     event.stopPropagation()
     if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
@@ -374,8 +397,12 @@ export function SignupFormNew() {
     event: React.DragEvent<HTMLDivElement>,
     target: "paymentProof" | "chairCv",
   ) => {
+    if (!isFileDrag(event)) {
+      return
+    }
     event.preventDefault()
     event.stopPropagation()
+    dragDepthRef.current = 0
     setActiveDropTarget(null)
 
     const file = event.dataTransfer.files && event.dataTransfer.files[0]
@@ -387,6 +414,77 @@ export function SignupFormNew() {
       }
     }
   }
+
+
+  useEffect(() => {
+    const globalDropTarget = resolveGlobalDropTarget()
+
+    if (!globalDropTarget) {
+      dragDepthRef.current = 0
+      setActiveDropTarget(null)
+      return
+    }
+
+    const onDragEnter = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      dragDepthRef.current += 1
+      setActiveDropTarget(globalDropTarget)
+    }
+
+    const onDragOver = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      setActiveDropTarget(globalDropTarget)
+    }
+
+    const onDragLeave = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      dragDepthRef.current = Math.max(dragDepthRef.current - 1, 0)
+      if (dragDepthRef.current === 0) {
+        setActiveDropTarget(null)
+      }
+    }
+
+    const onDrop = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      dragDepthRef.current = 0
+      setActiveDropTarget(null)
+      const file = event.dataTransfer?.files?.[0]
+      if (!file) {
+        return
+      }
+
+      if (globalDropTarget === "paymentProof") {
+        handlePaymentProofSelect(file)
+        return
+      }
+
+      handleChairCvSelect(file)
+    }
+
+    window.addEventListener("dragenter", onDragEnter)
+    window.addEventListener("dragover", onDragOver)
+    window.addEventListener("dragleave", onDragLeave)
+    window.addEventListener("drop", onDrop)
+
+    return () => {
+      window.removeEventListener("dragenter", onDragEnter)
+      window.removeEventListener("dragover", onDragOver)
+      window.removeEventListener("dragleave", onDragLeave)
+      window.removeEventListener("drop", onDrop)
+    }
+  }, [hasPaid, paymentProofTemporarilyDisabled, selectedRole])
 
   const clearReferralFeedbackForIndex = (index: number) => {
     setReferralFeedback((prev) => {
