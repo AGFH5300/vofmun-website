@@ -114,6 +114,9 @@ export function ProofOfPaymentForm() {
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault()
     event.stopPropagation()
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      return
+    }
     setIsDragActive(false)
   }
 
@@ -397,7 +400,7 @@ export function ProofOfPaymentForm() {
                   }}
                 >
                   {isDragActive && (
-                    <div className="absolute inset-0 rounded-xl bg-[#B22222]/10 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
+                    <div className="fixed inset-0 z-50 bg-[#B22222]/10 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
                       <UploadCloud className="h-10 w-10 text-[#B22222] animate-bounce" />
                       <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop file to upload</p>
                     </div>
