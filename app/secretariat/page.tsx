@@ -42,15 +42,15 @@ const foundingSecretariat: SecretariatMember[] = [
     image: "/founders/TalaSwaidan_SG.jpg",
     bio: "Co-founder guiding VOFMUN's vision for inclusive and empowering youth diplomacy.",
     linkedin: "https://www.linkedin.com/in/tala-swaidan-401547216",
-    writeup: `Hello! My name is Tala Swaidan, and I have the great honor and privilege of serving as the Founder and Secretary-General of Voices of the Future Model United Nations (VOFMUN) alongside my fantastic founding secretariat team. 
+    writeup: `Hello! I’m Tala Swaidan, and I’m honored to serve as Founder and Secretary-General of Voices of the Future Model United Nations (VOFMUN), alongside an incredible founding secretariat team.
 
-VOFMUN all began as an abstract idea shared among friends. But with time, dedication, and great effort, it grew into something far more meaningful: a platform for courageous MUN delegates to engage in diplomacy, express their perspectives, and take on global issues with confidence and purpose.
+VOFMUN began as an idea among friends and has grown into a platform where young delegates can engage in meaningful diplomacy, speak with confidence, and tackle global issues with purpose.
 
-Beyond my work with VOFMUN, I am an active member of my school's Digital Innovation and Technology team, have been deeply involved in Model United Nations for several years and have participated in over 15 Model United Nations conferences, with an extensive range of various awards. Moreover, I am the founder of my school’s STEM Society, where I lead workshops and projects to inspire students to explore science and innovation beyond the classroom. I also pursue my passions in sports, particularly basketball and kickboxing with MVP recognitions, which have both taught me the value of discipline, teamwork, and perseverance. Furthermore, I am deeply passionate about medicine and aspire to pursue it in the future.
+Beyond VOFMUN, I am part of my school’s Digital Innovation and Technology team and have been actively involved in MUN for several years, participating in 15+ conferences and earning multiple awards. I also founded my school’s STEM Society, where I lead workshops and projects that encourage students to explore science and innovation beyond the classroom. Outside academics, I am passionate about basketball and kickboxing, where MVP recognitions have taught me discipline, teamwork, and perseverance. I am also deeply passionate about medicine and hope to pursue it in the future.
 
-I hope to expand my horizons during the next academic year, working on initiatives such as GenAid, a youth-led nonprofit initiative dedicated to promoting dignity, hygiene, and health access in underserved communities, and on the first VOFMUN conference, taking place on April 3-5, 2026. Through all my endeavors, I strive to foster positive change, empower others, and lead with integrity.
+In the coming year, I look forward to continuing youth-led initiatives such as GenAid and helping deliver a memorable first VOFMUN conference from April 3–5, 2026. Through each initiative, I aim to create positive impact, empower others, and lead with integrity.
 
-As VOFMUN continues to grow, my hope is that it remains a space where young leaders can find their voice, challenge their thinking, and leave inspired to shape a better world. VOFMUN strives to empower young people, cultivate leadership, and amplify every voice; the Voices of the Future. I'm incredibly proud of how far we've come - and even more excited for what's ahead. See you soon at VOFMUN 2026!`,
+As VOFMUN continues to grow, I hope it remains a space where young leaders find their voice, challenge their thinking, and leave inspired to shape a better world. I’m incredibly proud of how far we’ve come and even more excited for what lies ahead. See you at VOFMUN 2026!`,
   },
   {
     name: "Vihaan Shukla",
