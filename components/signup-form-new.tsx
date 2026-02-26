@@ -169,7 +169,7 @@ export function SignupFormNew() {
   const [paymentFullName, setPaymentFullName] = useState("")
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null)
   const [paymentProofPreview, setPaymentProofPreview] = useState<string | null>(null)
-  const [isDragActive, setIsDragActive] = useState(false)
+  const [activeDropTarget, setActiveDropTarget] = useState<"paymentProof" | "chairCv" | null>(null)
   const [hasEditedFullName, setHasEditedFullName] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [lastPaymentStatus, setLastPaymentStatus] = useState<"yes" | "no" | null>(null)
@@ -240,7 +240,7 @@ export function SignupFormNew() {
       }
       setPaymentProofFile(null)
       setPaymentProofPreview(null)
-      setIsDragActive(false)
+      setActiveDropTarget(null)
       setPaymentFullName("")
       setHasEditedFullName(false)
       setErrors((prev) => {
@@ -320,7 +320,7 @@ export function SignupFormNew() {
     }
     setPaymentProofFile(null)
     setPaymentProofPreview(null)
-    setIsDragActive(false)
+    setActiveDropTarget(null)
   }
 
   const resetChairCv = () => {
@@ -351,28 +351,40 @@ export function SignupFormNew() {
     setReferralFeedback({})
   }
 
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>, target: "paymentProof" | "chairCv") => {
     event.preventDefault()
     event.stopPropagation()
-    if (!isDragActive) {
-      setIsDragActive(true)
+    if (activeDropTarget !== target) {
+      setActiveDropTarget(target)
     }
   }
 
-  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>, target: "paymentProof" | "chairCv") => {
     event.preventDefault()
     event.stopPropagation()
-    setIsDragActive(false)
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      return
+    }
+    if (activeDropTarget === target) {
+      setActiveDropTarget(null)
+    }
   }
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (
+    event: React.DragEvent<HTMLDivElement>,
+    target: "paymentProof" | "chairCv",
+  ) => {
     event.preventDefault()
     event.stopPropagation()
-    setIsDragActive(false)
+    setActiveDropTarget(null)
 
     const file = event.dataTransfer.files && event.dataTransfer.files[0]
     if (file) {
-      handlePaymentProofSelect(file)
+      if (target === "paymentProof") {
+        handlePaymentProofSelect(file)
+      } else {
+        handleChairCvSelect(file)
+      }
     }
   }
 
@@ -1805,11 +1817,25 @@ export function SignupFormNew() {
                   </Button>
                 </div>
 
-                <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4">
+                <div
+                  className={`relative rounded-lg border border-dashed bg-gray-50 p-4 transition-colors duration-200 ${
+                    activeDropTarget === "chairCv" ? "border-[#B22222] bg-[#B22222]/5" : "border-gray-200"
+                  }`}
+                  onDragOver={(event) => handleDragOver(event, "chairCv")}
+                  onDragEnter={(event) => handleDragOver(event, "chairCv")}
+                  onDragLeave={(event) => handleDragLeave(event, "chairCv")}
+                  onDrop={(event) => handleDrop(event, "chairCv")}
+                >
+                  {activeDropTarget === "chairCv" && (
+                    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#B22222]/10 backdrop-blur-[1px] pointer-events-none">
+                      <UploadCloud className="h-10 w-10 text-[#B22222] animate-bounce" />
+                      <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop file to upload CV</p>
+                    </div>
+                  )}
                   <div className="flex items-start gap-3">
                     <FileText className="h-5 w-5 text-gray-600" />
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-800">Upload your CV (PDF, DOC, or DOCX).</p>
+                      <p className="text-sm text-gray-800">Upload your CV (PDF, DOC, or DOCX), or drag and drop it here.</p>
                       <p className="text-xs text-gray-600">
                         Files are stored securely in Supabase storage so the Secretariat can review your experience.
                       </p>
@@ -2249,7 +2275,7 @@ export function SignupFormNew() {
                         ? "border-gray-300 bg-gray-50 cursor-not-allowed opacity-70"
                         : "cursor-pointer"
                     } ${
-                      isDragActive
+                      activeDropTarget === "paymentProof"
                         ? "border-[#B22222] bg-[#B22222]/5"
                         : errors.paymentProof
                           ? "border-red-500 bg-red-50"
@@ -2258,17 +2284,17 @@ export function SignupFormNew() {
                             : "border-gray-300 bg-white"
                     }`}
                     aria-disabled={paymentProofTemporarilyDisabled}
-                    onDragOver={paymentProofTemporarilyDisabled ? undefined : handleDragOver}
-                    onDragEnter={paymentProofTemporarilyDisabled ? undefined : handleDragOver}
-                    onDragLeave={paymentProofTemporarilyDisabled ? undefined : handleDragLeave}
-                    onDrop={paymentProofTemporarilyDisabled ? undefined : handleDrop}
+                    onDragOver={paymentProofTemporarilyDisabled ? undefined : (event) => handleDragOver(event, "paymentProof")}
+                    onDragEnter={paymentProofTemporarilyDisabled ? undefined : (event) => handleDragOver(event, "paymentProof")}
+                    onDragLeave={paymentProofTemporarilyDisabled ? undefined : (event) => handleDragLeave(event, "paymentProof")}
+                    onDrop={paymentProofTemporarilyDisabled ? undefined : (event) => handleDrop(event, "paymentProof")}
                     onClick={() => {
                       if (paymentProofTemporarilyDisabled) return
                       fileInputRef.current?.click()
                     }}
                   >
-                    {isDragActive && (
-                      <div className="absolute inset-0 rounded-xl bg-[#B22222]/10 backdrop-blur-[1px] flex flex-col items-center justify-center pointer-events-none">
+                    {activeDropTarget === "paymentProof" && (
+                      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#B22222]/10 backdrop-blur-[1px] pointer-events-none">
                         <UploadCloud className="h-10 w-10 text-[#B22222] animate-bounce" />
                         <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop file to upload</p>
                       </div>

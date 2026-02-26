@@ -58,6 +58,7 @@ export function SchoolDelegationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [spreadsheetFile, setSpreadsheetFile] = useState<File | null>(null)
+  const [isSpreadsheetDragActive, setIsSpreadsheetDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const handleInputChange = (field: keyof FormState, value: string | boolean) => {
@@ -88,6 +89,31 @@ export function SchoolDelegationForm() {
 
   const handleSpreadsheetSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null
+    handleSpreadsheetChange(file)
+  }
+
+  const handleSpreadsheetDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (!isSpreadsheetDragActive) {
+      setIsSpreadsheetDragActive(true)
+    }
+  }
+
+  const handleSpreadsheetDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      return
+    }
+    setIsSpreadsheetDragActive(false)
+  }
+
+  const handleSpreadsheetDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setIsSpreadsheetDragActive(false)
+    const file = event.dataTransfer.files?.[0] ?? null
     handleSpreadsheetChange(file)
   }
 
@@ -149,6 +175,7 @@ export function SchoolDelegationForm() {
   const resetForm = () => {
     setFormData(initialFormState)
     setSpreadsheetFile(null)
+    setIsSpreadsheetDragActive(false)
     setErrors({})
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
@@ -455,8 +482,22 @@ export function SchoolDelegationForm() {
             <h3 className="text-lg sm:text-xl font-serif font-semibold text-primary">Delegate Spreadsheet</h3>
             <div className="space-y-3 sm:space-y-4">
               <div
-                className="border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center gap-3 border-gray-200 bg-gray-50"
+                className={`relative border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center gap-3 transition-colors duration-200 ${
+                  isSpreadsheetDragActive
+                    ? "border-[#B22222] bg-[#B22222]/5"
+                    : "border-gray-200 bg-gray-50"
+                }`}
+                onDragOver={handleSpreadsheetDragOver}
+                onDragEnter={handleSpreadsheetDragOver}
+                onDragLeave={handleSpreadsheetDragLeave}
+                onDrop={handleSpreadsheetDrop}
               >
+                {isSpreadsheetDragActive && (
+                  <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#B22222]/10 backdrop-blur-[1px] pointer-events-none">
+                    <UploadCloud className="h-10 w-10 text-[#B22222] animate-bounce" />
+                    <p className="mt-2 text-sm font-semibold text-[#B22222]">Drop spreadsheet to upload</p>
+                  </div>
+                )}
                 <FileSpreadsheet className="h-10 w-10 text-gray-500" />
                 <div className="space-y-1">
                   <p className="font-medium text-gray-800">Upload completed delegate spreadsheet (.xlsx)</p>
