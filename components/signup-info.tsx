@@ -51,16 +51,16 @@ export function SignupInfo() {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-gray-800"><strong>Conference Dates:</strong></span>
-            <span className="text-gray-600">March 28-29, 2026</span>
+            <span className="text-gray-600">April 3-5, 2026</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <span className="text-gray-800"><strong>Venue:</strong></span>
             <div className="text-right space-y-1">
               <span className="text-gray-600 block">
-                UKCBC - Academic City, Dubai
+                Arcadia Global School, Dubai
               </span>
               <a
-                href="https://maps.app.goo.gl/jx4SsR7r58oauhedA"
+                href="https://maps.app.goo.gl/qf6igZTFr56Djqh79"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-medium text-[#B22222] hover:underline"

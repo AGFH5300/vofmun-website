@@ -21,7 +21,7 @@ export function SignupHero() {
                 <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
               </div>
               <div className="text-center">
-                <div className="font-semibold text-gray-900 text-sm sm:text-base">March 28-29, 2026</div>
+                <div className="font-semibold text-gray-900 text-sm sm:text-base">April 3-5, 2026</div>
                 <div className="text-xs sm:text-sm text-gray-600">Conference Dates</div>
               </div>
             </div>
@@ -31,13 +31,11 @@ export function SignupHero() {
               </div>
               <div className="text-center space-y-1">
                 <div className="font-semibold text-gray-900 text-sm sm:text-base">
-                  UKCBC Dubai Campus
+                  Arcadia Global School
                 </div>
-                <div className="text-xs sm:text-sm text-gray-600">
-                  Academic City
-                </div>
+                <div className="text-xs sm:text-sm text-gray-600">Dubai</div>
                 <a
-                  href="https://maps.app.goo.gl/jx4SsR7r58oauhedA"
+                  href="https://maps.app.goo.gl/qf6igZTFr56Djqh79"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs font-medium text-[#B22222] hover:underline"

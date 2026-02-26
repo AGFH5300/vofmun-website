@@ -17,7 +17,7 @@ export function CountdownSection() {
 
   useEffect(() => {
     // Set conference date (you can adjust this date)
-    const conferenceDate = new Date("2026-03-28T09:00:00")
+    const conferenceDate = new Date("2026-04-03T09:00:00")
 
     const timer = setInterval(() => {
       const now = new Date().getTime()
@@ -83,7 +83,7 @@ export function CountdownSection() {
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-serif font-semibold text-primary">Date</h3>
-                  <p className="text-sm sm:text-base text-foreground/70">March 28-29, 2026</p>
+                  <p className="text-sm sm:text-base text-foreground/70">April 3-5, 2026</p>
                 </div>
               </CardContent>
             </Card>
@@ -95,7 +95,7 @@ export function CountdownSection() {
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-serif font-semibold text-primary">Duration</h3>
-                  <p className="text-sm sm:text-base text-foreground/70">2 Full Days</p>
+                  <p className="text-sm sm:text-base text-foreground/70">3 Full Days</p>
                 </div>
               </CardContent>
             </Card>
@@ -107,12 +107,10 @@ export function CountdownSection() {
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-base sm:text-lg font-serif font-semibold text-primary">Venue</h3>
-                    <p className="text-sm sm:text-base text-foreground/70">
-                      United Kingdom College of Business & Computing – Dubai Campus
-                    </p>
-                    <p className="text-xs sm:text-sm text-foreground/60">Academic City, Dubai</p>
+                    <p className="text-sm sm:text-base text-foreground/70">Arcadia Global School</p>
+                    <p className="text-xs sm:text-sm text-foreground/60">Dubai</p>
                     <a
-                      href="https://maps.app.goo.gl/jx4SsR7r58oauhedA"
+                      href="https://maps.app.goo.gl/qf6igZTFr56Djqh79"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs font-medium text-primary hover:underline"
