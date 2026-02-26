@@ -513,7 +513,7 @@ export default function SecretariatPage() {
               Founders
             </h2>
             <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-              VOFMUN was co-founded by Vihaan Shukla and Ansh Gupta, whose shared vision continues to guide the
+              VOFMUN was co-founded by Tala Swaidan, Vihaan Shukla and Ansh Gupta, whose shared vision continues to guide the
               conference forward.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
