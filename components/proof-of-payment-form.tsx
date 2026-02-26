@@ -29,7 +29,11 @@ export function ProofOfPaymentForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const dragDepthRef = useRef(0)
   const uploadsLockedForLeadership = role === "chair" || role === "admin"
+
+  const isFileDrag = (event: DragEvent | React.DragEvent<HTMLElement>) =>
+    Array.from(event.dataTransfer?.types ?? []).includes("Files")
 
   useEffect(() => {
     return () => {
@@ -104,6 +108,9 @@ export function ProofOfPaymentForm() {
   }
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isFileDrag(event)) {
+      return
+    }
     event.preventDefault()
     event.stopPropagation()
     if (!isDragActive) {
@@ -112,6 +119,9 @@ export function ProofOfPaymentForm() {
   }
 
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isFileDrag(event)) {
+      return
+    }
     event.preventDefault()
     event.stopPropagation()
     if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
@@ -121,8 +131,12 @@ export function ProofOfPaymentForm() {
   }
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isFileDrag(event)) {
+      return
+    }
     event.preventDefault()
     event.stopPropagation()
+    dragDepthRef.current = 0
     setIsDragActive(false)
 
     const file = event.dataTransfer.files && event.dataTransfer.files[0]
@@ -130,6 +144,68 @@ export function ProofOfPaymentForm() {
       handlePaymentProofSelect(file)
     }
   }
+
+
+  useEffect(() => {
+    if (uploadsLockedForLeadership || hasPaid !== "yes") {
+      dragDepthRef.current = 0
+      setIsDragActive(false)
+      return
+    }
+
+    const onDragEnter = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      dragDepthRef.current += 1
+      setIsDragActive(true)
+    }
+
+    const onDragOver = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      setIsDragActive(true)
+    }
+
+    const onDragLeave = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      dragDepthRef.current = Math.max(dragDepthRef.current - 1, 0)
+      if (dragDepthRef.current === 0) {
+        setIsDragActive(false)
+      }
+    }
+
+    const onDrop = (event: DragEvent) => {
+      if (!isFileDrag(event)) {
+        return
+      }
+      event.preventDefault()
+      dragDepthRef.current = 0
+      setIsDragActive(false)
+      const file = event.dataTransfer?.files?.[0]
+      if (file) {
+        handlePaymentProofSelect(file)
+      }
+    }
+
+    window.addEventListener("dragenter", onDragEnter)
+    window.addEventListener("dragover", onDragOver)
+    window.addEventListener("dragleave", onDragLeave)
+    window.addEventListener("drop", onDrop)
+
+    return () => {
+      window.removeEventListener("dragenter", onDragEnter)
+      window.removeEventListener("dragover", onDragOver)
+      window.removeEventListener("dragleave", onDragLeave)
+      window.removeEventListener("drop", onDrop)
+    }
+  }, [hasPaid, uploadsLockedForLeadership])
 
   const fileToDataURL = (file: File) =>
     new Promise<string>((resolve, reject) => {
