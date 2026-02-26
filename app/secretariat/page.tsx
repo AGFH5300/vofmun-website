@@ -379,28 +379,28 @@ export default function SecretariatPage() {
     const isHovered = hoveredFounder === hoverKey;
 
     const cardPadding =
-      variant === "founder" ? "p-6 sm:p-8 md:p-10" : variant === "deputy" ? "p-4 sm:p-5" : "p-6";
+      variant === "founder" ? "p-5 sm:p-6 md:p-7" : variant === "deputy" ? "p-4 sm:p-5" : "p-6";
     const imageSizeClass =
       variant === "founder"
-        ? "w-36 h-36 md:w-44 md:h-44"
+        ? "w-32 h-32 md:w-36 md:h-36"
         : variant === "deputy"
         ? "w-24 h-24"
         : "w-28 h-28";
     const nameClass =
       variant === "founder"
-        ? "text-2xl md:text-3xl"
+        ? "text-2xl"
         : variant === "deputy"
         ? "text-base"
         : "text-lg";
     const roleClass =
       variant === "founder"
-        ? "text-base md:text-lg"
+        ? "text-base"
         : variant === "deputy"
         ? "text-xs"
         : "text-sm";
     const badgeClass =
       variant === "founder"
-        ? "inline-block px-5 py-2.5 rounded-full text-sm md:text-base font-medium"
+        ? "inline-block px-4 py-2 rounded-full text-sm font-medium"
         : variant === "deputy"
         ? "inline-block px-3 py-1.5 rounded-full text-xs font-medium"
         : "inline-block px-4 py-2 rounded-full text-sm font-medium";
@@ -424,7 +424,7 @@ export default function SecretariatPage() {
         <div
           className={`bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border-2 ${colors.border}/30 relative overflow-hidden ${
             isHovered ? "shadow-2xl animate-glow" : ""
-          } ${cardPadding} ${variant === "founder" ? "max-w-2xl mx-auto" : ""}`}
+          } ${cardPadding} ${variant === "founder" ? "max-w-md mx-auto" : ""}`}
         >
           <div
             className={`absolute inset-0 ${colors.bg} opacity-5 transition-opacity duration-300 ${
@@ -516,7 +516,7 @@ export default function SecretariatPage() {
               VOFMUN was co-founded by Tala Swaidan, Vihaan Shukla and Ansh Gupta, whose shared vision continues to guide the
               conference forward.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {foundingSecretariat.map((member, index) =>
                 renderMemberCard(member, index, "founder"),
               )}
