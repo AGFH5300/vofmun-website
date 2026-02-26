@@ -10,6 +10,11 @@ import Image from "next/image"
 
 const founders = [
   {
+    name: "Tala Swaidan",
+    role: "Founder, Secretary-General",
+    image: "/founders/TalaSwaidan_SG.jpg",
+  },
+  {
     name: "Vihaan Shukla",
     role: "Co-Founder, Director-General",
     image: "/founders/VihaanShukla_DG.png",
