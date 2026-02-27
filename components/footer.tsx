@@ -10,12 +10,14 @@ const partners = [
     name: "Arcadia Global School Dubai",
     logo: "/partners/ags.svg",
     website: "https://arcadiaglobal.sch.ae/",
+    logoContainerClass: "h-16 w-16",
   },
   {
     title: "Event Partner",
     name: "Summit of Diplomacy",
     logo: "/partners/sod.svg",
     website: "https://sodmun.com/",
+    logoContainerClass: "h-[4.25rem] w-[4.25rem]",
   },
   {
     title: "Delegate Experience Partner",
@@ -28,6 +30,7 @@ const partners = [
     name: "ReModelUN",
     logo: "/partners/remodelun.svg",
     website: "https://www.remodelun.org/",
+    logoContainerClass: "h-[3.9rem] w-[3.9rem]",
   },
   {
     title: "Conference Sponsor",
@@ -167,7 +170,9 @@ export function Footer() {
                 className="group relative rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:border-sky-300/40 hover:bg-slate-800/40 hover:shadow-[0_18px_40px_-24px_rgba(56,189,248,0.8)]"
               >
                 <div className="flex items-center gap-4">
-                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-gradient-to-r from-slate-900/70 via-slate-800/50 to-slate-900/70 p-2">
+                  <div
+                    className={`relative shrink-0 overflow-hidden rounded-lg border border-white/10 bg-gradient-to-r from-slate-900/70 via-slate-800/50 to-slate-900/70 p-2 ${partner.logoContainerClass ?? "h-14 w-14"}`}
+                  >
                     <Image src={partner.logo} alt={`${partner.name} logo`} fill className="object-contain p-2" />
                   </div>
                   <div>
