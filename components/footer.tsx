@@ -9,26 +9,31 @@ const partners = [
     title: "Venue Partner",
     name: "Arcadia Global School Dubai",
     logo: "/partners/ags.svg",
+    website: "https://arcadia.sch.ae/",
   },
   {
     title: "Event Partner",
     name: "Summit of Diplomacy",
     logo: "/partners/sod.svg",
+    website: "https://summitofdiplomacy.org/",
   },
   {
     title: "Delegate Experience Partner",
     name: "UniHawk",
     logo: "/partners/unihawk.svg",
+    website: "https://unihawk.org/",
   },
   {
     title: "Partner",
     name: "ReModelUN",
     logo: "/partners/remodelun.svg",
+    website: "https://www.remodelun.com/",
   },
   {
     title: "Conference Sponsor",
     name: "Transmak Dewatering",
     logo: "/partners/transmak.svg",
+    website: "https://transmakdewatering.com/",
   },
 ]
 
@@ -43,7 +48,7 @@ export function Footer() {
               <span className="font-bold text-lg sm:text-xl">VOFMUN</span>
             </div>
             <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
-              Empowering tomorrow's leaders through diplomatic excellence and global dialogue.
+              Empowering tomorrow&apos;s leaders through diplomatic excellence and global dialogue.
             </p>
           </div>
 
@@ -86,7 +91,7 @@ export function Footer() {
                   General Assembly
                 </Link>
               </li>
-              
+
               <li>
                 <Link href="/committees/ecosoc" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
                   ECOSOC
@@ -147,17 +152,27 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-gray-800 pt-8">
-          <h3 className="text-sm sm:text-base font-semibold tracking-wide text-gray-200 mb-4">Partners</h3>
+        <div className="mt-10 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-950 px-4 py-7 sm:px-6 sm:py-8">
+          <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <h3 className="text-sm sm:text-base font-semibold tracking-wide text-gray-100">Our Partners</h3>
+            <p className="text-xs text-gray-400">Click any logo or name to visit their official website.</p>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {partners.map((partner) => (
-              <div key={partner.name} className="rounded-xl border border-gray-800 bg-gray-950/60 p-4 sm:p-5">
-                <div className="relative h-14 w-full mb-3 rounded-md bg-white/95 p-2">
+              <Link
+                key={partner.name}
+                href={partner.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:border-sky-300/40 hover:bg-slate-800/40 hover:shadow-[0_18px_40px_-24px_rgba(56,189,248,0.8)]"
+              >
+                <div className="relative mb-4 h-14 w-full overflow-hidden rounded-lg border border-white/10 bg-gradient-to-r from-slate-900/70 via-slate-800/50 to-slate-900/70 p-2">
                   <Image src={partner.logo} alt={`${partner.name} logo`} fill className="object-contain p-2" />
                 </div>
-                <p className="text-xs text-gray-400">{partner.title}</p>
-                <p className="text-sm text-white font-medium">{partner.name}</p>
-              </div>
+                <p className="text-xs uppercase tracking-wide text-sky-200/70">{partner.title}</p>
+                <p className="mt-1 text-sm font-medium text-white transition-colors group-hover:text-sky-200">{partner.name}</p>
+              </Link>
             ))}
           </div>
         </div>
@@ -168,7 +183,10 @@ export function Footer() {
             © 2026 Voices of the Future Model United Nations. All rights reserved.
           </p>
           <p className="text-xs sm:text-sm">
-            Made by <a href="https://anshgupta.site" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Ansh Gupta</a>
+            Made by{" "}
+            <a href="https://anshgupta.site" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+              Ansh Gupta
+            </a>
           </p>
         </div>
       </div>
