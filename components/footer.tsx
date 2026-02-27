@@ -166,11 +166,15 @@ export function Footer() {
                 rel="noopener noreferrer"
                 className="group relative rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:border-sky-300/40 hover:bg-slate-800/40 hover:shadow-[0_18px_40px_-24px_rgba(56,189,248,0.8)]"
               >
-                <div className="relative mb-4 h-14 w-full overflow-hidden rounded-lg border border-white/10 bg-gradient-to-r from-slate-900/70 via-slate-800/50 to-slate-900/70 p-2">
-                  <Image src={partner.logo} alt={`${partner.name} logo`} fill className="object-contain p-2" />
+                <div className="flex items-center gap-4">
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-gradient-to-r from-slate-900/70 via-slate-800/50 to-slate-900/70 p-2">
+                    <Image src={partner.logo} alt={`${partner.name} logo`} fill className="object-contain p-2" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-sky-200/70">{partner.title}</p>
+                    <p className="mt-1 text-sm font-medium text-white transition-colors group-hover:text-sky-200">{partner.name}</p>
+                  </div>
                 </div>
-                <p className="text-xs uppercase tracking-wide text-sky-200/70">{partner.title}</p>
-                <p className="mt-1 text-sm font-medium text-white transition-colors group-hover:text-sky-200">{partner.name}</p>
               </Link>
             ))}
           </div>
