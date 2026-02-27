@@ -12,7 +12,7 @@ const founders = [
    {
     name: "Tala Swaidan",
     role: "Founder & Secretary-General",
-    image: "/founders/TalaSwaidan_SG.png",
+    image: "/founders/TalaSwaidan_SG.jpg",
   },
   {
     name: "Vihaan Shukla",
