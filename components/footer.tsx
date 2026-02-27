@@ -155,7 +155,6 @@ export function Footer() {
         <div className="mt-10 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-950 px-4 py-7 sm:px-6 sm:py-8">
           <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <h3 className="text-sm sm:text-base font-semibold tracking-wide text-gray-100">Our Partners</h3>
-            <p className="text-xs text-gray-400">Click any logo or name to visit their official website.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
