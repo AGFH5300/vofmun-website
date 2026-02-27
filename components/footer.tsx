@@ -9,31 +9,31 @@ const partners = [
     title: "Venue Partner",
     name: "Arcadia Global School Dubai",
     logo: "/partners/ags.svg",
-    website: "https://arcadia.sch.ae/",
+    website: "https://arcadiaglobal.sch.ae/",
   },
   {
     title: "Event Partner",
     name: "Summit of Diplomacy",
     logo: "/partners/sod.svg",
-    website: "https://summitofdiplomacy.org/",
+    website: "https://sodmun.com/",
   },
   {
     title: "Delegate Experience Partner",
     name: "UniHawk",
     logo: "/partners/unihawk.svg",
-    website: "https://unihawk.org/",
+    website: "https://www.unihawk.com/",
   },
   {
     title: "Partner",
     name: "ReModelUN",
     logo: "/partners/remodelun.svg",
-    website: "https://www.remodelun.com/",
+    website: "https://www.remodelun.org/",
   },
   {
     title: "Conference Sponsor",
     name: "Transmak Dewatering",
     logo: "/partners/transmak.svg",
-    website: "https://transmakdewatering.com/",
+    website: "https://www.transmak.ae/",
   },
 ]
 
