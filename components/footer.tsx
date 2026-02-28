@@ -13,13 +13,6 @@ const partners = [
     logoContainerClass: "h-16 w-16",
   },
   {
-    title: "Event Partner",
-    name: "Summit of Diplomacy",
-    logo: "/partners/sod.svg",
-    website: "https://sodmun.com/",
-    logoContainerClass: "h-[4.25rem] w-[4.25rem]",
-  },
-  {
     title: "Delegate Experience Partner",
     name: "UniHawk",
     logo: "/partners/unihawk.svg",
@@ -31,6 +24,13 @@ const partners = [
     logo: "/partners/remodelun.svg",
     website: "https://www.remodelun.org/",
     logoContainerClass: "h-[3.9rem] w-[3.9rem]",
+  },
+  {
+    title: "Event Partner",
+    name: "Summit of Diplomacy",
+    logo: "/partners/sod.svg",
+    website: "https://sodmun.com/",
+    logoContainerClass: "h-[4.25rem] w-[4.25rem]",
   },
   {
     title: "Conference Sponsor",
@@ -160,28 +160,32 @@ export function Footer() {
             <h3 className="text-sm sm:text-base font-semibold tracking-wide text-gray-100">Our Partners</h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {partners.map((partner) => (
-              <Link
-                key={partner.name}
-                href={partner.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:border-sky-300/40 hover:bg-slate-800/40 hover:shadow-[0_18px_40px_-24px_rgba(56,189,248,0.8)]"
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`relative shrink-0 overflow-hidden rounded-lg border border-white/10 bg-gradient-to-r from-slate-900/70 via-slate-800/50 to-slate-900/70 p-2 ${partner.logoContainerClass ?? "h-14 w-14"}`}
-                  >
-                    <Image src={partner.logo} alt={`${partner.name} logo`} fill className="object-contain p-2" />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+            {partners.map((partner, index) => {
+              const shouldCenterSecondRow = partners.length % 3 === 2 && index === partners.length - 2
+
+              return (
+                <Link
+                  key={partner.name}
+                  href={partner.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`group relative rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:border-sky-300/40 hover:bg-slate-800/40 hover:shadow-[0_18px_40px_-24px_rgba(56,189,248,0.8)] lg:col-span-2 ${shouldCenterSecondRow ? "lg:col-start-2" : ""}`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`relative shrink-0 overflow-hidden rounded-lg border border-white/10 bg-gradient-to-r from-slate-900/70 via-slate-800/50 to-slate-900/70 p-2 ${partner.logoContainerClass ?? "h-14 w-14"}`}
+                    >
+                      <Image src={partner.logo} alt={`${partner.name} logo`} fill className="object-contain p-2" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-sky-200/70">{partner.title}</p>
+                      <p className="mt-1 text-sm font-medium text-white transition-colors group-hover:text-sky-200">{partner.name}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wide text-sky-200/70">{partner.title}</p>
-                    <p className="mt-1 text-sm font-medium text-white transition-colors group-hover:text-sky-200">{partner.name}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              )
+            })}
           </div>
         </div>
 
