@@ -19,7 +19,7 @@ const partners = [
     website: "https://www.unihawk.com/",
   },
   {
-    title: "Partner",
+    title: "Delegate Experience Partner",
     name: "ReModelUN",
     logo: "/partners/remodelun.svg",
     website: "https://www.remodelun.org/",
