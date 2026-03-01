@@ -6,19 +6,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Download, FileText, Users, Clock, Award, AlertCircle } from "lucide-react"
+import { ComingSoonDialog } from "@/components/coming-soon-dialog"
 
 const handbooks = [
   {
     title: "Delegate Handbook",
     href: "/pdfs/delegate-handbook.pdf",
+    comingSoon: false,
   },
   {
     title: "Chair Handbook",
     href: "/pdfs/chair-handbook.pdf",
+    comingSoon: false,
   },
   {
     title: "Admin Handbook",
-    href: "/pdfs/admin-handbook.pdf",
+    href: "",
+    comingSoon: true,
   },
 ]
 
@@ -86,17 +90,33 @@ export function RulesSection() {
                 Download the handbook relevant to your role before committee sessions begin.
               </p>
               <div className="grid gap-3 sm:grid-cols-3">
-                {handbooks.map((handbook) => (
-                  <Button
-                    key={handbook.title}
-                    variant="outline"
-                    onClick={() => window.open(handbook.href, "_blank")}
-                    className="border-[#B22222]/30 text-[#B22222] hover:bg-[#B22222]/10"
-                  >
-                    <FileText className="mr-2 h-4 w-4" />
-                    {handbook.title}
-                  </Button>
-                ))}
+                {handbooks.map((handbook) => {
+                  if (handbook.comingSoon) {
+                    return (
+                      <ComingSoonDialog key={handbook.title} label={handbook.title}>
+                        <Button
+                          variant="outline"
+                          className="border-[#B22222]/30 text-[#B22222] hover:bg-[#B22222]/10"
+                        >
+                          <FileText className="mr-2 h-4 w-4" />
+                          {handbook.title}
+                        </Button>
+                      </ComingSoonDialog>
+                    )
+                  }
+
+                  return (
+                    <Button
+                      key={handbook.title}
+                      variant="outline"
+                      onClick={() => window.open(handbook.href, "_blank")}
+                      className="border-[#B22222]/30 text-[#B22222] hover:bg-[#B22222]/10"
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      {handbook.title}
+                    </Button>
+                  )
+                })}
               </div>
             </CardContent>
           </Card>
