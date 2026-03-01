@@ -14,7 +14,7 @@ export function LiveCountdownTimer() {
   })
 
   useEffect(() => {
-    const targetDate = new Date("2026-03-28T00:00:00").getTime()
+    const targetDate = new Date("2026-04-03T00:00:00").getTime()
 
     const updateCountdown = () => {
       const now = new Date().getTime()
