@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 import { insertUserSchema } from "@/lib/db/schema"
 import { countries } from "@/lib/countries"
-import { isAdminSignupClosed, isChairSignupClosed } from "@/lib/registration-deadlines"
+import { isChairSignupClosed } from "@/lib/registration-deadlines"
 import { normalizeReferralCode } from "@/lib/referral-codes"
 import { createClient } from "@/utils/supabase/server"
 
@@ -286,13 +286,6 @@ export async function POST(request: NextRequest) {
     if (normalizedRole === "chair" && isChairSignupClosed()) {
       return NextResponse.json(
         { message: "Chair applications are now closed.", status: "error" },
-        { status: 403 },
-      )
-    }
-
-    if (normalizedRole === "admin" && isAdminSignupClosed()) {
-      return NextResponse.json(
-        { message: "Admin applications are now closed.", status: "error" },
         { status: 403 },
       )
     }
