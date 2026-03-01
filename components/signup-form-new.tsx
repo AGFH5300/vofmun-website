@@ -1249,7 +1249,7 @@ export function SignupFormNew() {
 
           {(chairSignupClosed || adminSignupClosed) && (
             <Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-900">
-              <AlertTitle>Applications are closed for some leadership roles</AlertTitle>
+              <AlertTitle>Applications are closed for some roles</AlertTitle>
               <AlertDescription>
                 <div className="space-y-1">
                   {chairSignupClosed && (
