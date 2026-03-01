@@ -7,6 +7,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Download, FileText, Users, Clock, Award, AlertCircle } from "lucide-react"
 
+const handbooks = [
+  {
+    title: "Delegate Handbook",
+    href: "/pdfs/delegate-handbook.pdf",
+  },
+  {
+    title: "Chair Handbook",
+    href: "/pdfs/chair-handbook.pdf",
+  },
+  {
+    title: "Admin Handbook",
+    href: "/pdfs/admin-handbook.pdf",
+  },
+]
+
 const rules = [
   {
     category: "Parliamentary Procedure",
@@ -61,6 +76,30 @@ export function RulesSection() {
               Essential guidelines to ensure a professional and productive conference experience for all delegates.
             </p>
           </div>
+
+          <Card id="handbooks" className="mb-8 border-0 bg-white shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-2xl font-serif text-[#B22222]">Conference Handbooks</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-gray-700">
+                Download the handbook relevant to your role before committee sessions begin.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {handbooks.map((handbook) => (
+                  <Button
+                    key={handbook.title}
+                    variant="outline"
+                    onClick={() => window.open(handbook.href, "_blank")}
+                    className="border-[#B22222]/30 text-[#B22222] hover:bg-[#B22222]/10"
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    {handbook.title}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             {rules.map((rule, index) => {
