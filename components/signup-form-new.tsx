@@ -38,7 +38,12 @@ import { SchoolSelect } from "@/components/school-select"
 import { AIExperienceModal } from "@/components/ai-experience-modal"
 import { FileText, Shield, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { CHAIR_SIGNUP_CUTOFF_DISPLAY, isChairSignupClosed } from "@/lib/registration-deadlines"
+import {
+  ADMIN_SIGNUP_CUTOFF_DISPLAY,
+  CHAIR_SIGNUP_CUTOFF_DISPLAY,
+  isAdminSignupClosed,
+  isChairSignupClosed,
+} from "@/lib/registration-deadlines"
 import {
   findReferralSuggestions,
   getReferralCodeEntry,
@@ -157,6 +162,7 @@ export function SignupFormNew() {
   const [showAIModal, setShowAIModal] = useState(false)
   const [lastSubmittedRole, setLastSubmittedRole] = useState<Role | null>(null)
   const chairSignupClosed = isChairSignupClosed()
+  const adminSignupClosed = isAdminSignupClosed()
 
   const stripeButtonClasses =
     "inline-flex items-center justify-center gap-2 rounded-lg bg-[#635bff] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-[#4f47d8] active:bg-[#423ac7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635bff]"
@@ -195,6 +201,22 @@ export function SignupFormNew() {
     { key: "committee2" as const, label: "Second Choice", required: false },
     { key: "committee3" as const, label: "Third Choice", required: false },
   ]
+
+
+  const getRoleClosedState = (role: Role) => {
+    if (!role) {
+      return { closed: false, label: "", cutoffDisplay: "" }
+    }
+    if (role === "chair") {
+      return { closed: chairSignupClosed, label: "Chair", cutoffDisplay: CHAIR_SIGNUP_CUTOFF_DISPLAY }
+    }
+
+    if (role === "admin") {
+      return { closed: adminSignupClosed, label: "Admin", cutoffDisplay: ADMIN_SIGNUP_CUTOFF_DISPLAY }
+    }
+
+    return { closed: false, label: "Delegate", cutoffDisplay: "" }
+  }
 
 
   const isFileDrag = (event: DragEvent | React.DragEvent<HTMLElement>) =>
@@ -666,6 +688,14 @@ export function SignupFormNew() {
       if (selectedRole === "chair" && chairSignupClosed) {
         toast.error("Chair applications are closed", {
           description: `Chair applications closed on ${CHAIR_SIGNUP_CUTOFF_DISPLAY}.`,
+          duration: 6000,
+        })
+        return
+      }
+
+      if (selectedRole === "admin" && adminSignupClosed) {
+        toast.error("Admin applications are closed", {
+          description: `Admin applications closed on ${ADMIN_SIGNUP_CUTOFF_DISPLAY}.`,
           duration: 6000,
         })
         return
@@ -1217,20 +1247,27 @@ export function SignupFormNew() {
             <p className="text-gray-600 text-sm sm:text-base">Select the role you'd like to apply for at VOFMUN 2026</p>
           </div>
 
-          {chairSignupClosed && (
+          {(chairSignupClosed || adminSignupClosed) && (
             <Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-900">
-              <AlertTitle>Chair applications are closed</AlertTitle>
+              <AlertTitle>Applications are closed for some leadership roles</AlertTitle>
               <AlertDescription>
-                <p className="m-0">
-                  Chair applications closed on <b>{CHAIR_SIGNUP_CUTOFF_DISPLAY}</b>. For any queries,
-                  please contact us at{" "}
-                  <Link
-                    href="mailto:conference@vofmun.org"
-                    className="font-semibold text-[#B22222] underline-offset-4 hover:underline"
-                  >
-                    conference@vofmun.org
-                  </Link>
-                </p>
+                <div className="space-y-1">
+                  {chairSignupClosed && (
+                    <p className="m-0">Chair applications closed on <b>{CHAIR_SIGNUP_CUTOFF_DISPLAY}</b>.</p>
+                  )}
+                  {adminSignupClosed && (
+                    <p className="m-0">Admin applications closed on <b>{ADMIN_SIGNUP_CUTOFF_DISPLAY}</b>.</p>
+                  )}
+                  <p className="m-0">
+                    For any queries, please contact us at{" "}
+                    <Link
+                      href="mailto:conference@vofmun.org"
+                      className="font-semibold text-[#B22222] underline-offset-4 hover:underline"
+                    >
+                      conference@vofmun.org
+                    </Link>
+                  </p>
+                </div>
               </AlertDescription>
             </Alert>
           )}
@@ -1238,18 +1275,19 @@ export function SignupFormNew() {
           <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
             {roleCards.map((card) => {
               const IconComponent = card.icon
-              const isChairRoleClosed = chairSignupClosed && card.role === "chair"
+              const roleClosedState = getRoleClosedState(card.role)
+              const isRoleClosed = roleClosedState.closed
               return (
                 <div
                   key={card.role}
                   className={cn(
                     "relative border-2 border-gray-200 rounded-xl p-4 sm:p-6 transition-all duration-300 group flex flex-col",
-                    isChairRoleClosed
+                    isRoleClosed
                       ? "cursor-not-allowed opacity-60"
                       : "cursor-pointer hover:border-[#B22222] hover:shadow-lg hover:scale-105",
                   )}
                   onClick={() => {
-                    if (!isChairRoleClosed) {
+                    if (!isRoleClosed) {
                       setSelectedRole(card.role)
                     }
                   }}
@@ -1280,10 +1318,10 @@ export function SignupFormNew() {
 
                     <Button
                       className="flex w-full bg-[#B22222] hover:bg-[#B22222] text-white text-xs py-2 sm:py-2.5 mt-auto"
-                      disabled={isChairRoleClosed}
+                      disabled={isRoleClosed}
                       data-testid={`button-${card.role}`}
                     >
-                      {isChairRoleClosed ? "Closed" : "Select"}
+                      {isRoleClosed ? "Closed" : "Select"}
                     </Button>
                   </div>
                 </div>
@@ -1297,27 +1335,31 @@ export function SignupFormNew() {
     )
   }
 
-  if (selectedRole === "chair" && chairSignupClosed) {
-    return (
-      <>
-        <Card className="w-full max-w-2xl mx-auto diplomatic-shadow border-0 bg-white/90">
-          <CardHeader className="space-y-2 p-4 sm:p-6">
-            <CardTitle className="text-xl sm:text-2xl font-serif text-center text-gray-900">
-              Chair applications are closed
-            </CardTitle>
-            <CardDescription className="text-center text-gray-600 text-sm sm:text-base">
-              Chair applications closed on {CHAIR_SIGNUP_CUTOFF_DISPLAY}. Delegate and admin registrations remain open.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <Button className="w-full" onClick={() => setSelectedRole(null)}>
-              Back to role selection
-            </Button>
-          </CardContent>
-        </Card>
-        {successModal}
-      </>
-    )
+  if (selectedRole && selectedRole !== "delegate") {
+    const selectedRoleClosedState = getRoleClosedState(selectedRole)
+
+    if (selectedRoleClosedState.closed) {
+      return (
+        <>
+          <Card className="w-full max-w-2xl mx-auto diplomatic-shadow border-0 bg-white/90">
+            <CardHeader className="space-y-2 p-4 sm:p-6">
+              <CardTitle className="text-xl sm:text-2xl font-serif text-center text-gray-900">
+                {selectedRoleClosedState.label} applications are closed
+              </CardTitle>
+              <CardDescription className="text-center text-gray-600 text-sm sm:text-base">
+                {selectedRoleClosedState.label} applications closed on {selectedRoleClosedState.cutoffDisplay}. Delegate registrations remain open.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <Button className="w-full" onClick={() => setSelectedRole(null)}>
+                Back to role selection
+              </Button>
+            </CardContent>
+          </Card>
+          {successModal}
+        </>
+      )
+    }
   }
 
   return (
