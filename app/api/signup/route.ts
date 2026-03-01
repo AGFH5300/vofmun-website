@@ -21,7 +21,7 @@ import {
   isValidReferralCode,
   normalizeReferralCode,
 } from '@/lib/referral-codes'
-import { isChairSignupClosed } from '@/lib/registration-deadlines'
+import { isAdminSignupClosed, isChairSignupClosed } from '@/lib/registration-deadlines'
 import { z } from 'zod'
 
 export const runtime = 'nodejs'
@@ -49,6 +49,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           message: 'Chair applications are now closed.',
+          status: 'error',
+        },
+        { status: 403 },
+      )
+    }
+
+    if (body?.selectedRole === 'admin' && isAdminSignupClosed()) {
+      return NextResponse.json(
+        {
+          message: 'Admin applications are now closed.',
           status: 'error',
         },
         { status: 403 },

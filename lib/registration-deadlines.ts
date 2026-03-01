@@ -10,7 +10,17 @@ const getDefaultChairCutoff = () => {
   return cutoffUtc.toISOString()
 }
 
+const getDefaultAdminCutoff = () => {
+  const now = new Date()
+  const year = now.getUTCFullYear()
+
+  // Feb = month 1
+  const cutoffUtc = new Date(Date.UTC(year, 1, 28, 19, 59, 59))
+  return cutoffUtc.toISOString()
+}
+
 const DEFAULT_CHAIR_SIGNUP_CUTOFF_GST = getDefaultChairCutoff()
+const DEFAULT_ADMIN_SIGNUP_CUTOFF_GST = getDefaultAdminCutoff()
 
 const getChairCutoffTimestamp = () => {
   const rawCutoff =
@@ -27,8 +37,28 @@ const getChairCutoffTimestamp = () => {
   return parsed
 }
 
+const getAdminCutoffTimestamp = () => {
+  const rawCutoff =
+    process.env.NEXT_PUBLIC_ADMIN_SIGNUP_CUTOFF_GST ??
+    process.env.ADMIN_SIGNUP_CUTOFF_GST ??
+    DEFAULT_ADMIN_SIGNUP_CUTOFF_GST
+
+  const parsed = new Date(rawCutoff)
+
+  if (Number.isNaN(parsed.getTime())) {
+    return new Date(DEFAULT_ADMIN_SIGNUP_CUTOFF_GST)
+  }
+
+  return parsed
+}
+
 export const CHAIR_SIGNUP_CUTOFF_GST = getChairCutoffTimestamp()
 export const CHAIR_SIGNUP_CUTOFF_DISPLAY = "10th January"
+export const ADMIN_SIGNUP_CUTOFF_GST = getAdminCutoffTimestamp()
+export const ADMIN_SIGNUP_CUTOFF_DISPLAY = "28th February"
 
 export const isChairSignupClosed = (reference: Date = new Date()) =>
   reference.getTime() > CHAIR_SIGNUP_CUTOFF_GST.getTime()
+
+export const isAdminSignupClosed = (reference: Date = new Date()) =>
+  reference.getTime() > ADMIN_SIGNUP_CUTOFF_GST.getTime()
