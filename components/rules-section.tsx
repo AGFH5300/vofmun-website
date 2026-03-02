@@ -187,7 +187,7 @@ export function RulesSection() {
                   </p>
                 </div>
                 <ComingSoonDialog label="Rules of Procedure PDF">
-                  <Button size="lg" className="bg-white text-emerald-700 hover:bg-gray-100">
+                  <Button size="lg" onClick={() => window.open("/pdfs/Rules.pdf", "_blank")} className="bg-white text-emerald-700 hover:bg-gray-100">
                     <Download className="h-5 w-5 mr-2" />
                     Download Rules of Procedure PDF
                   </Button>
