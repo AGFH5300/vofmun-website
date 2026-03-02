@@ -2,7 +2,7 @@
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calendar } from "lucide-react"
+import { Calendar, Clock3, Coffee, Gavel, MoonStar, PartyPopper, Sparkles, Users } from "lucide-react"
 
 type ScheduleRow = {
   time: string
@@ -58,43 +58,135 @@ const scheduleByDay: ScheduleDay[] = [
   },
 ]
 
+function getEventStyle(event: string) {
+  const normalizedEvent = event.toLowerCase()
+
+  if (normalizedEvent.includes("social")) {
+    return {
+      icon: PartyPopper,
+      label: "Featured",
+      ringColor: "ring-fuchsia-300/70",
+      bgColor: "bg-fuchsia-50",
+      badgeColor: "bg-fuchsia-100 text-fuchsia-700",
+    }
+  }
+
+  if (normalizedEvent.includes("ceremony")) {
+    return {
+      icon: Sparkles,
+      label: "Highlight",
+      ringColor: "ring-amber-300/70",
+      bgColor: "bg-amber-50",
+      badgeColor: "bg-amber-100 text-amber-700",
+    }
+  }
+
+  if (normalizedEvent.includes("break") || normalizedEvent.includes("lunch")) {
+    return {
+      icon: Coffee,
+      label: "Break",
+      ringColor: "ring-lime-300/70",
+      bgColor: "bg-lime-50",
+      badgeColor: "bg-lime-100 text-lime-700",
+    }
+  }
+
+  if (normalizedEvent.includes("committee") || normalizedEvent.includes("workshop")) {
+    return {
+      icon: Gavel,
+      label: "Session",
+      ringColor: "ring-blue-300/70",
+      bgColor: "bg-blue-50",
+      badgeColor: "bg-blue-100 text-blue-700",
+    }
+  }
+
+  if (normalizedEvent.includes("registration") || normalizedEvent.includes("chair")) {
+    return {
+      icon: Users,
+      label: "Arrival",
+      ringColor: "ring-violet-300/70",
+      bgColor: "bg-violet-50",
+      badgeColor: "bg-violet-100 text-violet-700",
+    }
+  }
+
+  return {
+    icon: MoonStar,
+    label: "Update",
+    ringColor: "ring-slate-300/70",
+    bgColor: "bg-slate-50",
+    badgeColor: "bg-slate-100 text-slate-700",
+  }
+}
+
 export function ScheduleSection() {
   return (
-    <section id="schedule" className="py-12" style={{ backgroundColor: "#ffecdd" }}>
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto">
-          <Card className="diplomatic-shadow border-0 bg-white/95">
-            <CardHeader className="text-center space-y-3">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#B22222]/10">
-                <Calendar className="h-6 w-6 text-[#B22222]" />
+    <section
+      id="schedule"
+      className="relative overflow-hidden py-14 sm:py-16"
+      style={{
+        background:
+          "radial-gradient(circle at top right, rgba(255,214,170,0.7), transparent 35%), linear-gradient(180deg, #ffecdd 0%, #fff5ec 45%, #fff9f3 100%)",
+      }}
+    >
+      <div className="pointer-events-none absolute -right-8 top-10 h-28 w-28 rounded-full bg-[#B22222]/10 blur-2xl" />
+      <div className="pointer-events-none absolute -left-10 bottom-16 h-32 w-32 rounded-full bg-amber-400/20 blur-3xl" />
+
+      <div className="container relative mx-auto px-4">
+        <div className="mx-auto max-w-6xl">
+          <Card className="diplomatic-shadow border-[#B22222]/10 bg-white/85 backdrop-blur-sm">
+            <CardHeader className="space-y-4 text-center">
+              <div className="mx-auto flex h-14 w-14 animate-pulse items-center justify-center rounded-full bg-[#B22222]/10">
+                <Calendar className="h-7 w-7 text-[#B22222]" />
               </div>
-              <CardTitle className="text-2xl sm:text-3xl font-serif font-bold text-primary">Conference Schedule</CardTitle>
+              <CardTitle className="text-3xl font-bold text-primary sm:text-4xl">Conference Schedule</CardTitle>
+              <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
+                A polished, easy-to-scan timeline for all three conference days. Hover over each event to spotlight key
+                moments.
+              </p>
             </CardHeader>
-            <CardContent className="space-y-8 px-2 pb-8 sm:px-6">
-              {scheduleByDay.map((day) => (
-                <div key={day.title} className="overflow-hidden rounded-md border border-[#555]/60">
-                  <h3 className="bg-[#B22222] px-4 py-2 text-center text-2xl font-serif font-bold text-white">{day.title}</h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="bg-[#f0f0f0]">
-                          <th className="w-[32%] border border-[#999]/80 px-3 py-2 text-center text-xl font-serif font-bold">Time</th>
-                          <th className="border border-[#999]/80 px-3 py-2 text-center text-xl font-serif font-bold">Event</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {day.rows.map((row) => (
-                          <tr key={`${day.title}-${row.time}-${row.event}`}>
-                            <td className="border border-[#999]/80 bg-[#f6f6f6] px-3 py-2 text-center text-xl font-serif font-semibold text-[#212121]">
-                              {row.time}
-                            </td>
-                            <td className="border border-[#999]/80 bg-[#f9f5f5] px-3 py-2 text-center text-xl font-serif font-semibold text-[#212121]">
-                              {row.event}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+
+            <CardContent className="space-y-6 px-3 pb-8 sm:px-6">
+              {scheduleByDay.map((day, dayIndex) => (
+                <div
+                  key={day.title}
+                  className="overflow-hidden rounded-2xl border border-[#B22222]/20 bg-white/70 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="bg-gradient-to-r from-[#B22222] to-[#8f1818] px-5 py-3">
+                    <h3 className="text-center text-xl font-bold tracking-wide text-white sm:text-2xl">{day.title}</h3>
+                  </div>
+
+                  <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-3">
+                    {day.rows.map((row, rowIndex) => {
+                      const eventStyle = getEventStyle(row.event)
+                      const EventIcon = eventStyle.icon
+
+                      return (
+                        <article
+                          key={`${day.title}-${row.time}-${row.event}`}
+                          className={`group rounded-xl border border-slate-200/80 p-3 shadow-sm ring-1 ${eventStyle.ringColor} ${eventStyle.bgColor} transition-all duration-300 hover:-translate-y-1 hover:shadow-md`}
+                          style={{
+                            animation: "fadeIn 0.5s ease-out both",
+                            animationDelay: `${dayIndex * 0.08 + rowIndex * 0.03}s`,
+                          }}
+                        >
+                          <div className="mb-2 flex items-center justify-between gap-2">
+                            <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${eventStyle.badgeColor}`}>
+                              {eventStyle.label}
+                            </span>
+                            <EventIcon className="h-4 w-4 text-slate-600 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
+                          </div>
+
+                          <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-[#8f1818]">
+                            <Clock3 className="h-4 w-4" />
+                            {row.time}
+                          </div>
+
+                          <p className="text-sm font-medium text-slate-700">{row.event}</p>
+                        </article>
+                      )
+                    })}
                   </div>
                 </div>
               ))}
