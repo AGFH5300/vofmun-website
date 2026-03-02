@@ -159,15 +159,15 @@ export function RulesSection() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-serif font-bold mb-2 text-white">Complete Rules & Procedures</h3>
+                  <h3 className="text-2xl font-serif font-bold mb-2 text-white">Complete Terms & Conditions</h3>
                   <p className="text-white/90 leading-relaxed">
-                    Download the comprehensive rules document for detailed information about parliamentary procedure,
-                    committee-specific guidelines, and conference protocols.
+                    Download the official terms and conditions when you sign 
                   </p>
                 </div>
                 <Button variant="secondary" size="lg" onClick={() => window.open("/pdfs/T&Cs.pdf", "_blank")} className="bg-white text-[#B22222] hover:bg-gray-100">
                   <Download className="h-5 w-5 mr-2" />
-                  Download Full Rules PDF
+                  Download the official Terms and Conditions document outlining participation requirements, registration policies,
+  cancellation procedures, and general agreements applicable to all conference attendees.
                 </Button>
               </CardContent>
             </Card>
@@ -182,16 +182,14 @@ export function RulesSection() {
                 <div>
                   <h3 className="text-2xl font-serif font-bold mb-2 text-white">Rules of Procedure</h3>
                   <p className="text-white/90 leading-relaxed">
-                    Access the official Rules of Procedure document covering the flow of debate, motions, voting,
-                    and committee conduct during sessions.
+                   Access the official Rules of Procedure document outlining debate structure, motions, voting processes,
+  and committee guidelines for all conference participants.
                   </p>
                 </div>
-                <ComingSoonDialog label="Rules of Procedure PDF">
-                  <Button size="lg" onClick={() => window.open("/pdfs/Rules.pdf", "_blank")} className="bg-white text-emerald-700 hover:bg-gray-100">
-                    <Download className="h-5 w-5 mr-2" />
-                    Download Rules of Procedure PDF
-                  </Button>
-                </ComingSoonDialog>
+                <Button size="lg" onClick={() => window.open("/pdfs/Rules.pdf", "_blank")} className="bg-white text-emerald-700 hover:bg-gray-100">
+                  <Download className="h-5 w-5 mr-2" />
+                  Download Rules of Procedure PDF
+                </Button>
               </CardContent>
             </Card>
 
