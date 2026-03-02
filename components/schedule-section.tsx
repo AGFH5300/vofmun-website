@@ -119,10 +119,6 @@ export function ScheduleSection() {
     <section
       id="schedule"
       className="relative overflow-hidden py-14 sm:py-16"
-      style={{
-        background:
-          "radial-gradient(circle at top right, rgba(255,214,170,0.7), transparent 35%), linear-gradient(180deg, #ffecdd 0%, #fff5ec 45%, #fff9f3 100%)",
-      }}
     >
       <div className="pointer-events-none absolute -right-8 top-10 h-28 w-28 rounded-full bg-[#B22222]/10 blur-2xl" />
       <div className="pointer-events-none absolute -left-10 bottom-16 h-32 w-32 rounded-full bg-amber-400/20 blur-3xl" />
