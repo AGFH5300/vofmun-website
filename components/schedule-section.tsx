@@ -127,7 +127,7 @@ export function ScheduleSection() {
         <div className="mx-auto max-w-6xl">
           <Card className="diplomatic-shadow border-[#B22222]/10 bg-white/85 backdrop-blur-sm">
             <CardHeader className="space-y-4 text-center">
-              <div className="mx-auto flex h-14 w-14 animate-pulse items-center justify-center rounded-full bg-[#B22222]/10">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#B22222]/10">
                 <Calendar className="h-7 w-7 text-[#B22222]" />
               </div>
               <CardTitle className="text-3xl font-bold text-primary sm:text-4xl">Conference Schedule</CardTitle>
