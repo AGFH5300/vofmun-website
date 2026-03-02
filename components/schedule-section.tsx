@@ -131,9 +131,6 @@ export function ScheduleSection() {
                 <Calendar className="h-7 w-7 text-[#B22222]" />
               </div>
               <CardTitle className="text-3xl font-bold text-primary sm:text-4xl">Conference Schedule</CardTitle>
-              <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-                A polished, easy-to-scan timeline for all three conference days.
-              </p>
             </CardHeader>
 
             <CardContent className="space-y-6 px-3 pb-8 sm:px-6">
