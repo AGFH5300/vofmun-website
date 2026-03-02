@@ -72,7 +72,7 @@ function getEventStyle(event: string) {
 
   if (normalizedEvent.includes("ceremony")) {
     return {
-      label: "Highlight",
+      label: "Ceremony",
       ringColor: "ring-amber-300/70",
       bgColor: "bg-amber-50",
       badgeColor: "bg-amber-100 text-amber-700",
@@ -90,7 +90,7 @@ function getEventStyle(event: string) {
 
   if (normalizedEvent.includes("committee") || normalizedEvent.includes("workshop")) {
     return {
-      label: "Session",
+      label: "Committee",
       ringColor: "ring-blue-300/70",
       bgColor: "bg-blue-50",
       badgeColor: "bg-blue-100 text-blue-700",
@@ -99,7 +99,7 @@ function getEventStyle(event: string) {
 
   if (normalizedEvent.includes("registration") || normalizedEvent.includes("chair")) {
     return {
-      label: "Arrival",
+      label: "Registration",
       ringColor: "ring-violet-300/70",
       bgColor: "bg-violet-50",
       badgeColor: "bg-violet-100 text-violet-700",
@@ -107,7 +107,7 @@ function getEventStyle(event: string) {
   }
 
   return {
-    label: "Update",
+    label: "Departure",
     ringColor: "ring-slate-300/70",
     bgColor: "bg-slate-50",
     badgeColor: "bg-slate-100 text-slate-700",
