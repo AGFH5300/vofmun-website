@@ -137,7 +137,6 @@ export function ScheduleSection() {
             </CardHeader>
 
             <CardContent className="space-y-6 px-3 pb-8 sm:px-6">
-              {/*
               {scheduleByDay.map((day, dayIndex) => (
                 <div
                   key={day.title}
@@ -150,7 +149,6 @@ export function ScheduleSection() {
                   <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-3">
                     {day.rows.map((row, rowIndex) => {
                       const eventStyle = getEventStyle(row.event)
-                      const EventIcon = eventStyle.icon
 
                       return (
                         <article
@@ -165,7 +163,7 @@ export function ScheduleSection() {
                             <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${eventStyle.badgeColor}`}>
                               {eventStyle.label}
                             </span>
-                            <EventIcon className="h-4 w-4 text-slate-600 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
+                            <Clock3 className="h-4 w-4 text-slate-600 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
                           </div>
 
                           <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-[#8f1818]">
@@ -180,9 +178,7 @@ export function ScheduleSection() {
                   </div>
                 </div>
               ))}
-              */}
-
-              <div className="grid gap-4 lg:grid-cols-3">
+              {/* <div className="grid gap-4 lg:grid-cols-3">
                 {scheduleByDay.map((day) => (
                   <div
                     key={day.title}
@@ -218,7 +214,7 @@ export function ScheduleSection() {
                     </div>
                   </div>
                 ))}
-              </div>
+              </div> */}
             </CardContent>
           </Card>
         </div>
