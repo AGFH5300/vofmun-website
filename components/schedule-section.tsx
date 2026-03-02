@@ -137,48 +137,7 @@ export function ScheduleSection() {
             </CardHeader>
 
             <CardContent className="space-y-6 px-3 pb-8 sm:px-6">
-              {scheduleByDay.map((day, dayIndex) => (
-                <div
-                  key={day.title}
-                  className="overflow-hidden rounded-2xl border border-[#B22222]/20 bg-white/70 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                >
-                  <div className="bg-gradient-to-r from-[#B22222] to-[#8f1818] px-5 py-3">
-                    <h3 className="text-center text-xl font-bold tracking-wide text-white sm:text-2xl">{day.title}</h3>
-                  </div>
-
-                  <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-3">
-                    {day.rows.map((row, rowIndex) => {
-                      const eventStyle = getEventStyle(row.event)
-
-                      return (
-                        <article
-                          key={`${day.title}-${row.time}-${row.event}`}
-                          className={`group rounded-xl border border-slate-200/80 p-3 shadow-sm ring-1 ${eventStyle.ringColor} ${eventStyle.bgColor} transition-all duration-300 hover:-translate-y-1 hover:shadow-md`}
-                          style={{
-                            animation: "fadeIn 0.5s ease-out both",
-                            animationDelay: `${dayIndex * 0.08 + rowIndex * 0.03}s`,
-                          }}
-                        >
-                          <div className="mb-2 flex items-center justify-between gap-2">
-                            <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${eventStyle.badgeColor}`}>
-                              {eventStyle.label}
-                            </span>
-                            <Clock3 className="h-4 w-4 text-slate-600 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
-                          </div>
-
-                          <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-[#8f1818]">
-                            <Clock3 className="h-4 w-4" />
-                            {row.time}
-                          </div>
-
-                          <p className="text-sm font-medium text-slate-700">{row.event}</p>
-                        </article>
-                      )
-                    })}
-                  </div>
-                </div>
-              ))}
-              {/* <div className="grid gap-4 lg:grid-cols-3">
+              <div className="grid gap-4 lg:grid-cols-3">
                 {scheduleByDay.map((day) => (
                   <div
                     key={day.title}
@@ -214,7 +173,7 @@ export function ScheduleSection() {
                     </div>
                   </div>
                 ))}
-              </div> */}
+              </div>
             </CardContent>
           </Card>
         </div>
