@@ -116,6 +116,7 @@ As Co-Head of Committees at VOFMUN 2026, I oversee committee quality, background
     department: "Logistics",
     image: "/founders/VyomPatel_Logistics.png",
     bio: "Leading logistics planning to deliver a smooth and engaging conference experience.",
+    linkedin: "https://www.linkedin.com/in/vyom-patel-6b55393b4/",
     writeup: `Hey everyone, my name is Vyom Patel and it is my pleasure to serve as the Head of Logistics for VOFMUN 2026.
 
 I study at Gems Founders School Al Barsha in year 10 and I am 14 years old. some of my hobbies are playing the guitar, playing basketball and 8-ball pool.
