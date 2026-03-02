@@ -5,7 +5,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Download, FileText, Users, Clock, Award, AlertCircle } from "lucide-react"
+import { Download, FileText, Users, Clock, Award, AlertCircle, Scale } from "lucide-react"
 import { ComingSoonDialog } from "@/components/coming-soon-dialog"
 
 const handbooks = [
@@ -150,7 +150,7 @@ export function RulesSection() {
           </div>
 
           {/* Download Section */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             <Card className="bg-gradient-to-r from-[#B22222] to-[#D32F2F] text-white border-0 shadow-lg">
               <CardContent className="p-8 text-center space-y-6">
                 <div className="flex justify-center">
@@ -169,6 +169,29 @@ export function RulesSection() {
                   <Download className="h-5 w-5 mr-2" />
                   Download Full Rules PDF
                 </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-0 shadow-lg">
+              <CardContent className="p-8 text-center space-y-6">
+                <div className="flex justify-center">
+                  <div className="p-4 bg-white/10 rounded-full">
+                    <Scale className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-serif font-bold mb-2 text-white">Rules of Procedure</h3>
+                  <p className="text-white/90 leading-relaxed">
+                    Access the official Rules of Procedure document covering the flow of debate, motions, voting,
+                    and committee conduct during sessions.
+                  </p>
+                </div>
+                <ComingSoonDialog label="Rules of Procedure PDF">
+                  <Button size="lg" className="bg-white text-emerald-700 hover:bg-gray-100">
+                    <Download className="h-5 w-5 mr-2" />
+                    Download Rules of Procedure PDF
+                  </Button>
+                </ComingSoonDialog>
               </CardContent>
             </Card>
 
