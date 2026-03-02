@@ -161,13 +161,13 @@ export function RulesSection() {
                 <div>
                   <h3 className="text-2xl font-serif font-bold mb-2 text-white">Complete Terms & Conditions</h3>
                   <p className="text-white/90 leading-relaxed">
-                    Download the official terms and conditions when you sign 
+                    Download the official Terms and Conditions document outlining participation requirements, registration policies,
+  cancellation procedures, and general agreements applicable to all conference attendees.
                   </p>
                 </div>
                 <Button variant="secondary" size="lg" onClick={() => window.open("/pdfs/T&Cs.pdf", "_blank")} className="bg-white text-[#B22222] hover:bg-gray-100">
                   <Download className="h-5 w-5 mr-2" />
-                  Download the official Terms and Conditions document outlining participation requirements, registration policies,
-  cancellation procedures, and general agreements applicable to all conference attendees.
+                   Download Full Terms & Conditions PDF
                 </Button>
               </CardContent>
             </Card>
