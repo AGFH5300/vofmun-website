@@ -40,7 +40,7 @@ const scheduleByDay: ScheduleDay[] = [
       { time: "16:30 - 18:00", event: "Workshop (Group 2) / Committee Session 6 (Group 1)" },
       { time: "18:00 - 18:15", event: "Dispersal" },
       { time: "18:00 - 20:00", event: "Social Night" },
-      { time: "20:00 - 20:15", event: "Post-Social Night Dispersal" },
+      { time: "20:00 - 20:15", event: "Post-Social Dispersal" },
     ],
   },
   {
@@ -61,7 +61,7 @@ const scheduleByDay: ScheduleDay[] = [
 function getEventStyle(event: string) {
   const normalizedEvent = event.toLowerCase()
 
-  if (normalizedEvent.includes("social")) {
+  if (normalizedEvent.includes("night")) {
     return {
       label: "Featured",
       ringColor: "ring-fuchsia-300/70",
