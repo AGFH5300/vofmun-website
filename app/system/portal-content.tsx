@@ -2096,6 +2096,15 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
         <div className="flex flex-wrap items-center gap-2">
           <Button
             asChild
+            variant="outline"
+            className="gap-2 border-[#B22222]/40 text-[#B22222] hover:bg-[#B22222]/10 hover:text-[#B22222]"
+          >
+            <Link href="/system/allocations">
+              <Columns3 className="h-4 w-4" /> Allocations
+            </Link>
+          </Button>
+          <Button
+            asChild
             className="gap-2 bg-[#B22222] text-white shadow-sm transition hover:bg-[#9b1d1d]"
           >
             <Link href="/system/payment-reminders">

@@ -2,9 +2,10 @@
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
 import { createClient } from "@/utils/supabase/server"
+import { redirect } from "next/navigation"
 import SystemGoogleLogin from "./system-google-login"
 import { PortalContent } from "./portal-content"
-import { isSystemAdmin } from "./_lib/allowlist"
+import { canAccessAllocations, isSystemAdmin } from "./_lib/allowlist"
 
 export default async function SystemPage() {
   const supabase = await createClient()
@@ -15,13 +16,16 @@ export default async function SystemPage() {
     return (
       <main className="min-h-screen bg-[#ffecdd] text-slate-900">
         <div className="container mx-auto px-4 py-16">
-          <SystemGoogleLogin />
+          <SystemGoogleLogin nextPath="/system" />
         </div>
       </main>
     )
   }
 
   const email = user.email
+  if (canAccessAllocations(email) && !isSystemAdmin(email)) {
+    redirect("/system/allocations")
+  }
 
   if (!isSystemAdmin(email)) {
     await supabase.auth.signOut()
