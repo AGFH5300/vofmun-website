@@ -3,6 +3,8 @@
 
 "use client"
 
+import { useEffect, useMemo, useState } from "react"
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
@@ -20,8 +22,55 @@ interface CountryMatrixDialogProps {
   buttonClassName?: string
 }
 
+type MatrixAssignment = {
+  optionCode: string
+  assignedName: string
+}
+
 export function CountryMatrixDialog({ committeeName, matrix, buttonClassName }: CountryMatrixDialogProps) {
+  const [assignments, setAssignments] = useState<MatrixAssignment[]>([])
   const hasRows = matrix.rows.length > 0
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadAssignments = async () => {
+      try {
+        const response = await fetch(`/api/country-matrix/assignments?committee=${encodeURIComponent(committeeName)}`)
+
+        if (!response.ok) {
+          return
+        }
+
+        const payload = await response.json()
+        if (!isMounted) {
+          return
+        }
+
+        setAssignments(Array.isArray(payload.assignments) ? payload.assignments : [])
+      } catch {
+        if (isMounted) {
+          setAssignments([])
+        }
+      }
+    }
+
+    loadAssignments()
+
+    return () => {
+      isMounted = false
+    }
+  }, [committeeName])
+
+  const assignmentMap = useMemo(() => {
+    const assignmentEntries: Array<[string, string]> = assignments.map(({ optionCode, assignedName }) => [
+      optionCode.trim().toLowerCase(),
+      assignedName,
+    ])
+    return new Map<string, string>(assignmentEntries)
+  }, [assignments])
+
+  const headers = [...matrix.headers, "Assigned Delegate"]
 
   return (
     <Dialog>
@@ -44,7 +93,7 @@ export function CountryMatrixDialog({ committeeName, matrix, buttonClassName }: 
               <Table>
                 <TableHeader>
                   <TableRow>
-                    {matrix.headers.map((header) => (
+                    {headers.map((header) => (
                       <TableHead key={header} className="whitespace-nowrap">
                         {header}
                       </TableHead>
@@ -57,6 +106,7 @@ export function CountryMatrixDialog({ committeeName, matrix, buttonClassName }: 
                       {row.map((cell, cellIndex) => (
                         <TableCell key={`${rowIndex}-${cellIndex}`}>{cell}</TableCell>
                       ))}
+                      <TableCell>{assignmentMap.get(row[0]?.trim().toLowerCase() ?? "") ?? "—"}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
