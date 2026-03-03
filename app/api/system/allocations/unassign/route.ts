@@ -12,12 +12,27 @@ const unassignSchema = z.object({
   userId: z.number().int().positive(),
 })
 
+const getBearerToken = (request: Request) => {
+  const authHeader = request.headers.get("authorization")
+  if (!authHeader) return null
+
+  const [scheme, token] = authHeader.split(" ")
+  if (scheme?.toLowerCase() !== "bearer" || !token) return null
+
+  return token
+}
+
 export async function POST(request: Request) {
-  const supabase = await createClient()
+  const adminClient = createSupabaseAdminClient()
+  const bearerToken = getBearerToken(request)
+  const userResult = bearerToken
+    ? await adminClient.auth.getUser(bearerToken)
+    : await (await createClient()).auth.getUser()
+
   const {
     data: { user },
     error: authError,
-  } = await supabase.auth.getUser()
+  } = userResult
 
   if (authError || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -36,8 +51,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload", details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const adminClient = createSupabaseAdminClient()
-
   const { error } = await adminClient
     .from("users")
     .update({
@@ -45,8 +58,8 @@ export async function POST(request: Request) {
       allocated_country_code: null,
       allocated_country: null,
       allocation_status: "unallocated",
-      allocated_by_email: allocatorEmail,
-      allocated_at: new Date().toISOString(),
+      allocated_by_email: null,
+      allocated_at: null,
     })
     .eq("id", parsed.data.userId)
 
