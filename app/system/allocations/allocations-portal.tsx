@@ -23,10 +23,10 @@ import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { countries } from "@/lib/countries"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/client"
 import { type AllocationUserRow } from "../_lib/allocation-types"
+import { getAllocationOptionsForCommittee, normalizeCommitteeCode } from "../_lib/committee-allocation-options"
 
 type AllocationsPortalProps = {
   isAdmin: boolean
@@ -186,10 +186,24 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
     return Array.from(values).filter(Boolean).sort((a, b) => a.localeCompare(b))
   }, [rows])
 
-  const countryOptions = useMemo(
-    () => countries.map((country) => ({ value: country.code, label: `${country.code} — ${country.name}` })),
-    [],
-  )
+  const takenOptionsByCommittee = useMemo(() => {
+    const map = new Map<string, Set<string>>()
+
+    rows.forEach((row) => {
+      const committeeCode = normalizeCommitteeCode(row.allocated_committee_code)
+      const allocatedOption = row.allocated_country_code?.trim()
+
+      if (!committeeCode || !allocatedOption) return
+
+      if (!map.has(committeeCode)) {
+        map.set(committeeCode, new Set<string>())
+      }
+
+      map.get(committeeCode)?.add(allocatedOption)
+    })
+
+    return map
+  }, [rows])
 
   const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -272,6 +286,7 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
           allocated_country_code: "",
         }),
         [field]: value,
+        ...(field === "allocated_committee_code" ? { allocated_country_code: "" } : {}),
       },
     }))
     queueAutosave(id)
@@ -454,6 +469,14 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
                 filteredRows.map((row) => {
                   const draft = drafts[row.id]
                   const isSaving = savingId === row.id
+                  const selectedCommitteeCode = normalizeCommitteeCode(draft?.allocated_committee_code)
+                  const baseOptions = getAllocationOptionsForCommittee(selectedCommitteeCode)
+                  const takenOptions = takenOptionsByCommittee.get(selectedCommitteeCode) ?? new Set<string>()
+                  const currentSelection = draft?.allocated_country_code ?? ""
+
+                  const countryOptions = baseOptions
+                    .filter((option) => option === currentSelection || !takenOptions.has(option))
+                    .map((option) => ({ value: option, label: option }))
 
                   return (
                     <TableRow key={row.id}>
@@ -471,7 +494,7 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
                             value={draft?.allocated_committee_code ?? ""}
                             onValueChange={(value) => updateDraft(row.id, "allocated_committee_code", value)}
                             placeholder="Select committee"
-                            options={committeeOptions.map((committee) => ({ value: committee, label: committee }))}
+                            options={committeeOptions.map((committee) => ({ value: committee, label: committee.toUpperCase() }))}
                             searchPlaceholder="Search committees..."
                             disabled={isSaving}
                           />
@@ -482,10 +505,10 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
                           <SearchableSelect
                             value={draft?.allocated_country_code ?? ""}
                             onValueChange={(value) => updateDraft(row.id, "allocated_country_code", value)}
-                            placeholder="Select country"
+                            placeholder={selectedCommitteeCode ? "Select country / position" : "Select committee first"}
                             options={countryOptions}
-                            searchPlaceholder="Search countries..."
-                            disabled={isSaving}
+                            searchPlaceholder="Search countries / positions..."
+                            disabled={isSaving || !selectedCommitteeCode}
                           />
                         </TableCell>
                       )}
