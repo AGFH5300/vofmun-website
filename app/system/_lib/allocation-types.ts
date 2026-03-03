@@ -18,6 +18,7 @@ export type AllocationUserRow = {
   last_name: string
   email: string
   role: string
+  payment_status: string | null
   school: string | null
   grade: string | null
   delegate_data: DelegateAllocationData | null
