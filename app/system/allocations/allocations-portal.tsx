@@ -31,6 +31,7 @@ import { getAllocationOptionsForCommittee, normalizeCommitteeCode } from "../_li
 
 type AllocationsPortalProps = {
   isAdmin: boolean
+  userEmail: string
   onSignOut: () => Promise<void>
 }
 
@@ -67,6 +68,29 @@ const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
 ]
 
 const DEFAULT_COLUMNS: ColumnKey[] = ALL_COLUMNS.map((column) => column.key)
+const COLUMN_COOKIE_NAME = "system_allocations_visible_columns"
+const COLUMN_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365
+
+const sanitizeColumns = (columns: unknown): ColumnKey[] => {
+  if (!Array.isArray(columns)) return DEFAULT_COLUMNS
+
+  const allowed = new Set<ColumnKey>(ALL_COLUMNS.map((column) => column.key))
+  const cleaned = columns.filter((column): column is ColumnKey => typeof column === "string" && allowed.has(column as ColumnKey))
+  return cleaned.length > 0 ? cleaned : DEFAULT_COLUMNS
+}
+
+const getCookieValue = (cookieName: string) => {
+  if (typeof document === "undefined") return null
+
+  const prefix = `${cookieName}=`
+  const cookie = document.cookie
+    .split(";")
+    .map((entry) => entry.trim())
+    .find((entry) => entry.startsWith(prefix))
+
+  if (!cookie) return null
+  return cookie.slice(prefix.length)
+}
 
 function SearchableSelect({
   value,
@@ -123,14 +147,15 @@ function SearchableSelect({
   )
 }
 
-export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps) {
+export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: AllocationsPortalProps) {
   const [rows, setRows] = useState<AllocationUserRow[]>([])
   const [search, setSearch] = useState("")
   const [committeeFilter, setCommitteeFilter] = useState<string>("all")
   const [nameSort, setNameSort] = useState<"name_asc" | "name_desc">("name_asc")
   const [visibleColumns, setVisibleColumns] = useState<ColumnKey[]>(DEFAULT_COLUMNS)
+  const [columnsHydrated, setColumnsHydrated] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [savingId, setSavingId] = useState<number | null>(null)
+  const [savingIds, setSavingIds] = useState<Set<number>>(new Set())
   const [drafts, setDrafts] = useState<Record<number, EditableFields>>({})
   const saveTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({})
 
@@ -178,6 +203,51 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
     },
     [],
   )
+
+  useEffect(() => {
+    if (typeof document === "undefined") return
+
+    const emailKey = userEmail.trim().toLowerCase()
+    if (!emailKey) {
+      setColumnsHydrated(true)
+      return
+    }
+
+    try {
+      const rawCookie = getCookieValue(COLUMN_COOKIE_NAME)
+      if (!rawCookie) {
+        setColumnsHydrated(true)
+        return
+      }
+
+      const parsed = JSON.parse(decodeURIComponent(rawCookie)) as Record<string, unknown>
+      const userColumns = sanitizeColumns(parsed[emailKey])
+      setVisibleColumns(userColumns)
+    } catch (cause) {
+      console.warn("Failed to restore allocations column preferences", cause)
+    } finally {
+      setColumnsHydrated(true)
+    }
+  }, [userEmail])
+
+  useEffect(() => {
+    if (typeof document === "undefined" || !columnsHydrated) return
+
+    const emailKey = userEmail.trim().toLowerCase()
+    if (!emailKey) return
+
+    try {
+      const rawCookie = getCookieValue(COLUMN_COOKIE_NAME)
+      const parsed = rawCookie ? (JSON.parse(decodeURIComponent(rawCookie)) as Record<string, unknown>) : {}
+      const nextPreferences = {
+        ...parsed,
+        [emailKey]: visibleColumns,
+      }
+      document.cookie = `${COLUMN_COOKIE_NAME}=${encodeURIComponent(JSON.stringify(nextPreferences))}; path=/; max-age=${COLUMN_COOKIE_MAX_AGE_SECONDS}; samesite=lax`
+    } catch (cause) {
+      console.warn("Failed to persist allocations column preferences", cause)
+    }
+  }, [columnsHydrated, userEmail, visibleColumns])
 
   const eligibleRows = useMemo(() => {
     return rows.filter((row) => row.role === "delegate" && (row.payment_status ?? "").toLowerCase() === "paid")
@@ -241,44 +311,54 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
 
     const nextStatus = draft.allocated_committee_code && draft.allocated_country_code ? "allocated" : "pending"
 
-    setSavingId(rowId)
+    setSavingIds((prev) => new Set(prev).add(rowId))
 
-    const response = await fetch("/api/system/allocations/assign", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: rowId,
-        allocated_committee_code: draft.allocated_committee_code || null,
-        allocated_country_code: draft.allocated_country_code || null,
-        allocated_country: null,
-        allocation_status: nextStatus,
-      }),
-    })
-
-    const result = await response.json().catch(() => null)
-
-    if (!response.ok) {
-      toast.error("Failed to autosave allocation", {
-        description: result?.error ?? "Unknown error",
+    try {
+      const response = await fetch("/api/system/allocations/assign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: rowId,
+          allocated_committee_code: draft.allocated_committee_code || null,
+          allocated_country_code: draft.allocated_country_code || null,
+          allocated_country: null,
+          allocation_status: nextStatus,
+        }),
       })
-      setSavingId(null)
-      return
-    }
 
-    setRows((prev) =>
-      prev.map((entry) =>
-        entry.id === rowId
-          ? {
-              ...entry,
-              allocated_committee_code: draft.allocated_committee_code || null,
-              allocated_country_code: draft.allocated_country_code || null,
-              allocation_status: nextStatus,
-              updated_at: new Date().toISOString(),
-            }
-          : entry,
-      ),
-    )
-    setSavingId(null)
+      const result = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        toast.error("Failed to autosave allocation", {
+          description: result?.error ?? "Unknown error",
+        })
+        return
+      }
+
+      setRows((prev) =>
+        prev.map((entry) =>
+          entry.id === rowId
+            ? {
+                ...entry,
+                allocated_committee_code: draft.allocated_committee_code || null,
+                allocated_country_code: draft.allocated_country_code || null,
+                allocation_status: nextStatus,
+                updated_at: new Date().toISOString(),
+              }
+            : entry,
+        ),
+      )
+    } catch (error) {
+      toast.error("Failed to autosave allocation", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      })
+    } finally {
+      setSavingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(rowId)
+        return next
+      })
+    }
   }, [drafts, rows])
 
   const queueAutosave = useCallback(
@@ -309,46 +389,56 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
   }
 
   const unassign = async (row: AllocationUserRow) => {
-    setSavingId(row.id)
+    setSavingIds((prev) => new Set(prev).add(row.id))
 
-    const response = await fetch("/api/system/allocations/unassign", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: row.id }),
-    })
-
-    const result = await response.json().catch(() => null)
-
-    if (!response.ok) {
-      toast.error("Failed to unassign", {
-        description: result?.error ?? "Unknown error",
+    try {
+      const response = await fetch("/api/system/allocations/unassign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: row.id }),
       })
-      setSavingId(null)
-      return
-    }
 
-    setDrafts((prev) => ({
-      ...prev,
-      [row.id]: {
-        allocated_committee_code: "",
-        allocated_country_code: "",
-      },
-    }))
-    setRows((prev) =>
-      prev.map((entry) =>
-        entry.id === row.id
-          ? {
-              ...entry,
-              allocated_committee_code: null,
-              allocated_country_code: null,
-              allocation_status: "unallocated",
-              updated_at: new Date().toISOString(),
-            }
-          : entry,
-      ),
-    )
-    toast.success("Delegate unassigned")
-    setSavingId(null)
+      const result = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        toast.error("Failed to unassign", {
+          description: result?.error ?? "Unknown error",
+        })
+        return
+      }
+
+      setDrafts((prev) => ({
+        ...prev,
+        [row.id]: {
+          allocated_committee_code: "",
+          allocated_country_code: "",
+        },
+      }))
+      setRows((prev) =>
+        prev.map((entry) =>
+          entry.id === row.id
+            ? {
+                ...entry,
+                allocated_committee_code: null,
+                allocated_country_code: null,
+                allocation_status: "unallocated",
+                updated_at: new Date().toISOString(),
+              }
+            : entry,
+        ),
+      )
+      toast.success("Delegate unassigned")
+    } catch (error) {
+      toast.error("Failed to unassign", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      })
+    } finally {
+      setSavingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(row.id)
+        return next
+      })
+    }
   }
 
   const toggleColumn = (column: ColumnKey) => {
@@ -489,7 +579,7 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
               ) : (
                 sortedRows.map((row) => {
                   const draft = drafts[row.id]
-                  const isSaving = savingId === row.id
+                  const isSaving = savingIds.has(row.id)
                   const selectedCommitteeCode = normalizeCommitteeCode(draft?.allocated_committee_code)
                   const baseOptions = getAllocationOptionsForCommittee(selectedCommitteeCode)
                   const takenOptions = takenOptionsByCommittee.get(selectedCommitteeCode) ?? new Set<string>()

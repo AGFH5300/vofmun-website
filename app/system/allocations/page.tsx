@@ -61,7 +61,7 @@ export default async function SystemAllocationsPage() {
   return (
     <main className="min-h-screen bg-[#ffecdd] text-slate-900">
       <div className="container mx-auto px-4 py-16">
-        <AllocationsPortal isAdmin={isSystemAdmin(user.email)} onSignOut={signOutAction} />
+        <AllocationsPortal isAdmin={isSystemAdmin(user.email)} userEmail={user.email ?? ""} onSignOut={signOutAction} />
       </div>
     </main>
   )
