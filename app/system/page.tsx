@@ -2,10 +2,12 @@
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
 import { createClient } from "@/utils/supabase/server"
+import Link from "next/link"
 import { redirect } from "next/navigation"
 import SystemGoogleLogin from "./system-google-login"
 import { PortalContent } from "./portal-content"
 import { canAccessAllocations, isSystemAdmin } from "./_lib/allowlist"
+import { Button } from "@/components/ui/button"
 
 export default async function SystemPage() {
   const supabase = await createClient()
@@ -17,6 +19,11 @@ export default async function SystemPage() {
       <main className="min-h-screen bg-[#ffecdd] text-slate-900">
         <div className="container mx-auto px-4 py-16">
           <SystemGoogleLogin nextPath="/system" />
+          <div className="mx-auto mt-4 max-w-md">
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/system/allocations">Go to allocations portal</Link>
+            </Button>
+          </div>
         </div>
       </main>
     )
