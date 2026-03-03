@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   const adminClient = createSupabaseAdminClient()
   const payload = parsed.data
   const normalizedCommitteeCode = normalizeCommitteeCode(payload.allocated_committee_code)
-  const selectedCountryOrRole = payload.allocated_country_code?.trim() ?? null
+  const selectedCountryOrRole = payload.allocated_country_code?.trim() || null
 
   if (!normalizedCommitteeCode && selectedCountryOrRole) {
     return NextResponse.json({ error: "Select a committee before assigning a country/position." }, { status: 400 })
@@ -60,19 +60,19 @@ export async function POST(request: Request) {
       )
     }
 
-    const { data: existingAllocation, error: existingAllocationError } = await adminClient
+    const { data: existingAllocations, error: existingAllocationError } = await adminClient
       .from("users")
       .select("id")
       .eq("allocated_committee_code", normalizedCommitteeCode)
       .eq("allocated_country_code", selectedCountryOrRole)
       .neq("id", payload.userId)
-      .maybeSingle()
+      .limit(1)
 
     if (existingAllocationError) {
       return NextResponse.json({ error: existingAllocationError.message }, { status: 500 })
     }
 
-    if (existingAllocation) {
+    if (existingAllocations && existingAllocations.length > 0) {
       return NextResponse.json(
         { error: "This country/position has already been allocated in the selected committee." },
         { status: 409 },
