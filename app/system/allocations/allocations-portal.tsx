@@ -51,6 +51,7 @@ type ColumnKey =
   | "experience"
   | "committeeCode"
   | "countryCode"
+  | "allocatedBy"
   | "updated"
 
 const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
@@ -64,8 +65,22 @@ const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "experience", label: "Experience" },
   { key: "committeeCode", label: "Committee code" },
   { key: "countryCode", label: "Country code" },
+  { key: "allocatedBy", label: "Allocated by" },
   { key: "updated", label: "Updated" },
 ]
+
+const ALLOCATOR_EMAIL_MAP: Record<string, string> = {
+  "vidur245@gmail.com": "vidur",
+  "saxena.arsh@gmail.com": "arsh",
+  "vmundanat@gmail.com": "vaibhav",
+}
+
+const getAutoAllocatorLabel = (email: string, isAdmin: boolean) => {
+  const normalizedEmail = email.trim().toLowerCase()
+  if (!normalizedEmail) return ""
+  if (isAdmin) return `admin - ${normalizedEmail}`
+  return ALLOCATOR_EMAIL_MAP[normalizedEmail] ?? normalizedEmail
+}
 
 const DEFAULT_COLUMNS: ColumnKey[] = ALL_COLUMNS.map((column) => column.key)
 const COLUMN_COOKIE_NAME = "system_allocations_visible_columns"
@@ -166,7 +181,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
     const { data, error } = await supabase
       .from("users")
       .select(
-        "id,first_name,last_name,email,role,payment_status,school,grade,delegate_data,allocated_committee_code,allocated_country_code,allocation_status,updated_at",
+        "id,first_name,last_name,email,role,payment_status,school,grade,delegate_data,allocated_committee_code,allocated_country_code,allocated_by_email,allocation_status,updated_at",
       )
       .order("updated_at", { ascending: false })
 
@@ -342,6 +357,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                 ...entry,
                 allocated_committee_code: draft.allocated_committee_code || null,
                 allocated_country_code: draft.allocated_country_code || null,
+                allocated_by_email: getAutoAllocatorLabel(userEmail, isAdmin) || null,
                 allocation_status: nextStatus,
                 updated_at: new Date().toISOString(),
               }
@@ -359,7 +375,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
         return next
       })
     }
-  }, [drafts, rows])
+  }, [drafts, isAdmin, rows, userEmail])
 
   const queueAutosave = useCallback(
     (id: number) => {
@@ -421,6 +437,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                 ...entry,
                 allocated_committee_code: null,
                 allocated_country_code: null,
+                allocated_by_email: null,
                 allocation_status: "unallocated",
                 updated_at: new Date().toISOString(),
               }
@@ -559,6 +576,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                 {isVisible("experience") && <TableHead>Experience</TableHead>}
                 {isVisible("committeeCode") && <TableHead>Committee code</TableHead>}
                 {isVisible("countryCode") && <TableHead>Country code</TableHead>}
+                {isVisible("allocatedBy") && <TableHead>Allocated by</TableHead>}
                 {isVisible("updated") && <TableHead>Updated</TableHead>}
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -628,6 +646,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                           />
                         </TableCell>
                       )}
+                      {isVisible("allocatedBy") && <TableCell>{row.allocated_by_email ?? "—"}</TableCell>}
                       {isVisible("updated") && <TableCell>{new Date(row.updated_at).toLocaleString()}</TableCell>}
                       <TableCell className="text-right">
                         <Button size="sm" variant="outline" onClick={() => void unassign(row)} disabled={isSaving}>

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 
 import { createClient } from "@/utils/supabase/server"
-import { canAccessAllocations, normalizeEmail } from "@/app/system/_lib/allowlist"
+import { canAccessAllocations, isSystemAdmin, normalizeEmail } from "@/app/system/_lib/allowlist"
 import { createSupabaseAdminClient } from "@/app/system/_lib/supabase-admin"
 import { allocationStatuses } from "@/app/system/_lib/allocation-types"
 import { getAllocationOptionsForCommittee, normalizeCommitteeCode } from "@/app/system/_lib/committee-allocation-options"
@@ -17,6 +17,17 @@ const assignSchema = z.object({
   allocated_country: z.string().trim().nullable(),
   allocation_status: z.enum(allocationStatuses),
 })
+
+const allocatorLabelsByEmail: Record<string, string> = {
+  "vidur245@gmail.com": "vidur",
+  "saxena.arsh@gmail.com": "arsh",
+  "vmundanat@gmail.com": "vaibhav",
+}
+
+const getAllocatorLabelFromUser = (email: string, admin: boolean) => {
+  if (admin) return `admin - ${email}`
+  return allocatorLabelsByEmail[email] ?? email
+}
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -90,6 +101,8 @@ export async function POST(request: Request) {
   }
 
   const allocatedAt = payload.allocation_status === "allocated" ? new Date().toISOString() : null
+  const isAdminAllocator = isSystemAdmin(allocatorEmail)
+  const allocatorLabel = getAllocatorLabelFromUser(allocatorEmail, isAdminAllocator)
 
   const { error } = await adminClient
     .from("users")
@@ -98,7 +111,7 @@ export async function POST(request: Request) {
       allocated_country_code: selectedCountryOrRole,
       allocated_country: payload.allocated_country,
       allocation_status: payload.allocation_status,
-      allocated_by_email: allocatorEmail,
+      allocated_by_email: allocatorLabel,
       allocated_at: allocatedAt,
     })
     .eq("id", payload.userId)
