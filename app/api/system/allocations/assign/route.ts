@@ -9,6 +9,7 @@ import { canAccessAllocations, isSystemAdmin, normalizeEmail } from "@/app/syste
 import { createSupabaseAdminClient } from "@/app/system/_lib/supabase-admin"
 import { allocationStatuses } from "@/app/system/_lib/allocation-types"
 import { getAllocationOptionsForCommittee, normalizeCommitteeCode } from "@/app/system/_lib/committee-allocation-options"
+import { getAllocatorLabelFromEmail } from "@/app/system/_lib/allocator-label"
 
 const assignSchema = z.object({
   userId: z.number().int().positive(),
@@ -18,23 +19,27 @@ const assignSchema = z.object({
   allocation_status: z.enum(allocationStatuses),
 })
 
-const allocatorLabelsByEmail: Record<string, string> = {
-  "vidur245@gmail.com": "vidur",
-  "saxena.arsh@gmail.com": "arsh",
-  "vmundanat@gmail.com": "vaibhav",
-}
+const getBearerToken = (request: Request) => {
+  const authHeader = request.headers.get("authorization")
+  if (!authHeader) return null
 
-const getAllocatorLabelFromUser = (email: string, admin: boolean) => {
-  if (admin) return `admin - ${email}`
-  return allocatorLabelsByEmail[email] ?? email
+  const [scheme, token] = authHeader.split(" ")
+  if (scheme?.toLowerCase() !== "bearer" || !token) return null
+
+  return token
 }
 
 export async function POST(request: Request) {
-  const supabase = await createClient()
+  const adminClient = createSupabaseAdminClient()
+  const bearerToken = getBearerToken(request)
+  const userResult = bearerToken
+    ? await adminClient.auth.getUser(bearerToken)
+    : await (await createClient()).auth.getUser()
+
   const {
     data: { user },
     error: authError,
-  } = await supabase.auth.getUser()
+  } = userResult
 
   if (authError || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -53,7 +58,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload", details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const adminClient = createSupabaseAdminClient()
   const payload = parsed.data
   const normalizedCommitteeCode = normalizeCommitteeCode(payload.allocated_committee_code)
   const selectedCountryOrRole = payload.allocated_country_code?.trim() || null
@@ -78,7 +82,7 @@ export async function POST(request: Request) {
       .not("allocated_committee_code", "is", null)
       .not("allocated_country_code", "is", null)
 
-        if (existingAllocationError) {
+    if (existingAllocationError) {
       return NextResponse.json({ error: existingAllocationError.message }, { status: 500 })
     }
 
@@ -102,7 +106,7 @@ export async function POST(request: Request) {
 
   const allocatedAt = payload.allocation_status === "allocated" ? new Date().toISOString() : null
   const isAdminAllocator = isSystemAdmin(allocatorEmail)
-  const allocatorLabel = getAllocatorLabelFromUser(allocatorEmail, isAdminAllocator)
+  const allocatorLabel = getAllocatorLabelFromEmail(allocatorEmail, isAdminAllocator)
 
   const { error } = await adminClient
     .from("users")
