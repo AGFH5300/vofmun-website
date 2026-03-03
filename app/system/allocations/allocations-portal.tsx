@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/client"
 import { type AllocationUserRow } from "../_lib/allocation-types"
 import { getAllocationOptionsForCommittee, normalizeCommitteeCode } from "../_lib/committee-allocation-options"
+import { formatAllocatorDisplay, getAllocatorLabelFromEmail } from "../_lib/allocator-label"
 
 type AllocationsPortalProps = {
   isAdmin: boolean
@@ -68,19 +69,6 @@ const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "allocatedBy", label: "Allocated by" },
   { key: "updated", label: "Updated" },
 ]
-
-const ALLOCATOR_EMAIL_MAP: Record<string, string> = {
-  "vidur245@gmail.com": "vidur",
-  "saxena.arsh@gmail.com": "arsh",
-  "vmundanat@gmail.com": "vaibhav",
-}
-
-const getAutoAllocatorLabel = (email: string, isAdmin: boolean) => {
-  const normalizedEmail = email.trim().toLowerCase()
-  if (!normalizedEmail) return ""
-  if (isAdmin) return `admin - ${normalizedEmail}`
-  return ALLOCATOR_EMAIL_MAP[normalizedEmail] ?? normalizedEmail
-}
 
 const DEFAULT_COLUMNS: ColumnKey[] = ALL_COLUMNS.map((column) => column.key)
 const COLUMN_COOKIE_NAME = "system_allocations_visible_columns"
@@ -324,6 +312,16 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
     })
   }, [filteredRows, nameSort])
 
+  const getAuthorizationHeader = useCallback(async (): Promise<Record<string, string>> => {
+    const supabase = createClient()
+    const { data } = await supabase.auth.getSession()
+    const accessToken = data.session?.access_token
+
+    if (!accessToken) return {}
+
+    return { Authorization: `Bearer ${accessToken}` }
+  }, [])
+
   const saveAssignment = useCallback(async (rowId: number) => {
     const row = rows.find((item) => item.id === rowId)
     const draft = drafts[rowId]
@@ -334,9 +332,10 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
     setSavingIds((prev) => new Set(prev).add(rowId))
 
     try {
+      const authHeader = await getAuthorizationHeader()
       const response = await fetch("/api/system/allocations/assign", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeader },
         body: JSON.stringify({
           userId: rowId,
           allocated_committee_code: draft.allocated_committee_code || null,
@@ -362,7 +361,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                 ...entry,
                 allocated_committee_code: draft.allocated_committee_code || null,
                 allocated_country_code: draft.allocated_country_code || null,
-                allocated_by_email: getAutoAllocatorLabel(userEmail, isAdmin) || null,
+                allocated_by_email: getAllocatorLabelFromEmail(userEmail, isAdmin) || null,
                 allocation_status: nextStatus,
                 updated_at: new Date().toISOString(),
               }
@@ -380,7 +379,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
         return next
       })
     }
-  }, [drafts, isAdmin, rows, userEmail])
+  }, [drafts, getAuthorizationHeader, isAdmin, rows, userEmail])
 
   const queueAutosave = useCallback(
     (id: number) => {
@@ -413,9 +412,10 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
     setSavingIds((prev) => new Set(prev).add(row.id))
 
     try {
+      const authHeader = await getAuthorizationHeader()
       const response = await fetch("/api/system/allocations/unassign", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeader },
         body: JSON.stringify({ userId: row.id }),
       })
 
@@ -651,7 +651,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                           />
                         </TableCell>
                       )}
-                      {isVisible("allocatedBy") && <TableCell>{row.allocated_by_email ?? "—"}</TableCell>}
+                      {isVisible("allocatedBy") && <TableCell>{formatAllocatorDisplay(row.allocated_by_email) ?? "—"}</TableCell>}
                       {isVisible("updated") && <TableCell>{new Date(row.updated_at).toLocaleString()}</TableCell>}
                       <TableCell className="text-right">
                         <Button size="sm" variant="outline" onClick={() => void unassign(row)} disabled={isSaving}>
