@@ -91,6 +91,11 @@ const sanitizeColumns = (columns: unknown): ColumnKey[] => {
 
   const allowed = new Set<ColumnKey>(ALL_COLUMNS.map((column) => column.key))
   const cleaned = columns.filter((column): column is ColumnKey => typeof column === "string" && allowed.has(column as ColumnKey))
+
+  if (!cleaned.includes("allocatedBy")) {
+    cleaned.push("allocatedBy")
+  }
+
   return cleaned.length > 0 ? cleaned : DEFAULT_COLUMNS
 }
 
