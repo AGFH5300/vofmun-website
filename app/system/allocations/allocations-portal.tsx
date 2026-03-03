@@ -38,6 +38,7 @@ type AllocationsPortalProps = {
 type EditableFields = {
   allocated_committee_code: string
   allocated_country_code: string
+  allocated_by_email: string
 }
 
 type ColumnKey =
@@ -51,6 +52,7 @@ type ColumnKey =
   | "experience"
   | "committeeCode"
   | "countryCode"
+  | "allocatedBy"
   | "updated"
 
 const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
@@ -64,8 +66,20 @@ const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "experience", label: "Experience" },
   { key: "committeeCode", label: "Committee code" },
   { key: "countryCode", label: "Country code" },
+  { key: "allocatedBy", label: "Allocated by" },
   { key: "updated", label: "Updated" },
 ]
+
+const ALLOCATOR_OPTIONS = ["vidur", "vaibhav", "arsh"] as const
+
+const normalizeAllocatorValue = (value: string | null | undefined) => {
+  const normalized = (value ?? "").trim().toLowerCase()
+  if (!normalized) return ""
+  if (ALLOCATOR_OPTIONS.includes(normalized as (typeof ALLOCATOR_OPTIONS)[number])) return normalized
+  if (normalized === "admin") return "admin"
+  return ""
+}
+
 
 const DEFAULT_COLUMNS: ColumnKey[] = ALL_COLUMNS.map((column) => column.key)
 const COLUMN_COOKIE_NAME = "system_allocations_visible_columns"
@@ -166,7 +180,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
     const { data, error } = await supabase
       .from("users")
       .select(
-        "id,first_name,last_name,email,role,payment_status,school,grade,delegate_data,allocated_committee_code,allocated_country_code,allocation_status,updated_at",
+        "id,first_name,last_name,email,role,payment_status,school,grade,delegate_data,allocated_committee_code,allocated_country_code,allocated_by_email,allocation_status,updated_at",
       )
       .order("updated_at", { ascending: false })
 
@@ -186,6 +200,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
           {
             allocated_committee_code: row.allocated_committee_code ?? "",
             allocated_country_code: row.allocated_country_code ?? "",
+            allocated_by_email: normalizeAllocatorValue(row.allocated_by_email),
           },
         ]),
       ),
@@ -321,6 +336,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
           userId: rowId,
           allocated_committee_code: draft.allocated_committee_code || null,
           allocated_country_code: draft.allocated_country_code || null,
+          allocated_by_email: draft.allocated_by_email || null,
           allocated_country: null,
           allocation_status: nextStatus,
         }),
@@ -342,6 +358,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                 ...entry,
                 allocated_committee_code: draft.allocated_committee_code || null,
                 allocated_country_code: draft.allocated_country_code || null,
+                allocated_by_email: draft.allocated_by_email || null,
                 allocation_status: nextStatus,
                 updated_at: new Date().toISOString(),
               }
@@ -380,6 +397,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
         ...(prev[id] ?? {
           allocated_committee_code: "",
           allocated_country_code: "",
+          allocated_by_email: "",
         }),
         [field]: value,
         ...(field === "allocated_committee_code" ? { allocated_country_code: "" } : {}),
@@ -412,6 +430,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
         [row.id]: {
           allocated_committee_code: "",
           allocated_country_code: "",
+          allocated_by_email: "",
         },
       }))
       setRows((prev) =>
@@ -421,6 +440,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                 ...entry,
                 allocated_committee_code: null,
                 allocated_country_code: null,
+                allocated_by_email: null,
                 allocation_status: "unallocated",
                 updated_at: new Date().toISOString(),
               }
@@ -452,6 +472,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
   }
 
   const isVisible = (column: ColumnKey) => visibleColumns.includes(column)
+  const allocatorOptions = isAdmin ? [...ALLOCATOR_OPTIONS, "admin"] : [...ALLOCATOR_OPTIONS]
 
   return (
     <Card className="border-orange-200 bg-white/95 shadow-xl">
@@ -559,6 +580,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                 {isVisible("experience") && <TableHead>Experience</TableHead>}
                 {isVisible("committeeCode") && <TableHead>Committee code</TableHead>}
                 {isVisible("countryCode") && <TableHead>Country code</TableHead>}
+                {isVisible("allocatedBy") && <TableHead>Allocated by</TableHead>}
                 {isVisible("updated") && <TableHead>Updated</TableHead>}
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -626,6 +648,26 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                             searchPlaceholder="Search countries / positions..."
                             disabled={isSaving || !selectedCommitteeCode}
                           />
+                        </TableCell>
+                      )}
+                      {isVisible("allocatedBy") && (
+                        <TableCell>
+                          <Select
+                            value={draft?.allocated_by_email ?? ""}
+                            onValueChange={(value) => updateDraft(row.id, "allocated_by_email", value)}
+                            disabled={isSaving}
+                          >
+                            <SelectTrigger className="min-w-36">
+                              <SelectValue placeholder="Select allocator" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {allocatorOptions.map((allocator) => (
+                                <SelectItem key={allocator} value={allocator}>
+                                  {allocator}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                       )}
                       {isVisible("updated") && <TableCell>{new Date(row.updated_at).toLocaleString()}</TableCell>}
