@@ -14,12 +14,20 @@ const assignSchema = z.object({
   userId: z.number().int().positive(),
   allocated_committee_code: z.string().trim().nullable(),
   allocated_country_code: z.string().trim().nullable(),
-  allocated_by_email: z.string().trim().nullable(),
   allocated_country: z.string().trim().nullable(),
   allocation_status: z.enum(allocationStatuses),
 })
 
-const allocatorValues = ["vidur", "vaibhav", "arsh"] as const
+const allocatorLabelsByEmail: Record<string, string> = {
+  "vidur245@gmail.com": "vidur",
+  "saxena.arsh@gmail.com": "arsh",
+  "vmundanat@gmail.com": "vaibhav",
+}
+
+const getAllocatorLabelFromUser = (email: string, admin: boolean) => {
+  if (admin) return `admin - ${email}`
+  return allocatorLabelsByEmail[email] ?? email
+}
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -70,7 +78,7 @@ export async function POST(request: Request) {
       .not("allocated_committee_code", "is", null)
       .not("allocated_country_code", "is", null)
 
-    if (existingAllocationError) {
+        if (existingAllocationError) {
       return NextResponse.json({ error: existingAllocationError.message }, { status: 500 })
     }
 
@@ -93,15 +101,8 @@ export async function POST(request: Request) {
   }
 
   const allocatedAt = payload.allocation_status === "allocated" ? new Date().toISOString() : null
-  const allowedAllocators = new Set<string>(isSystemAdmin(allocatorEmail) ? [...allocatorValues, "admin"] : allocatorValues)
-  const selectedAllocator = payload.allocated_by_email?.trim().toLowerCase() ?? ""
-
-  if (selectedAllocator && !allowedAllocators.has(selectedAllocator)) {
-    return NextResponse.json(
-      { error: "Invalid allocator. Non-admins may only use vidur, vaibhav, or arsh." },
-      { status: 400 },
-    )
-  }
+  const isAdminAllocator = isSystemAdmin(allocatorEmail)
+  const allocatorLabel = getAllocatorLabelFromUser(allocatorEmail, isAdminAllocator)
 
   const { error } = await adminClient
     .from("users")
@@ -110,7 +111,7 @@ export async function POST(request: Request) {
       allocated_country_code: selectedCountryOrRole,
       allocated_country: payload.allocated_country,
       allocation_status: payload.allocation_status,
-      allocated_by_email: selectedAllocator || allocatorEmail,
+      allocated_by_email: allocatorLabel,
       allocated_at: allocatedAt,
     })
     .eq("id", payload.userId)
