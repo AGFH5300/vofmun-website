@@ -78,7 +78,7 @@ export async function POST(request: Request) {
       .not("allocated_committee_code", "is", null)
       .not("allocated_country_code", "is", null)
 
-    if (existingAllocationError) {
+        if (existingAllocationError) {
       return NextResponse.json({ error: existingAllocationError.message }, { status: 500 })
     }
 
