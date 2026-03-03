@@ -190,8 +190,9 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
     const map = new Map<string, Set<string>>()
 
     rows.forEach((row) => {
-      const committeeCode = normalizeCommitteeCode(row.allocated_committee_code)
-      const allocatedOption = row.allocated_country_code?.trim()
+      const draft = drafts[row.id]
+      const committeeCode = normalizeCommitteeCode(draft?.allocated_committee_code ?? row.allocated_committee_code)
+      const allocatedOption = (draft?.allocated_country_code ?? row.allocated_country_code)?.trim()
 
       if (!committeeCode || !allocatedOption) return
 
@@ -203,7 +204,7 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
     })
 
     return map
-  }, [rows])
+  }, [drafts, rows])
 
   const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase()
