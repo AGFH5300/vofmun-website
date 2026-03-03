@@ -62,17 +62,26 @@ export async function POST(request: Request) {
 
     const { data: existingAllocations, error: existingAllocationError } = await adminClient
       .from("users")
-      .select("id")
-      .eq("allocated_committee_code", normalizedCommitteeCode)
-      .eq("allocated_country_code", selectedCountryOrRole)
+      .select("id,allocated_committee_code,allocated_country_code")
       .neq("id", payload.userId)
-      .limit(1)
+      .not("allocated_committee_code", "is", null)
+      .not("allocated_country_code", "is", null)
 
     if (existingAllocationError) {
       return NextResponse.json({ error: existingAllocationError.message }, { status: 500 })
     }
 
-    if (existingAllocations && existingAllocations.length > 0) {
+    const hasConflictingAllocation = (existingAllocations ?? []).some((allocation) => {
+      const existingCommitteeCode = normalizeCommitteeCode(allocation.allocated_committee_code)
+      const existingCountryOrRole = allocation.allocated_country_code?.trim().toLowerCase()
+
+      return (
+        existingCommitteeCode === normalizedCommitteeCode &&
+        existingCountryOrRole === selectedCountryOrRole.toLowerCase()
+      )
+    })
+
+    if (hasConflictingAllocation) {
       return NextResponse.json(
         { error: "This country/position has already been allocated in the selected committee." },
         { status: 409 },
