@@ -8,6 +8,7 @@ import { createClient } from "@/utils/supabase/server"
 import { canAccessAllocations, normalizeEmail } from "@/app/system/_lib/allowlist"
 import { createSupabaseAdminClient } from "@/app/system/_lib/supabase-admin"
 import { allocationStatuses } from "@/app/system/_lib/allocation-types"
+import { getAllocationOptionsForCommittee, normalizeCommitteeCode } from "@/app/system/_lib/committee-allocation-options"
 
 const assignSchema = z.object({
   userId: z.number().int().positive(),
@@ -43,13 +44,49 @@ export async function POST(request: Request) {
 
   const adminClient = createSupabaseAdminClient()
   const payload = parsed.data
+  const normalizedCommitteeCode = normalizeCommitteeCode(payload.allocated_committee_code)
+  const selectedCountryOrRole = payload.allocated_country_code?.trim() ?? null
+
+  if (!normalizedCommitteeCode && selectedCountryOrRole) {
+    return NextResponse.json({ error: "Select a committee before assigning a country/position." }, { status: 400 })
+  }
+
+  if (normalizedCommitteeCode && selectedCountryOrRole) {
+    const committeeOptions = getAllocationOptionsForCommittee(normalizedCommitteeCode)
+    if (!committeeOptions.includes(selectedCountryOrRole)) {
+      return NextResponse.json(
+        { error: "Selected country/position is not available for the chosen committee." },
+        { status: 400 },
+      )
+    }
+
+    const { data: existingAllocation, error: existingAllocationError } = await adminClient
+      .from("users")
+      .select("id")
+      .eq("allocated_committee_code", normalizedCommitteeCode)
+      .eq("allocated_country_code", selectedCountryOrRole)
+      .neq("id", payload.userId)
+      .maybeSingle()
+
+    if (existingAllocationError) {
+      return NextResponse.json({ error: existingAllocationError.message }, { status: 500 })
+    }
+
+    if (existingAllocation) {
+      return NextResponse.json(
+        { error: "This country/position has already been allocated in the selected committee." },
+        { status: 409 },
+      )
+    }
+  }
+
   const allocatedAt = payload.allocation_status === "allocated" ? new Date().toISOString() : null
 
   const { error } = await adminClient
     .from("users")
     .update({
-      allocated_committee_code: payload.allocated_committee_code,
-      allocated_country_code: payload.allocated_country_code,
+      allocated_committee_code: normalizedCommitteeCode || null,
+      allocated_country_code: selectedCountryOrRole,
       allocated_country: payload.allocated_country,
       allocation_status: payload.allocation_status,
       allocated_by_email: allocatorEmail,
