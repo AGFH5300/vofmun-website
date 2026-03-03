@@ -6,15 +6,20 @@
 import { createClient } from "@/utils/supabase/client"
 import { Button } from "@/components/ui/button"
 
-export default function SystemGoogleLogin() {
+type SystemGoogleLoginProps = {
+  nextPath?: string
+}
+
+export default function SystemGoogleLogin({ nextPath = "/system" }: SystemGoogleLoginProps) {
   const signIn = async () => {
     const supabase = createClient()
+    const callbackUrl = new URL("/auth/callback", window.location.origin)
+    callbackUrl.searchParams.set("next", nextPath)
 
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        // IMPORTANT: no query string here
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
       },
     })
   }

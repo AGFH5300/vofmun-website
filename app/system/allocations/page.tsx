@@ -28,7 +28,7 @@ export default async function SystemAllocationsPage() {
     return (
       <main className="min-h-screen bg-[#ffecdd] text-slate-900">
         <div className="container mx-auto px-4 py-16">
-          <SystemGoogleLogin />
+          <SystemGoogleLogin nextPath="/system/allocations" />
         </div>
       </main>
     )
