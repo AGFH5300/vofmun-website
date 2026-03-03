@@ -5,8 +5,19 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, AlertCircle, CheckCircle } from "lucide-react"
+import {
+  ADMIN_SIGNUP_CUTOFF_DISPLAY,
+  CHAIR_SIGNUP_CUTOFF_DISPLAY,
+  isAdminSignupClosed,
+  isChairSignupClosed,
+} from "@/lib/registration-deadlines"
 
 export function SignupInfo() {
+  const chairSignupClosed = isChairSignupClosed()
+  const adminSignupClosed = isAdminSignupClosed()
+
+  const getSignupStatusLabel = (isClosed: boolean) => (isClosed ? "(Closed)" : "(Open)")
+
   return (
     <div className="space-y-6">
       {/* Registration Details */}
@@ -42,10 +53,20 @@ export function SignupInfo() {
                 <span className="text-gray-700">Delegates: March 28th 2026</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Chairs: January 10th 2026</span>
+                <span className="text-gray-700">
+                  Chairs: {CHAIR_SIGNUP_CUTOFF_DISPLAY}{" "}
+                  <span className={chairSignupClosed ? "text-red-600" : "text-green-600"}>
+                    {getSignupStatusLabel(chairSignupClosed)}
+                  </span>
+                </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Admin Staff: February 28th 2026</span>
+                <span className="text-gray-700">
+                  Admin Staff: {ADMIN_SIGNUP_CUTOFF_DISPLAY}{" "}
+                  <span className={adminSignupClosed ? "text-red-600" : "text-green-600"}>
+                    {getSignupStatusLabel(adminSignupClosed)}
+                  </span>
+                </span>
               </div>
             </div>
           </div>
