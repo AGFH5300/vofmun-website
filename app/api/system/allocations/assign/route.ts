@@ -29,6 +29,9 @@ const getBearerToken = (request: Request) => {
   return token
 }
 
+const getSelectedCountryOrRole = (payload: z.infer<typeof assignSchema>) =>
+  payload.allocated_country?.trim() || payload.allocated_country_code?.trim() || null
+
 export async function POST(request: Request) {
   const adminClient = createSupabaseAdminClient()
   const bearerToken = getBearerToken(request)
@@ -60,7 +63,7 @@ export async function POST(request: Request) {
 
   const payload = parsed.data
   const normalizedCommitteeCode = normalizeCommitteeCode(payload.allocated_committee_code)
-  const selectedCountryOrRole = payload.allocated_country_code?.trim() || null
+  const selectedCountryOrRole = getSelectedCountryOrRole(payload)
 
   if (!normalizedCommitteeCode && selectedCountryOrRole) {
     return NextResponse.json({ error: "Select a committee before assigning a country/position." }, { status: 400 })
@@ -77,10 +80,10 @@ export async function POST(request: Request) {
 
     const { data: existingAllocations, error: existingAllocationError } = await adminClient
       .from("users")
-      .select("id,allocated_committee_code,allocated_country_code")
+      .select("id,allocated_committee_code,allocated_country_code,allocated_country")
       .neq("id", payload.userId)
       .not("allocated_committee_code", "is", null)
-      .not("allocated_country_code", "is", null)
+      .or("allocated_country_code.not.is.null,allocated_country.not.is.null")
 
     if (existingAllocationError) {
       return NextResponse.json({ error: existingAllocationError.message }, { status: 500 })
@@ -88,7 +91,7 @@ export async function POST(request: Request) {
 
     const hasConflictingAllocation = (existingAllocations ?? []).some((allocation) => {
       const existingCommitteeCode = normalizeCommitteeCode(allocation.allocated_committee_code)
-      const existingCountryOrRole = allocation.allocated_country_code?.trim().toLowerCase()
+      const existingCountryOrRole = (allocation.allocated_country ?? allocation.allocated_country_code)?.trim().toLowerCase()
 
       return (
         existingCommitteeCode === normalizedCommitteeCode &&
@@ -112,8 +115,8 @@ export async function POST(request: Request) {
     .from("users")
     .update({
       allocated_committee_code: normalizedCommitteeCode || null,
-      allocated_country_code: selectedCountryOrRole,
-      allocated_country: payload.allocated_country,
+      allocated_country_code: null,
+      allocated_country: selectedCountryOrRole,
       allocation_status: payload.allocation_status,
       allocated_by_email: allocatorLabel,
       allocated_at: allocatedAt,

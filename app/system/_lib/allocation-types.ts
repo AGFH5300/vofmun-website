@@ -24,6 +24,7 @@ export type AllocationUserRow = {
   delegate_data: DelegateAllocationData | null
   allocated_committee_code: string | null
   allocated_country_code: string | null
+  allocated_country: string | null
   allocated_by_email: string | null
   allocation_status: AllocationStatus | null
   updated_at: string
