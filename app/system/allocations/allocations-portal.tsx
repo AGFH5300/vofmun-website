@@ -4,6 +4,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import Link from "next/link"
 import { Check, ChevronDown, Columns3, Loader2, LogOut, RefreshCw, ShieldCheck } from "lucide-react"
 import { toast } from "sonner"
 
@@ -78,7 +79,7 @@ function SearchableSelect({
   value: string
   onValueChange: (value: string) => void
   placeholder: string
-  options: { value: string; label: string }[]
+  options: { value: string; label: string; disabled?: boolean }[]
   searchPlaceholder: string
   disabled?: boolean
 }) {
@@ -103,13 +104,15 @@ function SearchableSelect({
                 <CommandItem
                   key={option.value}
                   value={`${option.label} ${option.value}`}
+                  disabled={option.disabled}
                   onSelect={() => {
+                    if (option.disabled) return
                     onValueChange(option.value)
                     setOpen(false)
                   }}
                 >
                   <Check className={cn("mr-2 h-4 w-4", value === option.value ? "opacity-100" : "opacity-0")} />
-                  {option.label}
+                  <span className={cn(option.disabled && "text-slate-400")}>{option.label}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -124,7 +127,7 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
   const [rows, setRows] = useState<AllocationUserRow[]>([])
   const [search, setSearch] = useState("")
   const [committeeFilter, setCommitteeFilter] = useState<string>("all")
-  const [roleFilter, setRoleFilter] = useState<"delegates" | "all">("delegates")
+  const [nameSort, setNameSort] = useState<"name_asc" | "name_desc">("name_asc")
   const [visibleColumns, setVisibleColumns] = useState<ColumnKey[]>(DEFAULT_COLUMNS)
   const [loading, setLoading] = useState(true)
   const [savingId, setSavingId] = useState<number | null>(null)
@@ -138,7 +141,7 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
     const { data, error } = await supabase
       .from("users")
       .select(
-        "id,first_name,last_name,email,role,school,grade,delegate_data,allocated_committee_code,allocated_country_code,allocation_status,updated_at",
+        "id,first_name,last_name,email,role,payment_status,school,grade,delegate_data,allocated_committee_code,allocated_country_code,allocation_status,updated_at",
       )
       .order("updated_at", { ascending: false })
 
@@ -176,20 +179,24 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
     [],
   )
 
+  const eligibleRows = useMemo(() => {
+    return rows.filter((row) => row.role === "delegate" && (row.payment_status ?? "").toLowerCase() === "paid")
+  }, [rows])
+
   const committeeOptions = useMemo(() => {
     const values = new Set<string>()
-    rows.forEach((row) => {
+    eligibleRows.forEach((row) => {
       ;[row.delegate_data?.committee1, row.delegate_data?.committee2, row.delegate_data?.committee3, row.allocated_committee_code]
         .filter(Boolean)
         .forEach((committee) => values.add(String(committee).trim()))
     })
     return Array.from(values).filter(Boolean).sort((a, b) => a.localeCompare(b))
-  }, [rows])
+  }, [eligibleRows])
 
   const takenOptionsByCommittee = useMemo(() => {
     const map = new Map<string, Set<string>>()
 
-    rows.forEach((row) => {
+    eligibleRows.forEach((row) => {
       const draft = drafts[row.id]
       const committeeCode = normalizeCommitteeCode(draft?.allocated_committee_code ?? row.allocated_committee_code)
       const allocatedOption = (draft?.allocated_country_code ?? row.allocated_country_code)?.trim()
@@ -204,20 +211,28 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
     })
 
     return map
-  }, [drafts, rows])
+  }, [drafts, eligibleRows])
 
   const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase()
 
-    return rows.filter((row) => {
-      if (roleFilter === "delegates" && row.role !== "delegate") return false
+    return eligibleRows.filter((row) => {
       if (committeeFilter !== "all" && (row.delegate_data?.committee1 ?? "") !== committeeFilter) return false
       if (!query) return true
 
       const haystack = [row.first_name, row.last_name, row.email, row.school ?? ""].join(" ").toLowerCase()
       return haystack.includes(query)
     })
-  }, [committeeFilter, roleFilter, rows, search])
+  }, [committeeFilter, eligibleRows, search])
+
+  const sortedRows = useMemo(() => {
+    return [...filteredRows].sort((a, b) => {
+      const firstNameCompare = a.first_name.localeCompare(b.first_name)
+      const lastNameCompare = a.last_name.localeCompare(b.last_name)
+      const result = firstNameCompare !== 0 ? firstNameCompare : lastNameCompare
+      return nameSort === "name_asc" ? result : -result
+    })
+  }, [filteredRows, nameSort])
 
   const saveAssignment = useCallback(async (rowId: number) => {
     const row = rows.find((item) => item.id === rowId)
@@ -359,6 +374,11 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button asChild variant="outline">
+                <Link href="/system">Go to main system</Link>
+              </Button>
+            )}
             <Badge variant="outline" className="border-orange-300 bg-orange-50 text-orange-700">
               <ShieldCheck className="mr-1 h-4 w-4" />
               {isAdmin ? "Admin access" : "Allocator access"}
@@ -393,13 +413,13 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
             </SelectContent>
           </Select>
 
-          <Select value={roleFilter} onValueChange={(value) => setRoleFilter(value as "delegates" | "all")}>
+          <Select value={nameSort} onValueChange={(value) => setNameSort(value as "name_asc" | "name_desc")}>
             <SelectTrigger>
-              <SelectValue placeholder="Role filter" />
+              <SelectValue placeholder="Name order" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="delegates">Delegates only</SelectItem>
-              <SelectItem value="all">All roles</SelectItem>
+              <SelectItem value="name_asc">Name (A-Z)</SelectItem>
+              <SelectItem value="name_desc">Name (Z-A)</SelectItem>
             </SelectContent>
           </Select>
 
@@ -460,14 +480,14 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
                     <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                   </TableCell>
                 </TableRow>
-              ) : filteredRows.length === 0 ? (
+              ) : sortedRows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={visibleColumns.length + 1} className="h-20 text-center text-slate-500">
                     No matching registrations found.
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredRows.map((row) => {
+                sortedRows.map((row) => {
                   const draft = drafts[row.id]
                   const isSaving = savingId === row.id
                   const selectedCommitteeCode = normalizeCommitteeCode(draft?.allocated_committee_code)
@@ -475,9 +495,14 @@ export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps
                   const takenOptions = takenOptionsByCommittee.get(selectedCommitteeCode) ?? new Set<string>()
                   const currentSelection = draft?.allocated_country_code ?? ""
 
-                  const countryOptions = baseOptions
-                    .filter((option) => option === currentSelection || !takenOptions.has(option))
-                    .map((option) => ({ value: option, label: option }))
+                  const countryOptions = baseOptions.map((option) => {
+                    const takenByAnotherDelegate = option !== currentSelection && takenOptions.has(option)
+                    return {
+                      value: option,
+                      label: takenByAnotherDelegate ? `${option} ✓ already allocated` : option,
+                      disabled: takenByAnotherDelegate,
+                    }
+                  })
 
                   return (
                     <TableRow key={row.id}>
