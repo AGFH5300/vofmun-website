@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 
 import { createClient } from "@/utils/supabase/server"
-import { canAccessAllocations, normalizeEmail } from "@/app/system/_lib/allowlist"
+import { canAccessAllocations, isSystemAdmin, normalizeEmail } from "@/app/system/_lib/allowlist"
 import { createSupabaseAdminClient } from "@/app/system/_lib/supabase-admin"
 import { allocationStatuses } from "@/app/system/_lib/allocation-types"
 import { getAllocationOptionsForCommittee, normalizeCommitteeCode } from "@/app/system/_lib/committee-allocation-options"
@@ -14,9 +14,12 @@ const assignSchema = z.object({
   userId: z.number().int().positive(),
   allocated_committee_code: z.string().trim().nullable(),
   allocated_country_code: z.string().trim().nullable(),
+  allocated_by_email: z.string().trim().nullable(),
   allocated_country: z.string().trim().nullable(),
   allocation_status: z.enum(allocationStatuses),
 })
+
+const allocatorValues = ["vidur", "vaibhav", "arsh"] as const
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -90,6 +93,15 @@ export async function POST(request: Request) {
   }
 
   const allocatedAt = payload.allocation_status === "allocated" ? new Date().toISOString() : null
+  const allowedAllocators = new Set<string>(isSystemAdmin(allocatorEmail) ? [...allocatorValues, "admin"] : allocatorValues)
+  const selectedAllocator = payload.allocated_by_email?.trim().toLowerCase() ?? ""
+
+  if (selectedAllocator && !allowedAllocators.has(selectedAllocator)) {
+    return NextResponse.json(
+      { error: "Invalid allocator. Non-admins may only use vidur, vaibhav, or arsh." },
+      { status: 400 },
+    )
+  }
 
   const { error } = await adminClient
     .from("users")
@@ -98,7 +110,7 @@ export async function POST(request: Request) {
       allocated_country_code: selectedCountryOrRole,
       allocated_country: payload.allocated_country,
       allocation_status: payload.allocation_status,
-      allocated_by_email: allocatorEmail,
+      allocated_by_email: selectedAllocator || allocatorEmail,
       allocated_at: allocatedAt,
     })
     .eq("id", payload.userId)
