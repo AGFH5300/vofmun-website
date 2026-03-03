@@ -322,9 +322,9 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
     return { Authorization: `Bearer ${accessToken}` }
   }, [])
 
-  const saveAssignment = useCallback(async (rowId: number) => {
+  const saveAssignment = useCallback(async (rowId: number, draftOverride?: EditableFields) => {
     const row = rows.find((item) => item.id === rowId)
-    const draft = drafts[rowId]
+    const draft = draftOverride ?? drafts[rowId]
     if (!row || !draft) return
 
     const nextStatus = draft.allocated_committee_code && draft.allocated_country_code ? "allocated" : "pending"
@@ -382,30 +382,41 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
   }, [drafts, getAuthorizationHeader, isAdmin, rows, userEmail])
 
   const queueAutosave = useCallback(
-    (id: number) => {
+    (id: number, draft: EditableFields) => {
       const previousTimer = saveTimers.current[id]
       if (previousTimer) clearTimeout(previousTimer)
 
       saveTimers.current[id] = setTimeout(() => {
-        void saveAssignment(id)
+        void saveAssignment(id, draft)
       }, 500)
     },
     [saveAssignment],
   )
 
   const updateDraft = (id: number, field: keyof EditableFields, value: string) => {
-    setDrafts((prev) => ({
-      ...prev,
-      [id]: {
+    let nextDraft: EditableFields | null = null
+
+    setDrafts((prev) => {
+      const calculatedDraft = {
         ...(prev[id] ?? {
           allocated_committee_code: "",
           allocated_country_code: "",
         }),
         [field]: value,
         ...(field === "allocated_committee_code" ? { allocated_country_code: "" } : {}),
-      },
-    }))
-    queueAutosave(id)
+      }
+
+      nextDraft = calculatedDraft
+
+      return {
+        ...prev,
+        [id]: calculatedDraft,
+      }
+    })
+
+    if (nextDraft) {
+      queueAutosave(id, nextDraft)
+    }
   }
 
   const unassign = async (row: AllocationUserRow) => {
