@@ -3,40 +3,133 @@
 
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { Loader2, RefreshCw, ShieldCheck } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Check, ChevronDown, Columns3, Loader2, LogOut, RefreshCw, ShieldCheck } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { countries } from "@/lib/countries"
+import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/client"
-import { AllocationStatus, allocationStatuses, type AllocationUserRow } from "../_lib/allocation-types"
+import { type AllocationUserRow } from "../_lib/allocation-types"
 
 type AllocationsPortalProps = {
   isAdmin: boolean
+  onSignOut: () => Promise<void>
 }
 
 type EditableFields = {
   allocated_committee_code: string
   allocated_country_code: string
-  allocation_status: AllocationStatus
 }
 
-const statusOptions: AllocationStatus[] = [...allocationStatuses]
+type ColumnKey =
+  | "name"
+  | "email"
+  | "school"
+  | "grade"
+  | "preference1"
+  | "preference2"
+  | "preference3"
+  | "experience"
+  | "committeeCode"
+  | "countryCode"
+  | "updated"
 
-export function AllocationsPortal({ isAdmin }: AllocationsPortalProps) {
+const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
+  { key: "name", label: "Name" },
+  { key: "email", label: "Email" },
+  { key: "school", label: "School" },
+  { key: "grade", label: "Grade" },
+  { key: "preference1", label: "Preference 1" },
+  { key: "preference2", label: "Preference 2" },
+  { key: "preference3", label: "Preference 3" },
+  { key: "experience", label: "Experience" },
+  { key: "committeeCode", label: "Committee code" },
+  { key: "countryCode", label: "Country code" },
+  { key: "updated", label: "Updated" },
+]
+
+const DEFAULT_COLUMNS: ColumnKey[] = ALL_COLUMNS.map((column) => column.key)
+
+function SearchableSelect({
+  value,
+  onValueChange,
+  placeholder,
+  options,
+  searchPlaceholder,
+  disabled,
+}: {
+  value: string
+  onValueChange: (value: string) => void
+  placeholder: string
+  options: { value: string; label: string }[]
+  searchPlaceholder: string
+  disabled?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const selected = options.find((option) => option.value === value)
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" role="combobox" className="min-w-44 justify-between" disabled={disabled}>
+          <span className="truncate text-left">{selected?.label ?? placeholder}</span>
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[320px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder={searchPlaceholder} className="h-9" />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  value={`${option.label} ${option.value}`}
+                  onSelect={() => {
+                    onValueChange(option.value)
+                    setOpen(false)
+                  }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", value === option.value ? "opacity-100" : "opacity-0")} />
+                  {option.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+export function AllocationsPortal({ isAdmin, onSignOut }: AllocationsPortalProps) {
   const [rows, setRows] = useState<AllocationUserRow[]>([])
   const [search, setSearch] = useState("")
-  const [statusFilter, setStatusFilter] = useState<"all" | AllocationStatus>("all")
   const [committeeFilter, setCommitteeFilter] = useState<string>("all")
   const [roleFilter, setRoleFilter] = useState<"delegates" | "all">("delegates")
+  const [visibleColumns, setVisibleColumns] = useState<ColumnKey[]>(DEFAULT_COLUMNS)
   const [loading, setLoading] = useState(true)
   const [savingId, setSavingId] = useState<number | null>(null)
   const [drafts, setDrafts] = useState<Record<number, EditableFields>>({})
+  const saveTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({})
 
   const loadRows = useCallback(async () => {
     setLoading(true)
@@ -55,10 +148,7 @@ export function AllocationsPortal({ isAdmin }: AllocationsPortalProps) {
       return
     }
 
-    const nextRows = (data ?? []).map((row) => ({
-      ...row,
-      allocation_status: (row.allocation_status ?? "pending") as AllocationStatus,
-    })) as AllocationUserRow[]
+    const nextRows = data as AllocationUserRow[]
 
     setRows(nextRows)
     setDrafts(
@@ -68,7 +158,6 @@ export function AllocationsPortal({ isAdmin }: AllocationsPortalProps) {
           {
             allocated_committee_code: row.allocated_committee_code ?? "",
             allocated_country_code: row.allocated_country_code ?? "",
-            allocation_status: row.allocation_status ?? "pending",
           },
         ]),
       ),
@@ -80,28 +169,99 @@ export function AllocationsPortal({ isAdmin }: AllocationsPortalProps) {
     void loadRows()
   }, [loadRows])
 
+  useEffect(
+    () => () => {
+      Object.values(saveTimers.current).forEach((timer) => clearTimeout(timer))
+    },
+    [],
+  )
+
   const committeeOptions = useMemo(() => {
     const values = new Set<string>()
     rows.forEach((row) => {
-      const committee = row.delegate_data?.committee1?.trim()
-      if (committee) values.add(committee)
+      ;[row.delegate_data?.committee1, row.delegate_data?.committee2, row.delegate_data?.committee3, row.allocated_committee_code]
+        .filter(Boolean)
+        .forEach((committee) => values.add(String(committee).trim()))
     })
-    return Array.from(values).sort((a, b) => a.localeCompare(b))
+    return Array.from(values).filter(Boolean).sort((a, b) => a.localeCompare(b))
   }, [rows])
+
+  const countryOptions = useMemo(
+    () => countries.map((country) => ({ value: country.code, label: `${country.code} — ${country.name}` })),
+    [],
+  )
 
   const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase()
 
     return rows.filter((row) => {
       if (roleFilter === "delegates" && row.role !== "delegate") return false
-      if (statusFilter !== "all" && (row.allocation_status ?? "pending") !== statusFilter) return false
       if (committeeFilter !== "all" && (row.delegate_data?.committee1 ?? "") !== committeeFilter) return false
       if (!query) return true
 
       const haystack = [row.first_name, row.last_name, row.email, row.school ?? ""].join(" ").toLowerCase()
       return haystack.includes(query)
     })
-  }, [committeeFilter, roleFilter, rows, search, statusFilter])
+  }, [committeeFilter, roleFilter, rows, search])
+
+  const saveAssignment = useCallback(async (rowId: number) => {
+    const row = rows.find((item) => item.id === rowId)
+    const draft = drafts[rowId]
+    if (!row || !draft) return
+
+    const nextStatus = draft.allocated_committee_code && draft.allocated_country_code ? "allocated" : "pending"
+
+    setSavingId(rowId)
+
+    const response = await fetch("/api/system/allocations/assign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: rowId,
+        allocated_committee_code: draft.allocated_committee_code || null,
+        allocated_country_code: draft.allocated_country_code || null,
+        allocated_country: null,
+        allocation_status: nextStatus,
+      }),
+    })
+
+    const result = await response.json().catch(() => null)
+
+    if (!response.ok) {
+      toast.error("Failed to autosave allocation", {
+        description: result?.error ?? "Unknown error",
+      })
+      setSavingId(null)
+      return
+    }
+
+    setRows((prev) =>
+      prev.map((entry) =>
+        entry.id === rowId
+          ? {
+              ...entry,
+              allocated_committee_code: draft.allocated_committee_code || null,
+              allocated_country_code: draft.allocated_country_code || null,
+              allocation_status: nextStatus,
+              updated_at: new Date().toISOString(),
+            }
+          : entry,
+      ),
+    )
+    setSavingId(null)
+  }, [drafts, rows])
+
+  const queueAutosave = useCallback(
+    (id: number) => {
+      const previousTimer = saveTimers.current[id]
+      if (previousTimer) clearTimeout(previousTimer)
+
+      saveTimers.current[id] = setTimeout(() => {
+        void saveAssignment(id)
+      }, 500)
+    },
+    [saveAssignment],
+  )
 
   const updateDraft = (id: number, field: keyof EditableFields, value: string) => {
     setDrafts((prev) => ({
@@ -110,46 +270,11 @@ export function AllocationsPortal({ isAdmin }: AllocationsPortalProps) {
         ...(prev[id] ?? {
           allocated_committee_code: "",
           allocated_country_code: "",
-          allocation_status: "pending" as AllocationStatus,
         }),
         [field]: value,
       },
     }))
-  }
-
-  const saveAssignment = async (row: AllocationUserRow) => {
-    const draft = drafts[row.id]
-    if (!draft) return
-
-    setSavingId(row.id)
-
-    const payload = {
-      userId: row.id,
-      allocated_committee_code: draft.allocated_committee_code || null,
-      allocated_country_code: draft.allocated_country_code || null,
-      allocated_country: null,
-      allocation_status: draft.allocation_status,
-    }
-
-    const response = await fetch("/api/system/allocations/assign", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-
-    const result = await response.json().catch(() => null)
-
-    if (!response.ok) {
-      toast.error("Failed to save allocation", {
-        description: result?.error ?? "Unknown error",
-      })
-      setSavingId(null)
-      return
-    }
-
-    toast.success("Allocation updated")
-    await loadRows()
-    setSavingId(null)
+    queueAutosave(id)
   }
 
   const unassign = async (row: AllocationUserRow) => {
@@ -171,10 +296,41 @@ export function AllocationsPortal({ isAdmin }: AllocationsPortalProps) {
       return
     }
 
+    setDrafts((prev) => ({
+      ...prev,
+      [row.id]: {
+        allocated_committee_code: "",
+        allocated_country_code: "",
+      },
+    }))
+    setRows((prev) =>
+      prev.map((entry) =>
+        entry.id === row.id
+          ? {
+              ...entry,
+              allocated_committee_code: null,
+              allocated_country_code: null,
+              allocation_status: "unallocated",
+              updated_at: new Date().toISOString(),
+            }
+          : entry,
+      ),
+    )
     toast.success("Delegate unassigned")
-    await loadRows()
     setSavingId(null)
   }
+
+  const toggleColumn = (column: ColumnKey) => {
+    setVisibleColumns((prev) => {
+      if (prev.includes(column)) {
+        if (prev.length === 1) return prev
+        return prev.filter((item) => item !== column)
+      }
+      return [...prev, column]
+    })
+  }
+
+  const isVisible = (column: ColumnKey) => visibleColumns.includes(column)
 
   return (
     <Card className="border-orange-200 bg-white/95 shadow-xl">
@@ -183,13 +339,21 @@ export function AllocationsPortal({ isAdmin }: AllocationsPortalProps) {
           <div>
             <CardTitle className="text-2xl">Allocations Portal</CardTitle>
             <CardDescription>
-              Restricted editor for committee/country allocations only.
+              Restricted editor for committee/country allocations only. Changes are autosaved.
             </CardDescription>
           </div>
-          <Badge variant="outline" className="border-orange-300 bg-orange-50 text-orange-700">
-            <ShieldCheck className="mr-1 h-4 w-4" />
-            {isAdmin ? "Admin access" : "Allocator access"}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="border-orange-300 bg-orange-50 text-orange-700">
+              <ShieldCheck className="mr-1 h-4 w-4" />
+              {isAdmin ? "Admin access" : "Allocator access"}
+            </Badge>
+            <form action={onSignOut}>
+              <Button type="submit" variant="outline">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out
+              </Button>
+            </form>
+          </div>
         </div>
 
         <div className="grid gap-3 md:grid-cols-4">
@@ -198,20 +362,6 @@ export function AllocationsPortal({ isAdmin }: AllocationsPortalProps) {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
-
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as "all" | AllocationStatus)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              {statusOptions.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
 
           <Select value={committeeFilter} onValueChange={setCommitteeFilter}>
             <SelectTrigger>
@@ -236,6 +386,28 @@ export function AllocationsPortal({ isAdmin }: AllocationsPortalProps) {
               <SelectItem value="all">All roles</SelectItem>
             </SelectContent>
           </Select>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Columns3 className="mr-2 h-4 w-4" />
+                Columns
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Visible columns</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {ALL_COLUMNS.map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.key}
+                  checked={isVisible(column.key)}
+                  onCheckedChange={() => toggleColumn(column.key)}
+                >
+                  {column.label}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div>
@@ -251,31 +423,30 @@ export function AllocationsPortal({ isAdmin }: AllocationsPortalProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>School</TableHead>
-                <TableHead>Grade</TableHead>
-                <TableHead>Preference 1</TableHead>
-                <TableHead>Preference 2</TableHead>
-                <TableHead>Preference 3</TableHead>
-                <TableHead>Experience</TableHead>
-                <TableHead>Committee code</TableHead>
-                <TableHead>Country code</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Updated</TableHead>
+                {isVisible("name") && <TableHead>Name</TableHead>}
+                {isVisible("email") && <TableHead>Email</TableHead>}
+                {isVisible("school") && <TableHead>School</TableHead>}
+                {isVisible("grade") && <TableHead>Grade</TableHead>}
+                {isVisible("preference1") && <TableHead>Preference 1</TableHead>}
+                {isVisible("preference2") && <TableHead>Preference 2</TableHead>}
+                {isVisible("preference3") && <TableHead>Preference 3</TableHead>}
+                {isVisible("experience") && <TableHead>Experience</TableHead>}
+                {isVisible("committeeCode") && <TableHead>Committee code</TableHead>}
+                {isVisible("countryCode") && <TableHead>Country code</TableHead>}
+                {isVisible("updated") && <TableHead>Updated</TableHead>}
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={13} className="h-20 text-center text-slate-500">
+                  <TableCell colSpan={visibleColumns.length + 1} className="h-20 text-center text-slate-500">
                     <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                   </TableCell>
                 </TableRow>
               ) : filteredRows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={13} className="h-20 text-center text-slate-500">
+                  <TableCell colSpan={visibleColumns.length + 1} className="h-20 text-center text-slate-500">
                     No matching registrations found.
                   </TableCell>
                 </TableRow>
@@ -286,63 +457,43 @@ export function AllocationsPortal({ isAdmin }: AllocationsPortalProps) {
 
                   return (
                     <TableRow key={row.id}>
-                      <TableCell>{`${row.first_name} ${row.last_name}`}</TableCell>
-                      <TableCell>{row.email}</TableCell>
-                      <TableCell>{row.school ?? "—"}</TableCell>
-                      <TableCell>{row.grade ?? "—"}</TableCell>
-                      <TableCell>{row.delegate_data?.committee1 ?? "—"}</TableCell>
-                      <TableCell>{row.delegate_data?.committee2 ?? "—"}</TableCell>
-                      <TableCell>{row.delegate_data?.committee3 ?? "—"}</TableCell>
-                      <TableCell>{row.delegate_data?.experience ?? "—"}</TableCell>
-                      <TableCell>
-                        <Input
-                          value={draft?.allocated_committee_code ?? ""}
-                          onChange={(event) => updateDraft(row.id, "allocated_committee_code", event.target.value)}
-                          disabled={isSaving}
-                          className="min-w-28"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          value={draft?.allocated_country_code ?? ""}
-                          onChange={(event) => updateDraft(row.id, "allocated_country_code", event.target.value)}
-                          disabled={isSaving}
-                          className="min-w-24"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Select
-                          value={draft?.allocation_status ?? "pending"}
-                          onValueChange={(value) => updateDraft(row.id, "allocation_status", value)}
-                          disabled={isSaving}
-                        >
-                          <SelectTrigger className="min-w-36">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {statusOptions.map((status) => (
-                              <SelectItem key={status} value={status}>
-                                {status}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>{new Date(row.updated_at).toLocaleString()}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button size="sm" onClick={() => void saveAssignment(row)} disabled={isSaving}>
-                            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => void unassign(row)}
+                      {isVisible("name") && <TableCell>{`${row.first_name} ${row.last_name}`}</TableCell>}
+                      {isVisible("email") && <TableCell>{row.email}</TableCell>}
+                      {isVisible("school") && <TableCell>{row.school ?? "—"}</TableCell>}
+                      {isVisible("grade") && <TableCell>{row.grade ?? "—"}</TableCell>}
+                      {isVisible("preference1") && <TableCell>{row.delegate_data?.committee1 ?? "—"}</TableCell>}
+                      {isVisible("preference2") && <TableCell>{row.delegate_data?.committee2 ?? "—"}</TableCell>}
+                      {isVisible("preference3") && <TableCell>{row.delegate_data?.committee3 ?? "—"}</TableCell>}
+                      {isVisible("experience") && <TableCell>{row.delegate_data?.experience ?? "—"}</TableCell>}
+                      {isVisible("committeeCode") && (
+                        <TableCell>
+                          <SearchableSelect
+                            value={draft?.allocated_committee_code ?? ""}
+                            onValueChange={(value) => updateDraft(row.id, "allocated_committee_code", value)}
+                            placeholder="Select committee"
+                            options={committeeOptions.map((committee) => ({ value: committee, label: committee }))}
+                            searchPlaceholder="Search committees..."
                             disabled={isSaving}
-                          >
-                            Unassign
-                          </Button>
-                        </div>
+                          />
+                        </TableCell>
+                      )}
+                      {isVisible("countryCode") && (
+                        <TableCell>
+                          <SearchableSelect
+                            value={draft?.allocated_country_code ?? ""}
+                            onValueChange={(value) => updateDraft(row.id, "allocated_country_code", value)}
+                            placeholder="Select country"
+                            options={countryOptions}
+                            searchPlaceholder="Search countries..."
+                            disabled={isSaving}
+                          />
+                        </TableCell>
+                      )}
+                      {isVisible("updated") && <TableCell>{new Date(row.updated_at).toLocaleString()}</TableCell>}
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="outline" onClick={() => void unassign(row)} disabled={isSaving}>
+                          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Unassign"}
+                        </Button>
                       </TableCell>
                     </TableRow>
                   )

@@ -2,9 +2,11 @@
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
 import { createClient } from "@/utils/supabase/server"
+import { Button } from "@/components/ui/button"
 import SystemGoogleLogin from "../system-google-login"
 import { AllocationsPortal } from "./allocations-portal"
 import { canAccessAllocations, isSystemAdmin } from "../_lib/allowlist"
+import { LogOut } from "lucide-react"
 
 /**
  * Allocations portal access is controlled by SYSTEM_ADMIN_EMAILS and SYSTEM_ALLOCATOR_EMAILS.
@@ -13,6 +15,12 @@ import { canAccessAllocations, isSystemAdmin } from "../_lib/allowlist"
  */
 export default async function SystemAllocationsPage() {
   const supabase = await createClient()
+  const signOutAction = async () => {
+    "use server"
+    const scopedSupabase = await createClient()
+    await scopedSupabase.auth.signOut()
+  }
+
   const { data } = await supabase.auth.getUser()
   const user = data.user
 
@@ -27,8 +35,6 @@ export default async function SystemAllocationsPage() {
   }
 
   if (!canAccessAllocations(user.email)) {
-    await supabase.auth.signOut()
-
     return (
       <main className="min-h-screen bg-[#ffecdd] text-slate-900">
         <div className="container mx-auto px-4 py-16">
@@ -40,6 +46,12 @@ export default async function SystemAllocationsPage() {
             <p className="mt-2 text-xs text-slate-500">
               Signed in as: <span className="font-mono">{user.email}</span>
             </p>
+            <form action={signOutAction} className="mt-6">
+              <Button type="submit" variant="outline">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out and switch account
+              </Button>
+            </form>
           </div>
         </div>
       </main>
@@ -49,7 +61,7 @@ export default async function SystemAllocationsPage() {
   return (
     <main className="min-h-screen bg-[#ffecdd] text-slate-900">
       <div className="container mx-auto px-4 py-16">
-        <AllocationsPortal isAdmin={isSystemAdmin(user.email)} />
+        <AllocationsPortal isAdmin={isSystemAdmin(user.email)} onSignOut={signOutAction} />
       </div>
     </main>
   )
