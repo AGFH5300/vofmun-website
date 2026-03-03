@@ -38,7 +38,6 @@ type AllocationsPortalProps = {
 type EditableFields = {
   allocated_committee_code: string
   allocated_country_code: string
-  allocated_by_email: string
 }
 
 type ColumnKey =
@@ -70,16 +69,18 @@ const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "updated", label: "Updated" },
 ]
 
-const ALLOCATOR_OPTIONS = ["vidur", "vaibhav", "arsh"] as const
-
-const normalizeAllocatorValue = (value: string | null | undefined) => {
-  const normalized = (value ?? "").trim().toLowerCase()
-  if (!normalized) return ""
-  if (ALLOCATOR_OPTIONS.includes(normalized as (typeof ALLOCATOR_OPTIONS)[number])) return normalized
-  if (normalized === "admin") return "admin"
-  return ""
+const ALLOCATOR_EMAIL_MAP: Record<string, string> = {
+  "vidur245@gmail.com": "vidur",
+  "saxena.arsh@gmail.com": "arsh",
+  "vmundanat@gmail.com": "vaibhav",
 }
 
+const getAutoAllocatorLabel = (email: string, isAdmin: boolean) => {
+  const normalizedEmail = email.trim().toLowerCase()
+  if (!normalizedEmail) return ""
+  if (isAdmin) return `admin - ${normalizedEmail}`
+  return ALLOCATOR_EMAIL_MAP[normalizedEmail] ?? normalizedEmail
+}
 
 const DEFAULT_COLUMNS: ColumnKey[] = ALL_COLUMNS.map((column) => column.key)
 const COLUMN_COOKIE_NAME = "system_allocations_visible_columns"
@@ -200,7 +201,6 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
           {
             allocated_committee_code: row.allocated_committee_code ?? "",
             allocated_country_code: row.allocated_country_code ?? "",
-            allocated_by_email: normalizeAllocatorValue(row.allocated_by_email),
           },
         ]),
       ),
@@ -336,7 +336,6 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
           userId: rowId,
           allocated_committee_code: draft.allocated_committee_code || null,
           allocated_country_code: draft.allocated_country_code || null,
-          allocated_by_email: draft.allocated_by_email || null,
           allocated_country: null,
           allocation_status: nextStatus,
         }),
@@ -358,7 +357,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                 ...entry,
                 allocated_committee_code: draft.allocated_committee_code || null,
                 allocated_country_code: draft.allocated_country_code || null,
-                allocated_by_email: draft.allocated_by_email || null,
+                allocated_by_email: getAutoAllocatorLabel(userEmail, isAdmin) || null,
                 allocation_status: nextStatus,
                 updated_at: new Date().toISOString(),
               }
@@ -376,7 +375,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
         return next
       })
     }
-  }, [drafts, rows])
+  }, [drafts, isAdmin, rows, userEmail])
 
   const queueAutosave = useCallback(
     (id: number) => {
@@ -397,7 +396,6 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
         ...(prev[id] ?? {
           allocated_committee_code: "",
           allocated_country_code: "",
-          allocated_by_email: "",
         }),
         [field]: value,
         ...(field === "allocated_committee_code" ? { allocated_country_code: "" } : {}),
@@ -430,7 +428,6 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
         [row.id]: {
           allocated_committee_code: "",
           allocated_country_code: "",
-          allocated_by_email: "",
         },
       }))
       setRows((prev) =>
@@ -472,7 +469,6 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
   }
 
   const isVisible = (column: ColumnKey) => visibleColumns.includes(column)
-  const allocatorOptions = isAdmin ? [...ALLOCATOR_OPTIONS, "admin"] : [...ALLOCATOR_OPTIONS]
 
   return (
     <Card className="border-orange-200 bg-white/95 shadow-xl">
@@ -650,26 +646,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                           />
                         </TableCell>
                       )}
-                      {isVisible("allocatedBy") && (
-                        <TableCell>
-                          <Select
-                            value={draft?.allocated_by_email ?? ""}
-                            onValueChange={(value) => updateDraft(row.id, "allocated_by_email", value)}
-                            disabled={isSaving}
-                          >
-                            <SelectTrigger className="min-w-36">
-                              <SelectValue placeholder="Select allocator" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {allocatorOptions.map((allocator) => (
-                                <SelectItem key={allocator} value={allocator}>
-                                  {allocator}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      )}
+                      {isVisible("allocatedBy") && <TableCell>{row.allocated_by_email ?? "—"}</TableCell>}
                       {isVisible("updated") && <TableCell>{new Date(row.updated_at).toLocaleString()}</TableCell>}
                       <TableCell className="text-right">
                         <Button size="sm" variant="outline" onClick={() => void unassign(row)} disabled={isSaving}>
