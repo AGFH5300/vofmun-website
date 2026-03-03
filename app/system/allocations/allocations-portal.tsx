@@ -174,7 +174,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
     const { data, error } = await supabase
       .from("users")
       .select(
-        "id,first_name,last_name,email,role,payment_status,school,grade,delegate_data,allocated_committee_code,allocated_country_code,allocated_by_email,allocation_status,updated_at",
+        "id,first_name,last_name,email,role,payment_status,school,grade,delegate_data,allocated_committee_code,allocated_country_code,allocated_country,allocated_by_email,allocation_status,updated_at",
       )
       .order("updated_at", { ascending: false })
 
@@ -193,7 +193,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
           row.id,
           {
             allocated_committee_code: row.allocated_committee_code ?? "",
-            allocated_country_code: row.allocated_country_code ?? "",
+            allocated_country_code: row.allocated_country ?? row.allocated_country_code ?? "",
           },
         ]),
       ),
@@ -277,7 +277,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
     eligibleRows.forEach((row) => {
       const draft = drafts[row.id]
       const committeeCode = normalizeCommitteeCode(draft?.allocated_committee_code ?? row.allocated_committee_code)
-      const allocatedOption = (draft?.allocated_country_code ?? row.allocated_country_code)?.trim()
+      const allocatedOption = (draft?.allocated_country_code ?? row.allocated_country ?? row.allocated_country_code)?.trim()
 
       if (!committeeCode || !allocatedOption) return
 
@@ -339,8 +339,8 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
         body: JSON.stringify({
           userId: rowId,
           allocated_committee_code: draft.allocated_committee_code || null,
-          allocated_country_code: draft.allocated_country_code || null,
-          allocated_country: null,
+          allocated_country_code: null,
+          allocated_country: draft.allocated_country_code || null,
           allocation_status: nextStatus,
         }),
       })
@@ -360,7 +360,8 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
             ? {
                 ...entry,
                 allocated_committee_code: draft.allocated_committee_code || null,
-                allocated_country_code: draft.allocated_country_code || null,
+                allocated_country_code: null,
+                allocated_country: draft.allocated_country_code || null,
                 allocated_by_email: getAllocatorLabelFromEmail(userEmail, isAdmin) || null,
                 allocation_status: nextStatus,
                 updated_at: new Date().toISOString(),
@@ -453,6 +454,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
                 ...entry,
                 allocated_committee_code: null,
                 allocated_country_code: null,
+                allocated_country: null,
                 allocated_by_email: null,
                 allocation_status: "unallocated",
                 updated_at: new Date().toISOString(),
