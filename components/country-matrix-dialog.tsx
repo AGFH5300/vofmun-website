@@ -70,7 +70,8 @@ export function CountryMatrixDialog({ committeeName, matrix, buttonClassName }: 
     return new Map<string, string>(assignmentEntries)
   }, [assignments])
 
-  const headers = [...matrix.headers, "Assigned Delegate"]
+  const primaryHeader = matrix.headers[0] ?? "Country"
+  const headers = [primaryHeader, "Assigned Delegate"]
 
   return (
     <Dialog>
@@ -103,9 +104,7 @@ export function CountryMatrixDialog({ committeeName, matrix, buttonClassName }: 
                 <TableBody>
                   {matrix.rows.map((row, rowIndex) => (
                     <TableRow key={`${rowIndex}-${row.join("-")}`}>
-                      {row.map((cell, cellIndex) => (
-                        <TableCell key={`${rowIndex}-${cellIndex}`}>{cell}</TableCell>
-                      ))}
+                      <TableCell>{row[0] ?? "—"}</TableCell>
                       <TableCell>{assignmentMap.get(row[0]?.trim().toLowerCase() ?? "") ?? "—"}</TableCell>
                     </TableRow>
                   ))}
