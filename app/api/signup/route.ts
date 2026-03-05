@@ -40,6 +40,48 @@ const chairCvSchema = z.object({
   dataUrl: z.string().regex(/^data:.*;base64,.+/, 'Invalid CV file format'),
 })
 
+async function partitionReferralCodesByValidity(supabase: Awaited<ReturnType<typeof createClient>>, codes: string[]) {
+  if (codes.length === 0) {
+    return { validCodes: new Set<string>(), invalidCodes: [] as string[] }
+  }
+
+  const validCodes = new Set<string>()
+  const unresolvedCodes: string[] = []
+
+  for (const code of codes) {
+    if (isValidReferralCode(code)) {
+      validCodes.add(code)
+      continue
+    }
+
+    unresolvedCodes.push(code)
+  }
+
+  if (unresolvedCodes.length === 0) {
+    return { validCodes, invalidCodes: [] as string[] }
+  }
+
+  const { data: matchingUsers, error } = await supabase
+    .from('users')
+    .select('own_referral_code')
+    .in('own_referral_code', unresolvedCodes)
+
+  if (error) {
+    throw new Error(`Failed to validate referral codes: ${error.message}`)
+  }
+
+  for (const user of matchingUsers ?? []) {
+    const ownCode = typeof user.own_referral_code === 'string' ? normalizeReferralCode(user.own_referral_code) : ''
+    if (ownCode) {
+      validCodes.add(ownCode)
+    }
+  }
+
+  const invalidCodes = unresolvedCodes.filter((code) => !validCodes.has(code))
+
+  return { validCodes, invalidCodes }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -245,7 +287,7 @@ export async function POST(request: NextRequest) {
       roleData = adminDataSchema.parse(body.adminData)
     }
 
-    const incomingReferralCodes = Array.isArray(body.referralCodes)
+    const incomingReferralCodes: unknown[] = Array.isArray(body.referralCodes)
       ? body.referralCodes
       : Array.isArray(body.delegateData?.referralCodes)
         ? body.delegateData.referralCodes
@@ -260,7 +302,7 @@ export async function POST(request: NextRequest) {
       .filter((code): code is string => code.length > 0)
 
     const uniqueReferralCodes = Array.from(new Set(sanitizedReferralCodes))
-    const invalidReferralCodes = uniqueReferralCodes.filter((code) => !isValidReferralCode(code))
+    const { invalidCodes: invalidReferralCodes } = await partitionReferralCodesByValidity(supabase, uniqueReferralCodes)
 
     if (invalidReferralCodes.length > 0) {
       const message = invalidReferralCodes
