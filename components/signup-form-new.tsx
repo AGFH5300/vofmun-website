@@ -607,8 +607,8 @@ export function SignupFormNew() {
     setReferralFeedback((prev) => ({
       ...prev,
       [index]: {
-        type: "error",
-        message: "We couldn't find a matching referral code.",
+        type: "info",
+        message: "We'll verify this code when you submit the form.",
       },
     }))
   }
@@ -619,7 +619,7 @@ export function SignupFormNew() {
         <div>
           <h4 className="text-md sm:text-lg font-semibold text-gray-700">Referral Codes (Optional)</h4>
           <p className="text-sm text-muted-foreground">
-            Enter referral codes shared with you by any secretariat members. Add multiple codes if you have more than one.
+            Enter referral codes shared with you by a chair, delegate, or organizing team member. Add multiple codes if you have more than one.
           </p>
         </div>
         <Button
