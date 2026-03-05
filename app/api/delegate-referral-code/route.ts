@@ -17,7 +17,7 @@ const REQUEST_SCHEMA = z.object({
   email: z.string().email('Please enter a valid email address'),
 })
 
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000
+const RATE_LIMIT_WINDOW_MS = 2 * 60 * 1000
 const RATE_LIMIT_MAX_REQUESTS = 5
 const requestBuckets = new Map<string, { count: number; resetAt: number }>()
 
