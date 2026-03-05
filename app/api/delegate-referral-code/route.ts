@@ -12,6 +12,7 @@ export const runtime = 'nodejs'
 
 const SUCCESS_MESSAGE = 'Your referral code has been sent to your email.'
 const USER_NOT_FOUND_MESSAGE = "We couldn't find a registered delegate with that email."
+const RATE_LIMIT_MESSAGE = 'Too many requests. Please wait a few minutes before trying again.'
 const REQUEST_SCHEMA = z.object({
   email: z.string().email('Please enter a valid email address'),
 })
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
     const normalizedEmail = payload.email.trim().toLowerCase()
 
     if (applyRateLimit(request, normalizedEmail)) {
-      return NextResponse.json({ status: 'success', message: SUCCESS_MESSAGE }, { status: 429 })
+      return NextResponse.json({ status: 'rate_limited', message: RATE_LIMIT_MESSAGE }, { status: 429 })
     }
 
     const supabase = createSupabaseAdminClient()
