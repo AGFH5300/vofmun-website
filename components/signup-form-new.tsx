@@ -1184,6 +1184,15 @@ export function SignupFormNew() {
 
             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
               <li>Check your inbox (and spam) for the payment email.</li>
+              {lastSubmittedRole === "delegate" ? (
+                <li>
+                  You can now apply for your personal referral code on the{" "}
+                  <Link href="/delegate-referral-code" className="underline">
+                    Delegate Referral Code page
+                  </Link>
+                  .
+                </li>
+              ) : null}
               <li>
                 Need help? Email <a href="mailto:conference@vofmun.org" className="underline">conference@vofmun.org</a>.
               </li>
