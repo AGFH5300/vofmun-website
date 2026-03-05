@@ -92,7 +92,12 @@ async function withEmailSendQueue<T>(task: () => Promise<T>): Promise<T> {
 type SendEmailArgs = Parameters<NonNullable<typeof resendClient>["emails"]["send"]>[0]
 
 type EmailLogContext = {
-  category: "payment-confirmed" | "payment-reminder" | "payment-reminder-short" | "payment-reminder-audit"
+  category:
+    | "payment-confirmed"
+    | "payment-reminder"
+    | "payment-reminder-short"
+    | "payment-reminder-audit"
+    | "delegate-referral-code"
   recipient: string
 }
 
@@ -299,6 +304,49 @@ export async function sendPaymentReminderEmail(payload: RegistrationEmailPayload
     html,
     text,
   }, { category: "payment-reminder", recipient: payload.email })
+}
+
+export async function sendDelegateReferralCodeEmail(payload: {
+  email: string
+  firstName?: string | null
+  lastName?: string | null
+  referralCode: string
+}) {
+  if (!resendClient) {
+    console.warn("Resend API key not configured; skipping delegate referral code email")
+    return
+  }
+
+  const nameForGreeting = greetingName(payload.firstName, payload.lastName)
+  const normalizedCode = payload.referralCode.trim().toUpperCase()
+
+  const html = `
+    <div style="${baseBodyStyle}">
+      <p>Hi ${nameForGreeting},</p>
+      <p>Here is your personal VOFMUN delegate referral code:</p>
+      <p style="font-size: 28px; font-weight: 700; letter-spacing: 0.12em; color: #0f172a; margin: 16px 0;">${normalizedCode}</p>
+      <p>
+        You can share or use this referral code during VOFMUN delegate registrations where referral codes are accepted.
+      </p>
+      <p style="margin-top: 24px;">Warm regards,<br/>VOFMUN Secretariat</p>
+    </div>
+  `
+
+  const text = `Hi ${nameForGreeting},\n\nHere is your personal VOFMUN delegate referral code:\n\n${normalizedCode}\n\nYou can share or use this referral code during VOFMUN delegate registrations where referral codes are accepted.\n\nWarm regards,\nVOFMUN Secretariat`
+
+  await sendEmailAndLog(
+    {
+      from: FROM_EMAIL,
+      to: payload.email,
+      subject: "Your VOFMUN Delegate Referral Code",
+      html,
+      text,
+    },
+    {
+      category: "delegate-referral-code",
+      recipient: payload.email,
+    },
+  )
 }
 
 export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPayload) {
