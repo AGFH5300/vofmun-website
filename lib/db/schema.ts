@@ -23,6 +23,9 @@ export const users = pgTable('users', {
   chairData: jsonb('chair_data'), // For chair-specific fields including experiences
   adminData: jsonb('admin_data'), // For admin-specific fields
   referralCodes: jsonb('referral_codes'),
+  ownReferralCode: varchar('own_referral_code', { length: 5 }),
+  ownReferralCodeGeneratedAt: timestamp('own_referral_code_generated_at'),
+  ownReferralCodeEmailedAt: timestamp('own_referral_code_emailed_at'),
   
   // Common fields
   dietaryType: varchar('dietary_type', { length: 50 }),
