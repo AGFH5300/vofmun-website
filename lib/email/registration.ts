@@ -16,29 +16,28 @@ const resendClient = resendApiKey ? new Resend(resendApiKey) : null
 const FROM_EMAIL = "no-reply@vofmun.org"
 const RESEND_RATE_LIMIT_MS = 550
 const MAX_RATE_LIMIT_RETRIES = 4
+const PAYMENT_PAGE_URL = "https://vofmun.org/signup#payment"
+
+const EMAIL_FONT =
+  "Inter,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif"
+
+const EMAIL_COLORS = {
+  bg: "#f7f5ef",
+  card: "#ffffff",
+  border: "#eadfce",
+  primary: "#701e1e",
+  primarySoft: "#fff7ea",
+  primarySoftText: "#7a4a00",
+  text: "#1f2a2f",
+  muted: "#52636a",
+  link: "#0f4c5c",
+  footer: "#8c8c8c",
+}
 
 let emailSendQueue: Promise<void> = Promise.resolve()
 let lastEmailSentAt = 0
 
-const baseBodyStyle =
-  "font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #111827; line-height: 1.7; font-size: 15px;"
-
-const summaryListStyle =
-  "list-style: none; padding: 0; margin: 0; border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb;"
-
 type ChairAdminEmailMode = "paid" | "unpaid"
-
-function formatFullName(firstName?: string | null, lastName?: string | null) {
-  return [firstName, lastName]
-    .filter((value) => typeof value === "string" && value.trim().length > 0)
-    .join(" ")
-    .trim()
-}
-
-function greetingName(firstName?: string | null, lastName?: string | null) {
-  const fullName = formatFullName(firstName, lastName)
-  return fullName.length > 0 ? fullName : "there"
-}
 
 type RegistrationEmailPayload = {
   firstName?: string | null
@@ -55,6 +54,124 @@ type PaymentReminderAuditPayload = {
   recipientsAttempted: number
   remindersSent: number
   remindersFailed: number
+}
+
+function formatFullName(firstName?: string | null, lastName?: string | null) {
+  return [firstName, lastName]
+    .filter((value) => typeof value === "string" && value.trim().length > 0)
+    .join(" ")
+    .trim()
+}
+
+function greetingName(firstName?: string | null, lastName?: string | null) {
+  const fullName = formatFullName(firstName, lastName)
+  return fullName.length > 0 ? fullName : "there"
+}
+
+function escapeHtml(value: string) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
+}
+
+function renderButton(label: string, href: string) {
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
+      <tr>
+        <td style="background:${EMAIL_COLORS.primary};border-radius:12px;">
+          <a
+            href="${escapeHtml(href)}"
+            style="display:inline-block;padding:12px 16px;color:#fff;text-decoration:none;font-weight:700;font-size:14px;"
+          >
+            ${escapeHtml(label)}
+          </a>
+        </td>
+      </tr>
+    </table>
+  `
+}
+
+function renderInfoCard(rows: Array<{ label: string; value: string }>) {
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border:1px solid ${EMAIL_COLORS.border};border-radius:14px;overflow:hidden;background:#fcfbf8;margin:14px 0 18px;">
+      ${rows
+        .map(
+          (row, index) => `
+            <tr>
+              <td style="padding:12px 16px;${
+                index < rows.length - 1 ? `border-bottom:1px solid ${EMAIL_COLORS.border};` : ""
+              }">
+                <div style="font-size:12px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:${EMAIL_COLORS.muted};margin-bottom:4px;">
+                  ${escapeHtml(row.label)}
+                </div>
+                <div style="font-size:14px;line-height:1.5;color:${EMAIL_COLORS.text};word-break:break-word;">
+                  ${escapeHtml(row.value)}
+                </div>
+              </td>
+            </tr>
+          `,
+        )
+        .join("")}
+    </table>
+  `
+}
+
+function renderEmailFrame(args: {
+  title: string
+  recipientEmail: string
+  preheader?: string
+  contentHtml: string
+}) {
+  const preheader = args.preheader?.trim() || args.title
+
+  return `
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
+      ${escapeHtml(preheader)}
+    </div>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:${EMAIL_COLORS.bg};padding:24px 0;font-family:${EMAIL_FONT};">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width:600px;background:${EMAIL_COLORS.card};border:1px solid ${EMAIL_COLORS.border};border-radius:18px;overflow:hidden;">
+            <tr>
+              <td style="background:${EMAIL_COLORS.primary};padding:18px 22px;">
+                <div style="color:#fff;font-size:18px;font-weight:700;margin-top:6px;">
+                  ${escapeHtml(args.title)}
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:22px;color:${EMAIL_COLORS.text};font-size:15px;line-height:1.6;">
+                ${args.contentHtml}
+              </td>
+            </tr>
+
+            <tr>
+              <td style="background:${EMAIL_COLORS.primarySoft};border-top:1px solid ${EMAIL_COLORS.border};padding:14px 22px;">
+                <p style="margin:0;color:${EMAIL_COLORS.primarySoftText};font-size:12px;line-height:1.55;">
+                  Need help? Contact us at
+                  <a
+                    href="mailto:conference@vofmun.org"
+                    style="font-weight:600;color:#B22222;text-underline-offset:4px;text-decoration:none;"
+                  >
+                    conference@vofmun.org
+                  </a>
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          <div style="max-width:600px;color:${EMAIL_COLORS.footer};font-size:11px;line-height:1.5;margin-top:10px;font-family:${EMAIL_FONT};">
+            © VOFMUN 2026 • This message was sent to ${escapeHtml(args.recipientEmail)}
+          </div>
+        </td>
+      </tr>
+    </table>
+  `
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -160,42 +277,68 @@ async function sendEmailWithRateLimitHandling(args: SendEmailArgs) {
 
 const buildChairAdminEmailContent = (
   payload: RegistrationEmailPayload,
-  mode: ChairAdminEmailMode,
+  _mode: ChairAdminEmailMode,
 ): { subject: string; html: string; text: string } => {
   const nameForGreeting = greetingName(payload.firstName, payload.lastName)
   const roleLabel = payload.role === "chair" ? "Chair" : "Admin"
 
-  const html = `
-    <div style="${baseBodyStyle}">
-      <p>Hi ${nameForGreeting},</p>
-      <p>Thanks for applying to be a ${roleLabel.toLowerCase()} at <strong>VOFMUN I 2026</strong>!</p>
-      <p>
-        We will get in touch with all candidates once the application deadline has elapsed to share your application status.
-        ${payload.role === "chair"
-          ? "All shortlisted chairing applicants will move on to the interview stage to select the final chairs for VOFMUN I 2026."
-          : "Admins will be contacted soon after the deadline regarding whether they have been selected."}
-      </p>
-      <p>We wish you the best of luck on your application.</p>
-      <p style="margin-top: 12px;">If you are selected, we will share the onboarding details and payment instructions with you directly.</p>
-      <p style="margin-top: 24px;">Thanks for applying!<br/>VOFMUN I 2026 Secretariat</p>
-    </div>
-  `
+  const html = renderEmailFrame({
+    title: `${roleLabel} application received`,
+    recipientEmail: payload.email,
+    preheader: `Your VOFMUN ${roleLabel.toLowerCase()} application has been received.`,
+    contentHtml: `
+      <p style="margin:0 0 12px;">Hi ${escapeHtml(nameForGreeting)},</p>
 
-  const text = `Hi ${nameForGreeting},\n\nThanks for applying to be a ${roleLabel.toLowerCase()} at VOFMUN I 2026!\n\nWe will get in touch with all candidates once the application deadline has elapsed to share your application status. ${
+      <p style="margin:0 0 12px;">
+        Thank you for applying to be a <strong>${roleLabel.toLowerCase()}</strong> at <strong>VOFMUN I 2026</strong>.
+      </p>
+
+      <p style="margin:0 0 12px;">
+        We have received your application and it is now under review.
+      </p>
+
+      <p style="margin:0 0 18px;">
+        We will contact all applicants after the application deadline with an update on their status.
+        ${
+          payload.role === "chair"
+            ? "Shortlisted chair applicants will be invited to the interview stage before final selections are made."
+            : "Selected admins will be contacted directly with the next steps."
+        }
+      </p>
+
+      <div style="border-top:1px solid ${EMAIL_COLORS.border};padding-top:14px;">
+        <p style="margin:0;color:${EMAIL_COLORS.muted};font-size:13px;line-height:1.55;">
+          If you are selected, we will share onboarding details and any relevant payment information with you directly.
+        </p>
+      </div>
+    `,
+  })
+
+  const text = `Hi ${nameForGreeting},
+
+Thank you for applying to be a ${roleLabel.toLowerCase()} at VOFMUN I 2026.
+
+We have received your application and it is now under review.
+
+We will contact all applicants after the application deadline with an update on their status. ${
     payload.role === "chair"
-      ? "All shortlisted chairing applicants will move on to the interview stage to select the final chairs for VOFMUN I 2026."
-      : "Admins will be contacted soon after the deadline regarding whether they have been selected."
-  }\n\nWe wish you the best of luck on your application.\n\nIf you are selected, we will share onboarding details and payment instructions with you directly.\n\nThanks for applying!\nVOFMUN I 2026 Secretariat`
+      ? "Shortlisted chair applicants will be invited to the interview stage before final selections are made."
+      : "Selected admins will be contacted directly with the next steps."
+  }
+
+If you are selected, we will share onboarding details and any relevant payment information with you directly.
+
+VOFMUN I 2026 Secretariat`
 
   return {
-    subject: `VOFMUN ${roleLabel} application received`,
+    subject: `Your VOFMUN ${roleLabel} application has been received`,
     html,
     text,
   }
 }
 
 export async function sendPaymentConfirmedEmail(
-  payload: RegistrationEmailPayload & { paymentProofFileName?: string | null }
+  payload: RegistrationEmailPayload & { paymentProofFileName?: string | null },
 ) {
   if (!resendClient) {
     console.warn("Resend API key not configured; skipping payment confirmation email")
@@ -205,46 +348,81 @@ export async function sendPaymentConfirmedEmail(
   if (payload.role === "chair" || payload.role === "admin") {
     const content = buildChairAdminEmailContent(payload, "paid")
 
-    await sendEmailAndLog({
-      from: FROM_EMAIL,
-      to: payload.email,
-      subject: content.subject,
-      html: content.html,
-      text: content.text,
-    }, { category: "payment-confirmed", recipient: payload.email })
+    await sendEmailAndLog(
+      {
+        from: FROM_EMAIL,
+        to: payload.email,
+        subject: content.subject,
+        html: content.html,
+        text: content.text,
+      },
+      { category: "payment-confirmed", recipient: payload.email },
+    )
     return
   }
 
   const nameForGreeting = greetingName(payload.firstName, payload.lastName)
-  const fullName = formatFullName(payload.firstName, payload.lastName) || "your registration"
+  const fullName = formatFullName(payload.firstName, payload.lastName) || "Not provided"
+  const roleLabel = payload.role.charAt(0).toUpperCase() + payload.role.slice(1)
 
-  const html = `
-    <div style="${baseBodyStyle}">
-      <p>Hi ${nameForGreeting},</p>
-      <p>
-        Thank you for registering for <strong>VOFMUN 2026</strong>. We have received your application as a
-        <strong>${payload.role.charAt(0).toUpperCase() + payload.role.slice(1)}</strong> and your proof of payment.
-        Our finance team will verify the transfer shortly and send your official confirmation with next steps.
+  const html = renderEmailFrame({
+    title: "Registration received",
+    recipientEmail: payload.email,
+    preheader: "We’ve received your VOFMUN registration and proof of payment.",
+    contentHtml: `
+      <p style="margin:0 0 12px;">Hi ${escapeHtml(nameForGreeting)},</p>
+
+      <p style="margin:0 0 12px;">
+        Thank you for registering for <strong>VOFMUN 2026</strong>. We have received your <strong>${escapeHtml(
+          payload.role,
+        )}</strong> application and your proof of payment.
       </p>
-      <p style="margin-top: 24px; font-weight: 600; color: #0f172a;">Registration summary</p>
-      <ul style="${summaryListStyle}">
-        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Full name: ${fullName}</li>
-        <li style="padding: 12px 16px;">Role: ${payload.role}</li>
-      </ul>
-      <p style="margin-top: 24px;">We'll be in touch soon with conference logistics, committee assignments, and travel information.</p>
-      <p style="margin-top: 24px;">Warm regards,<br/>VOFMUN Secretariat</p>
-    </div>
-  `
 
-  const text = `Hi ${nameForGreeting},\n\nThank you for registering for VOFMUN 2026. We received your ${payload.role} application and your proof of payment.\n\nRegistration summary:\n- Full name: ${fullName}\n- Role: ${payload.role}\n\nWe'll be in touch soon with next steps.\n\nVOFMUN Secretariat`
+      <p style="margin:0 0 12px;">
+        Our finance team will verify the transfer shortly and send your official confirmation with the next steps.
+      </p>
 
-  await sendEmailAndLog({
-    from: FROM_EMAIL,
-    to: payload.email,
-    subject: "VOFMUN registration & payment received",
-    html,
-    text,
-  }, { category: "payment-confirmed", recipient: payload.email })
+      ${renderInfoCard([
+        { label: "Full name", value: fullName },
+        { label: "Role", value: roleLabel },
+      ])}
+
+      <p style="margin:0 0 18px;">
+        We’ll be in touch soon with conference logistics, committee details, and any important updates.
+      </p>
+
+      <div style="border-top:1px solid ${EMAIL_COLORS.border};padding-top:14px;">
+        <p style="margin:0;color:${EMAIL_COLORS.muted};font-size:13px;line-height:1.55;">
+          Thank you for registering with VOFMUN.
+        </p>
+      </div>
+    `,
+  })
+
+  const text = `Hi ${nameForGreeting},
+
+Thank you for registering for VOFMUN 2026. We have received your ${payload.role} application and your proof of payment.
+
+Our finance team will verify the transfer shortly and send your official confirmation with the next steps.
+
+Registration summary:
+- Full name: ${fullName}
+- Role: ${roleLabel}
+
+We’ll be in touch soon with conference logistics, committee details, and any important updates.
+
+VOFMUN Secretariat`
+
+  await sendEmailAndLog(
+    {
+      from: FROM_EMAIL,
+      to: payload.email,
+      subject: "VOFMUN registration and payment received",
+      html,
+      text,
+    },
+    { category: "payment-confirmed", recipient: payload.email },
+  )
 }
 
 export async function sendPaymentReminderEmail(payload: RegistrationEmailPayload) {
@@ -256,54 +434,97 @@ export async function sendPaymentReminderEmail(payload: RegistrationEmailPayload
   if (payload.role === "chair" || payload.role === "admin") {
     const content = buildChairAdminEmailContent(payload, "unpaid")
 
-    await sendEmailAndLog({
-      from: FROM_EMAIL,
-      to: payload.email,
-      subject: content.subject,
-      html: content.html,
-      text: content.text,
-    }, { category: "payment-reminder", recipient: payload.email })
+    await sendEmailAndLog(
+      {
+        from: FROM_EMAIL,
+        to: payload.email,
+        subject: content.subject,
+        html: content.html,
+        text: content.text,
+      },
+      { category: "payment-reminder", recipient: payload.email },
+    )
     return
   }
 
   const nameForGreeting = greetingName(payload.firstName, payload.lastName)
   const proofLink = PAYMENT_DETAILS.proofUploadUrl
 
-  const html = `
-    <div style="${baseBodyStyle}">
-      <p>Hi ${nameForGreeting},</p>
-      <p>
-        Thank you for submitting your <strong>${payload.role}</strong> application for VOFMUN 2026! You let us know that you
-        still need to complete payment, so we've included all of the bank transfer details below. Once you pay, please upload
-        your proof of payment so we can activate your registration.
+  const html = renderEmailFrame({
+    title: "Complete your payment",
+    recipientEmail: payload.email,
+    preheader: "Complete your VOFMUN payment to confirm your registration.",
+    contentHtml: `
+      <p style="margin:0 0 12px;">Hi ${escapeHtml(nameForGreeting)},</p>
+
+      <p style="margin:0 0 12px;">
+        Thank you for submitting your <strong>${escapeHtml(payload.role)}</strong> application for VOFMUN 2026.
       </p>
+
+      <p style="margin:0 0 18px;">
+        Your registration has been received, but your spot can only be confirmed once payment is completed and your proof of payment is uploaded.
+      </p>
+
       ${renderStripeCtaHtml()}
-      <p style="margin-top: 24px; font-weight: 600; color: #0f172a;">How to complete your payment</p>
-      ${renderPaymentDetailsHtml()}
-      <p style="margin-top: 24px;">Upload your transfer receipt or screenshot here:</p>
-      <p>
-        <a
-          href="${proofLink}"
-          style="display: inline-flex; align-items: center; gap: 8px; background: #B22222; color: #fff; padding: 12px 20px; border-radius: 999px; text-decoration: none; font-weight: 600;"
-        >
-          Upload proof of payment
-        </a>
+
+      <p style="margin:0 0 12px;">
+        You can pay via secure Stripe checkout or bank transfer:
       </p>
-      <p style="margin-top: 24px;">If you've already paid, simply share the receipt via the link above and we'll mark your payment as received.</p>
-      <p style="margin-top: 24px;">We're excited to welcome you to VOFMUN 2026!</p>
-      <p style="margin-top: 24px;">Warm regards,<br/>VOFMUN Secretariat</p>
-    </div>
-  `
 
-  const text = `Hi ${nameForGreeting},\n\nThanks for registering for VOFMUN 2026 as a ${payload.role}! You mentioned you still need to pay.\n${renderStripeCtaText() ? `\n${renderStripeCtaText()}\n` : ""}\n${renderPaymentDetailsText()}\n\nUpload proof: ${proofLink}\n\nIf you've already completed the transfer, send us the receipt using the link above so we can confirm it.\n\nVOFMUN Secretariat`
+      ${renderPaymentDetailsHtml()}
 
-  await sendEmailAndLog({
-    from: FROM_EMAIL,
-    to: payload.email,
-    subject: "Complete your VOFMUN payment",
-    html,
-    text,
-  }, { category: "payment-reminder", recipient: payload.email })
+      <div style="border:1px solid ${EMAIL_COLORS.border};border-radius:14px;background:#fffaf7;padding:16px;margin:18px 0;">
+        <div style="font-size:16px;font-weight:700;color:${EMAIL_COLORS.text};margin-bottom:8px;">
+          Upload proof after paying
+        </div>
+        <p style="margin:0 0 12px;color:${EMAIL_COLORS.muted};font-size:14px;line-height:1.6;">
+          After payment, please upload proof of payment (screenshot or receipt) so we can confirm your registration.
+        </p>
+        ${renderButton("Upload proof of payment", proofLink)}
+        <p style="margin:0;color:${EMAIL_COLORS.link};font-size:13px;line-height:1.55;word-break:break-all;">
+          <a href="${PAYMENT_PAGE_URL}" style="color:${EMAIL_COLORS.link};text-decoration:none;">${PAYMENT_PAGE_URL}</a>
+        </p>
+      </div>
+
+      <div style="border-top:1px solid ${EMAIL_COLORS.border};padding-top:14px;">
+        <p style="margin:0;color:${EMAIL_COLORS.muted};font-size:13px;line-height:1.55;">
+          If you have already paid, simply upload your receipt and we will review it as soon as possible.
+        </p>
+      </div>
+    `,
+  })
+
+  const stripeText = renderStripeCtaText()
+  const text = `Hi ${nameForGreeting},
+
+Thank you for submitting your ${payload.role} application for VOFMUN 2026.
+
+Your registration has been received, but your spot can only be confirmed once payment is completed and your proof of payment is uploaded.
+${stripeText ? `\n${stripeText}\n` : ""}
+You can pay via secure Stripe checkout or bank transfer:
+
+${renderPaymentDetailsText()}
+
+After payment, upload your proof of payment here:
+${proofLink}
+
+Full payment details:
+${PAYMENT_PAGE_URL}
+
+If you have already paid, simply upload your receipt and we will review it as soon as possible.
+
+VOFMUN Secretariat`
+
+  await sendEmailAndLog(
+    {
+      from: FROM_EMAIL,
+      to: payload.email,
+      subject: "Complete your VOFMUN registration payment",
+      html,
+      text,
+    },
+    { category: "payment-reminder", recipient: payload.email },
+  )
 }
 
 export async function sendDelegateReferralCodeEmail(payload: {
@@ -320,19 +541,49 @@ export async function sendDelegateReferralCodeEmail(payload: {
   const nameForGreeting = greetingName(payload.firstName, payload.lastName)
   const normalizedCode = payload.referralCode.trim().toUpperCase()
 
-  const html = `
-    <div style="${baseBodyStyle}">
-      <p>Hi ${nameForGreeting},</p>
-      <p>Here is your personal VOFMUN delegate referral code:</p>
-      <p style="font-size: 28px; font-weight: 700; letter-spacing: 0.12em; color: #0f172a; margin: 16px 0;">${normalizedCode}</p>
-      <p>
-        You can share or use this referral code during VOFMUN delegate registrations where referral codes are accepted.
-      </p>
-      <p style="margin-top: 24px;">Warm regards,<br/>VOFMUN Secretariat</p>
-    </div>
-  `
+  const html = renderEmailFrame({
+    title: "Your referral code",
+    recipientEmail: payload.email,
+    preheader: "Your personal VOFMUN delegate referral code is ready.",
+    contentHtml: `
+      <p style="margin:0 0 12px;">Hi ${escapeHtml(nameForGreeting)},</p>
 
-  const text = `Hi ${nameForGreeting},\n\nHere is your personal VOFMUN delegate referral code:\n\n${normalizedCode}\n\nYou can share or use this referral code during VOFMUN delegate registrations where referral codes are accepted.\n\nWarm regards,\nVOFMUN Secretariat`
+      <p style="margin:0 0 12px;">
+        Here is your personal VOFMUN delegate referral code:
+      </p>
+
+      <div style="border:1px solid ${EMAIL_COLORS.border};border-radius:16px;background:#fcfbf8;padding:18px;text-align:center;margin:14px 0 18px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${EMAIL_COLORS.muted};margin-bottom:8px;">
+          Referral code
+        </div>
+        <div style="font-size:32px;font-weight:800;letter-spacing:.16em;color:${EMAIL_COLORS.primary};line-height:1.2;">
+          ${escapeHtml(normalizedCode)}
+        </div>
+      </div>
+
+      <p style="margin:0 0 12px;">
+        You can share or use this code during VOFMUN delegate registrations where referral codes are accepted.
+      </p>
+
+      <div style="border-top:1px solid ${EMAIL_COLORS.border};padding-top:14px;">
+        <p style="margin:0;color:${EMAIL_COLORS.muted};font-size:13px;line-height:1.55;">
+          Please copy and use the code exactly as shown above.
+        </p>
+      </div>
+    `,
+  })
+
+  const text = `Hi ${nameForGreeting},
+
+Here is your personal VOFMUN delegate referral code:
+
+${normalizedCode}
+
+You can share or use this code during VOFMUN delegate registrations where referral codes are accepted.
+
+Please use the code exactly as shown above.
+
+VOFMUN Secretariat`
 
   await sendEmailAndLog(
     {
@@ -358,13 +609,16 @@ export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPa
   if (payload.role === "chair" || payload.role === "admin") {
     const content = buildChairAdminEmailContent(payload, "unpaid")
 
-    const response = await sendEmailAndLog({
-      from: FROM_EMAIL,
-      to: payload.email,
-      subject: content.subject,
-      html: content.html,
-      text: content.text,
-    }, { category: "payment-reminder-short", recipient: payload.email })
+    const response = await sendEmailAndLog(
+      {
+        from: FROM_EMAIL,
+        to: payload.email,
+        subject: content.subject,
+        html: content.html,
+        text: content.text,
+      },
+      { category: "payment-reminder-short", recipient: payload.email },
+    )
 
     if (response.error) {
       throw new Error(`Failed to send reminder email: ${response.error.message}`)
@@ -376,39 +630,75 @@ export async function sendShortPaymentReminderEmail(payload: RegistrationEmailPa
   const nameForGreeting = greetingName(payload.firstName, payload.lastName)
   const proofLink = PAYMENT_DETAILS.proofUploadUrl
 
-  const html = `
-    <div style="${baseBodyStyle}">
-      <p>Hi ${nameForGreeting},</p>
-      <p>
+  const html = renderEmailFrame({
+    title: "Quick payment reminder",
+    recipientEmail: payload.email,
+    preheader: "A quick reminder to complete your VOFMUN payment.",
+    contentHtml: `
+      <p style="margin:0 0 12px;">Hi ${escapeHtml(nameForGreeting)},</p>
+
+      <p style="margin:0 0 18px;">
         This is a quick reminder to complete your payment for VOFMUN 2026 so we can confirm your delegate spot.
       </p>
+
       ${renderStripeCtaHtml()}
-      ${renderPaymentDetailsHtml()}
-      <p style="margin-top: 24px;">Upload your transfer receipt or screenshot here:</p>
-      <p>
-        <a
-          href="${proofLink}"
-          style="display: inline-flex; align-items: center; gap: 8px; background: #B22222; color: #fff; padding: 12px 20px; border-radius: 999px; text-decoration: none; font-weight: 600;"
-        >
-          Upload proof of payment
-        </a>
+
+      <p style="margin:0 0 12px;">
+        You can pay via secure Stripe checkout or bank transfer:
       </p>
-      <p style="margin-top: 24px;">If you’ve already paid, you can ignore this message.</p>
-      <p style="margin-top: 24px;">Warm regards,<br/>VOFMUN Secretariat</p>
-    </div>
-  `
 
-  const text = `Hi ${nameForGreeting},\n\nThis is a quick reminder to complete your payment for VOFMUN 2026 so we can confirm your delegate spot.\n${
-    renderStripeCtaText() ? `\n${renderStripeCtaText()}\n` : ""
-  }\n${renderPaymentDetailsText()}\n\nUpload proof: ${proofLink}\n\nIf you’ve already paid, you can ignore this message.\nWarm regards,\nVOFMUN Secretariat`
+      ${renderPaymentDetailsHtml()}
 
-  const response = await sendEmailAndLog({
-    from: FROM_EMAIL,
-    to: payload.email,
-    subject: "Quick reminder: complete your VOFMUN payment",
-    html,
-    text,
-  }, { category: "payment-reminder-short", recipient: payload.email })
+      <div style="border:1px solid ${EMAIL_COLORS.border};border-radius:14px;background:#fffaf7;padding:16px;margin:18px 0;">
+        <div style="font-size:16px;font-weight:700;color:${EMAIL_COLORS.text};margin-bottom:8px;">
+          Upload proof after paying
+        </div>
+        <p style="margin:0 0 12px;color:${EMAIL_COLORS.muted};font-size:14px;line-height:1.6;">
+          After payment, please upload proof of payment (screenshot or receipt) so we can confirm your registration.
+        </p>
+        ${renderButton("Upload proof of payment", proofLink)}
+        <p style="margin:0;color:${EMAIL_COLORS.link};font-size:13px;line-height:1.55;word-break:break-all;">
+          <a href="${PAYMENT_PAGE_URL}" style="color:${EMAIL_COLORS.link};text-decoration:none;">${PAYMENT_PAGE_URL}</a>
+        </p>
+      </div>
+
+      <div style="border-top:1px solid ${EMAIL_COLORS.border};padding-top:14px;">
+        <p style="margin:0;color:${EMAIL_COLORS.muted};font-size:13px;line-height:1.55;">
+          If you have already paid, you can ignore this message.
+        </p>
+      </div>
+    `,
+  })
+
+  const stripeText = renderStripeCtaText()
+  const text = `Hi ${nameForGreeting},
+
+This is a quick reminder to complete your payment for VOFMUN 2026 so we can confirm your delegate spot.
+${stripeText ? `\n${stripeText}\n` : ""}
+You can pay via secure Stripe checkout or bank transfer:
+
+${renderPaymentDetailsText()}
+
+After payment, upload your proof of payment here:
+${proofLink}
+
+Full payment details:
+${PAYMENT_PAGE_URL}
+
+If you have already paid, you can ignore this message.
+
+VOFMUN Secretariat`
+
+  const response = await sendEmailAndLog(
+    {
+      from: FROM_EMAIL,
+      to: payload.email,
+      subject: "Quick reminder — complete your VOFMUN payment",
+      html,
+      text,
+    },
+    { category: "payment-reminder-short", recipient: payload.email },
+  )
 
   if (response.error) {
     throw new Error(`Failed to send reminder email: ${response.error.message}`)
@@ -421,30 +711,53 @@ export async function sendPaymentReminderAuditEmail(payload: PaymentReminderAudi
     return
   }
 
-  const html = `
-    <div style="${baseBodyStyle}">
-      <p>A payment reminder action was performed from the system portal.</p>
-      <ul style="${summaryListStyle}">
-        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Action type: ${payload.actionType}</li>
-        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Selection mode: ${payload.selectionMode}</li>
-        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">IP address: ${payload.ipAddress}</li>
-        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Device/User-Agent: ${payload.deviceInfo}</li>
-        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Recipients attempted: ${payload.recipientsAttempted}</li>
-        <li style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Reminders sent: ${payload.remindersSent}</li>
-        <li style="padding: 12px 16px;">Reminders failed: ${payload.remindersFailed}</li>
-      </ul>
-    </div>
-  `
+  const html = renderEmailFrame({
+    title: "Payment reminder activity log",
+    recipientEmail: "dxb.avg@gmail.com",
+    preheader: "A payment reminder action was recorded from the system portal.",
+    contentHtml: `
+      <p style="margin:0 0 12px;">
+        A payment reminder action was performed from the VOFMUN system portal.
+      </p>
 
-  const text = `Payment reminder action detected.\n\nAction type: ${payload.actionType}\nSelection mode: ${payload.selectionMode}\nIP address: ${payload.ipAddress}\nDevice/User-Agent: ${payload.deviceInfo}\nRecipients attempted: ${payload.recipientsAttempted}\nReminders sent: ${payload.remindersSent}\nReminders failed: ${payload.remindersFailed}`
+      ${renderInfoCard([
+        { label: "Action type", value: payload.actionType },
+        { label: "Selection mode", value: payload.selectionMode },
+        { label: "IP address", value: payload.ipAddress },
+        { label: "Device / User-Agent", value: payload.deviceInfo },
+        { label: "Recipients attempted", value: String(payload.recipientsAttempted) },
+        { label: "Reminders sent", value: String(payload.remindersSent) },
+        { label: "Reminders failed", value: String(payload.remindersFailed) },
+      ])}
 
-  const response = await sendEmailAndLog({
-    from: FROM_EMAIL,
-    to: "dxb.avg@gmail.com",
-    subject: "VOFMUN payment reminder activity log",
-    html,
-    text,
-  }, { category: "payment-reminder-audit", recipient: "dxb.avg@gmail.com" })
+      <div style="border-top:1px solid ${EMAIL_COLORS.border};padding-top:14px;">
+        <p style="margin:0;color:${EMAIL_COLORS.muted};font-size:13px;line-height:1.55;">
+          This email is for administrative tracking only.
+        </p>
+      </div>
+    `,
+  })
+
+  const text = `Payment reminder action detected.
+
+Action type: ${payload.actionType}
+Selection mode: ${payload.selectionMode}
+IP address: ${payload.ipAddress}
+Device/User-Agent: ${payload.deviceInfo}
+Recipients attempted: ${payload.recipientsAttempted}
+Reminders sent: ${payload.remindersSent}
+Reminders failed: ${payload.remindersFailed}`
+
+  const response = await sendEmailAndLog(
+    {
+      from: FROM_EMAIL,
+      to: "dxb.avg@gmail.com",
+      subject: "VOFMUN payment reminder activity log",
+      html,
+      text,
+    },
+    { category: "payment-reminder-audit", recipient: "dxb.avg@gmail.com" },
+  )
 
   if (response.error) {
     throw new Error(`Failed to send payment reminder audit email: ${response.error.message}`)
