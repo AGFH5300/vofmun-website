@@ -3,8 +3,6 @@
 
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
@@ -22,53 +20,48 @@ interface CountryMatrixDialogProps {
   buttonClassName?: string
 }
 
-type MatrixAssignment = {
-  optionCode: string
-  assignedName: string
-}
-
 export function CountryMatrixDialog({ committeeName, matrix, buttonClassName }: CountryMatrixDialogProps) {
-  const [assignments, setAssignments] = useState<MatrixAssignment[]>([])
   const hasRows = matrix.rows.length > 0
 
-  useEffect(() => {
-    let isMounted = true
+  // NOTE: Temporarily disabled mapping delegates to matrix options on committee pages.
+  // useEffect(() => {
+  //   let isMounted = true
+  //
+  //   const loadAssignments = async () => {
+  //     try {
+  //       const response = await fetch(`/api/country-matrix/assignments?committee=${encodeURIComponent(committeeName)}`)
+  //
+  //       if (!response.ok) {
+  //         return
+  //       }
+  //
+  //       const payload = await response.json()
+  //       if (!isMounted) {
+  //         return
+  //       }
+  //
+  //       setAssignments(Array.isArray(payload.assignments) ? payload.assignments : [])
+  //     } catch {
+  //       if (isMounted) {
+  //         setAssignments([])
+  //       }
+  //     }
+  //   }
+  //
+  //   loadAssignments()
+  //
+  //   return () => {
+  //     isMounted = false
+  //   }
+  // }, [committeeName])
 
-    const loadAssignments = async () => {
-      try {
-        const response = await fetch(`/api/country-matrix/assignments?committee=${encodeURIComponent(committeeName)}`)
-
-        if (!response.ok) {
-          return
-        }
-
-        const payload = await response.json()
-        if (!isMounted) {
-          return
-        }
-
-        setAssignments(Array.isArray(payload.assignments) ? payload.assignments : [])
-      } catch {
-        if (isMounted) {
-          setAssignments([])
-        }
-      }
-    }
-
-    loadAssignments()
-
-    return () => {
-      isMounted = false
-    }
-  }, [committeeName])
-
-  const assignmentMap = useMemo(() => {
-    const assignmentEntries: Array<[string, string]> = assignments.map(({ optionCode, assignedName }) => [
-      optionCode.trim().toLowerCase(),
-      assignedName,
-    ])
-    return new Map<string, string>(assignmentEntries)
-  }, [assignments])
+  // const assignmentMap = useMemo(() => {
+  //   const assignmentEntries: Array<[string, string]> = assignments.map(({ optionCode, assignedName }) => [
+  //     optionCode.trim().toLowerCase(),
+  //     assignedName,
+  //   ])
+  //   return new Map<string, string>(assignmentEntries)
+  // }, [assignments])
 
   const primaryHeader = matrix.headers[0] ?? "Country"
   const headers = [primaryHeader, "Assigned Delegate"]
@@ -105,7 +98,7 @@ export function CountryMatrixDialog({ committeeName, matrix, buttonClassName }: 
                   {matrix.rows.map((row, rowIndex) => (
                     <TableRow key={`${rowIndex}-${row.join("-")}`}>
                       <TableCell>{row[0] ?? "—"}</TableCell>
-                      <TableCell>{assignmentMap.get(row[0]?.trim().toLowerCase() ?? "") ?? "—"}</TableCell>
+                      <TableCell>—</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
