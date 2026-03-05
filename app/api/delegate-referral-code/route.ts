@@ -74,7 +74,7 @@ async function codeExistsAnywhere(code: string) {
     supabase
       .from('users')
       .select('id')
-      .contains('referral_codes', [code])
+      .filter('referral_codes', 'cs', JSON.stringify([code]))
       .limit(1),
   ])
 
