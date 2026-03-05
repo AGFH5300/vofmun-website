@@ -16,6 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CountrySelect } from "@/components/country-select"
 import { PhoneInput } from "@/components/phone-input"
 import { toast } from "sonner"
+import { getRequestErrorMessage, getTooManyRequestsMessage } from "@/lib/http/client-errors"
 import {
   AlertCircle,
   Download,
@@ -297,10 +298,14 @@ export function SchoolDelegationForm() {
         body: JSON.stringify(payload),
       })
 
-      const result = await response.json()
+      const result = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(result?.message || "Unable to submit the delegation. Please try again.")
+        if (response.status === 429) {
+          throw new Error(getTooManyRequestsMessage(result?.message))
+        }
+
+        throw new Error(getRequestErrorMessage(response.status, result?.message, "Unable to submit the delegation. Please try again."))
       }
 
       toast.success("Delegation submission received!", {

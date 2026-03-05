@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Loader2, Sparkles, Info } from "lucide-react"
 import { toast } from "sonner"
+import { getRequestErrorMessage, getTooManyRequestsMessage } from "@/lib/http/client-errors"
 
 interface ExperienceItem {
   conference?: string
@@ -57,19 +58,22 @@ export function AIExperienceModal({ isOpen, onClose, roleType, onExperiencesPars
         }),
       })
 
-      const result = await response.json()
+      const result = await response.json().catch(() => null)
 
       if (response.ok && result.experiences) {
         onExperiencesParsed(result.experiences)
         toast.success(`Successfully parsed ${result.experiences.length} experience entries!`)
         setExperienceText("")
         onClose()
+      } else if (response.status === 429) {
+        throw new Error(getTooManyRequestsMessage(result?.message || result?.error))
       } else {
-        throw new Error(result.error || 'Failed to parse experience')
+        throw new Error(getRequestErrorMessage(response.status, result?.error || result?.message, 'Failed to parse experience'))
       }
     } catch (error: any) {
       console.error('AI parsing error:', error)
-      toast.error("Failed to parse experience. Please try again or fill manually.")
+      const message = error instanceof Error && error.message ? error.message : "Failed to parse experience. Please try again or fill manually."
+      toast.error(message)
     } finally {
       setIsProcessing(false)
     }
