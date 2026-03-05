@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { getRequestErrorMessage, getTooManyRequestsMessage } from '@/lib/http/client-errors'
 
 export function DelegateReferralCodeForm() {
   const [email, setEmail] = useState('')
@@ -53,15 +54,21 @@ export function DelegateReferralCodeForm() {
         return
       }
 
-      const result = await response.json()
+      const result = await response.json().catch(() => null)
 
       if (response.status === 404) {
         setServerError(result?.message || "We couldn't find a registered delegate with that email.")
         return
       }
 
-      if (!response.ok && response.status !== 429) {
-        throw new Error('Server request failed')
+      if (response.status === 429) {
+        setServerError(getTooManyRequestsMessage(result?.message))
+        return
+      }
+
+      if (!response.ok) {
+        setServerError(getRequestErrorMessage(response.status, result?.message, 'We could not process your request right now. Please try again in a moment.'))
+        return
       }
 
       setSuccessMessage(result?.message || 'Your referral code has been sent to your email.')
