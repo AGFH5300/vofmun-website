@@ -11,8 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-const SAFE_SUCCESS_MESSAGE = 'If eligible, your referral code has been sent to your email.'
-
 export function DelegateReferralCodeForm() {
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
@@ -55,11 +53,18 @@ export function DelegateReferralCodeForm() {
         return
       }
 
+      const result = await response.json()
+
+      if (response.status === 404) {
+        setServerError(result?.message || "We couldn't find a registered delegate with that email.")
+        return
+      }
+
       if (!response.ok && response.status !== 429) {
         throw new Error('Server request failed')
       }
 
-      setSuccessMessage(SAFE_SUCCESS_MESSAGE)
+      setSuccessMessage(result?.message || 'Your referral code has been sent to your email.')
       setEmail('')
     } catch (_error) {
       setServerError('We could not process your request right now. Please try again in a moment.')

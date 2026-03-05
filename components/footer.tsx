@@ -78,6 +78,14 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/delegate-referral-code"
+                  className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm"
+                >
+                  Delegate Referral Code
+                </Link>
+              </li>
+              <li>
                 <Link href="/secretariat" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
                   Secretariat
                 </Link>

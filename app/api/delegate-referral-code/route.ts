@@ -10,7 +10,8 @@ import { generateOwnReferralCode } from '@/lib/own-referral-code'
 
 export const runtime = 'nodejs'
 
-const SAFE_SUCCESS_MESSAGE = 'If this email belongs to a registered delegate, the referral code has been sent.'
+const SUCCESS_MESSAGE = 'Your referral code has been sent to your email.'
+const USER_NOT_FOUND_MESSAGE = "We couldn't find a registered delegate with that email."
 const REQUEST_SCHEMA = z.object({
   email: z.string().email('Please enter a valid email address'),
 })
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
     const normalizedEmail = payload.email.trim().toLowerCase()
 
     if (applyRateLimit(request, normalizedEmail)) {
-      return NextResponse.json({ status: 'success', message: SAFE_SUCCESS_MESSAGE }, { status: 429 })
+      return NextResponse.json({ status: 'success', message: SUCCESS_MESSAGE }, { status: 429 })
     }
 
     const supabase = createSupabaseAdminClient()
@@ -150,12 +151,12 @@ export async function POST(request: NextRequest) {
     const user = users?.[0] as ExistingUserRecord | undefined
 
     if (!user || user.role !== 'delegate') {
-      return NextResponse.json({ status: 'success', message: SAFE_SUCCESS_MESSAGE }, { status: 200 })
+      return NextResponse.json({ status: 'not_found', message: USER_NOT_FOUND_MESSAGE }, { status: 404 })
     }
 
     const nameParts = getTrimmedNameParts(user)
     if (!nameParts) {
-      return NextResponse.json({ status: 'success', message: SAFE_SUCCESS_MESSAGE }, { status: 200 })
+      return NextResponse.json({ status: 'not_found', message: USER_NOT_FOUND_MESSAGE }, { status: 404 })
     }
 
     const emailedAt = new Date().toISOString()
@@ -173,7 +174,7 @@ export async function POST(request: NextRequest) {
       }
 
       await sendReferralCodeEmail(user, user.own_referral_code)
-      return NextResponse.json({ status: 'success', message: SAFE_SUCCESS_MESSAGE }, { status: 200 })
+      return NextResponse.json({ status: 'success', message: SUCCESS_MESSAGE }, { status: 200 })
     }
 
     const generatedCode = await generateUniqueCode(nameParts.firstName, nameParts.lastName)
@@ -200,7 +201,7 @@ export async function POST(request: NextRequest) {
         const alreadySavedCode = latestUser?.[0]?.own_referral_code as string | null | undefined
         if (alreadySavedCode) {
           await sendReferralCodeEmail(user, alreadySavedCode)
-          return NextResponse.json({ status: 'success', message: SAFE_SUCCESS_MESSAGE }, { status: 200 })
+          return NextResponse.json({ status: 'success', message: SUCCESS_MESSAGE }, { status: 200 })
         }
       }
 
@@ -211,7 +212,7 @@ export async function POST(request: NextRequest) {
 
     await sendReferralCodeEmail(user, finalCode)
 
-    return NextResponse.json({ status: 'success', message: SAFE_SUCCESS_MESSAGE }, { status: 200 })
+    return NextResponse.json({ status: 'success', message: SUCCESS_MESSAGE }, { status: 200 })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
