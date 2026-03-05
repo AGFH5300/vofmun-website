@@ -51,6 +51,7 @@ import {
   normalizeReferralCode,
 } from "@/lib/referral-codes"
 import { HAS_STRIPE_PAYMENT_LINK, STRIPE_PAYMENT_URL } from "@/lib/payment-details"
+import { getRequestErrorMessage, getTooManyRequestsMessage } from "@/lib/http/client-errors"
 import { cn } from "@/lib/utils"
 
 type Role = "delegate" | "chair" | "admin" | null
@@ -920,7 +921,7 @@ export function SignupFormNew() {
         body: JSON.stringify(submitData),
       })
 
-      const result = await response.json()
+      const result = await response.json().catch(() => null)
 
       if (response.ok) {
         setLastSubmittedRole(selectedRole)
@@ -986,9 +987,14 @@ export function SignupFormNew() {
               duration: 6000,
             })
           }
+        } else if (response.status === 429) {
+          toast.error("Too Many Requests", {
+            description: getTooManyRequestsMessage(result?.message),
+            duration: 6000,
+          })
         } else {
           toast.error("Registration Failed", {
-            description: result.message || "Something went wrong. Please try again.",
+            description: getRequestErrorMessage(response.status, result?.message, "Something went wrong. Please try again."),
             duration: 6000,
           })
         }

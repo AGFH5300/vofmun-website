@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { EligibleRecipient } from "./types"
+import { getRequestErrorMessage } from "@/lib/http/client-errors"
 
 const formatPaymentStatus = (status: string | null) => {
   switch (status) {
@@ -136,9 +137,15 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
 
       if (!response.ok || !response.body) {
         const errorBody = await response.json().catch(() => null)
+        const errorMessage = getRequestErrorMessage(
+          response.status,
+          errorBody?.message,
+          "Unable to send reminders right now.",
+        )
+
         setFormState({
           status: "error",
-          message: errorBody?.message ?? "Unable to send reminders right now.",
+          message: errorMessage,
         })
         return
       }
