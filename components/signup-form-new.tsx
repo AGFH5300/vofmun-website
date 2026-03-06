@@ -196,6 +196,7 @@ export function SignupFormNew() {
   const [referralCodes, setReferralCodes] = useState<string[]>([""])
 
   const [referralFeedback, setReferralFeedback] = useState<Record<number, ReferralFeedbackEntry>>({})
+  const [verifyingReferralCode, setVerifyingReferralCode] = useState<Record<number, boolean>>({})
 
   const committeeChoices = [
     { key: "committee1" as const, label: "First Choice", required: true },
@@ -517,6 +518,18 @@ export function SignupFormNew() {
     })
   }
 
+  const setReferralVerificationState = (index: number, isVerifying: boolean) => {
+    setVerifyingReferralCode((prev) => {
+      if (isVerifying) {
+        return { ...prev, [index]: true }
+      }
+
+      if (!(index in prev)) return prev
+      const { [index]: _removed, ...rest } = prev
+      return rest
+    })
+  }
+
   const addReferralCode = () => {
     setReferralCodes((prev) => [...prev, ""])
   }
@@ -546,6 +559,17 @@ export function SignupFormNew() {
         })
         return next
       })
+      setVerifyingReferralCode((current) => {
+        if (Object.keys(current).length === 0) return current
+        const next: Record<number, boolean> = {}
+        updatedCodes.forEach((_, newIndex) => {
+          const sourceIndex = newIndex < index ? newIndex : newIndex + 1
+          if (current[sourceIndex]) {
+            next[newIndex] = current[sourceIndex]
+          }
+        })
+        return next
+      })
       return updatedCodes
     })
   }
@@ -554,6 +578,7 @@ export function SignupFormNew() {
     const rawCode = referralCodes[index] ?? ""
     if (!rawCode.trim()) {
       clearReferralFeedbackForIndex(index)
+      setReferralVerificationState(index, false)
       return
     }
 
@@ -571,9 +596,11 @@ export function SignupFormNew() {
           message: owner ? `Referral code belongs to ${owner}.` : "Referral code looks good.",
         },
       }))
+      setReferralVerificationState(index, false)
       return
     }
 
+    setReferralVerificationState(index, true)
     try {
       const response = await fetch("/api/referral-code-owner", {
         method: "POST",
@@ -597,6 +624,8 @@ export function SignupFormNew() {
       }
     } catch (error) {
       console.warn("Unable to verify delegate referral code owner on blur", error)
+    } finally {
+      setReferralVerificationState(index, false)
     }
 
     const suggestions = findReferralSuggestions(normalizedCode, 1)
@@ -662,6 +691,7 @@ export function SignupFormNew() {
       <div className="space-y-2">
         {referralCodes.map((code, index) => {
           const feedback = referralFeedback[index]
+          const isVerifying = Boolean(verifyingReferralCode[index])
           const feedbackColor =
             feedback?.type === "error"
               ? "text-red-600"
@@ -679,6 +709,12 @@ export function SignupFormNew() {
                   className="flex-1"
                   data-testid={`input-referral-code-${index}`}
                 />
+                {isVerifying && (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                    Verifying referral code...
+                  </p>
+                )}
                 {feedback && (
                   <p className={`mt-1 text-xs ${feedbackColor}`}>{feedback.message}</p>
                 )}
