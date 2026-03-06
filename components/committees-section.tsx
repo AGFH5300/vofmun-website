@@ -47,7 +47,7 @@ const committees = [
     fullName: "United Nations Human Rights Council",
     acronym: "UNHRC",
     icon: Shield,
-    logo:"/logo.svg",
+    logo:"/svgs/UN.svg",
     topics: [
       "TBC",
     ],
@@ -60,7 +60,7 @@ const committees = [
     fullName: "United Nations Environment Programme",
     acronym: "UNEP",
     icon: Globe,
-    logo:"/logo.svg",
+    logo:"/svgs/UN.svg",
     topics: [
       "TBC",
     ],
