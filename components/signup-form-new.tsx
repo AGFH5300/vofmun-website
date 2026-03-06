@@ -593,7 +593,7 @@ export function SignupFormNew() {
         ...prev,
         [index]: {
           type: "success",
-          message: owner ? `Referral code belongs to delegate ${owner}.` : "Referral code looks good.",
+          message: owner ? `Referral code belongs to ${owner}.` : "Referral code looks good.",
         },
       }))
       setReferralVerificationState(index, false)
@@ -617,7 +617,7 @@ export function SignupFormNew() {
           ...prev,
           [index]: {
             type: "success",
-            message: `Referral code belongs to delegate ${payload.owner.trim()}.`,
+            message: `Referral code belongs to ${payload.owner.trim()}.`,
           },
         }))
         return
