@@ -11,10 +11,9 @@ export async function GET() {
   try {
     const supabase = await createClient()
     
-    const { data: delegates, error } = await supabase
+    const { data: users, error } = await supabase
       .from('users')
       .select('nationality')
-      .eq('role', 'delegate')
     
     if (error) {
       throw error
@@ -22,9 +21,9 @@ export async function GET() {
     
     const counts: Record<string, number> = {}
     
-    delegates?.forEach((delegate) => {
-      if (delegate.nationality) {
-        const normalizedCode = normalizeToAlpha2CountryCode(delegate.nationality)
+    users?.forEach((user) => {
+      if (user.nationality) {
+        const normalizedCode = normalizeToAlpha2CountryCode(user.nationality)
         if (!normalizedCode) {
           return
         }
@@ -42,9 +41,9 @@ export async function GET() {
       }
     )
   } catch (error) {
-    console.error('Error fetching delegate counts:', error)
+    console.error('Error fetching participant nationality counts:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch delegate counts' },
+      { error: 'Failed to fetch participant nationality counts' },
       { status: 500 }
     )
   }
