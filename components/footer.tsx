@@ -124,6 +124,16 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/committees/unhrc" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
+                  UNHRC
+                </Link>
+              </li>
+              <li>
+                <Link href="/committees/unep" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
+                  UNEP
+                </Link>
+              </li>
+              <li>
                 <Link href="/committees/icj" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
                   ICJ
                 </Link>

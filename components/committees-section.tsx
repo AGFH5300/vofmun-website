@@ -43,6 +43,32 @@ const committees = [
   },
   // Intermediate Level
   {
+    name: "United Nations Human Rights Council",
+    fullName: "United Nations Human Rights Council",
+    acronym: "UNHRC",
+    icon: Shield,
+    logo:"/logo.svg",
+    topics: [
+      "TBC",
+    ],
+    difficulty: "Junior",
+    delegates: "20-25",
+    href: "/committees/unhrc",
+  },
+  {
+    name: "United Nations Environment Programme",
+    fullName: "United Nations Environment Programme",
+    acronym: "UNEP",
+    icon: Globe,
+    logo:"/logo.svg",
+    topics: [
+      "TBC",
+    ],
+    difficulty: "Junior",
+    delegates: "20-25",
+    href: "/committees/unep",
+  },
+  {
     name: "UN Office on Drugs and Crime",
     fullName: "United Nations Office on Drugs and Crime",
     acronym: "UNODC",
@@ -120,6 +146,8 @@ const getDifficultyColor = (difficulty: string) => {
       return "bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 transition-colors cursor-pointer"
     case "Intermediate":
       return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900 transition-colors cursor-pointer"
+    case "Junior":
+      return "bg-emerald-100 text-emerald-800 hover:bg-emerald-200 hover:text-emerald-900 transition-colors cursor-pointer"
     case "Advanced":
       return "bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900 transition-colors cursor-pointer"
     case "Expert":
