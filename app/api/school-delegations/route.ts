@@ -14,6 +14,7 @@ import {
   getDelegationSpreadsheetBucketName,
 } from '@/utils/supabase/storage'
 import { insertSchoolDelegationSchema } from '@/lib/db/schema'
+import { normalizeToAlpha2CountryCode } from '@/lib/countries'
 import { z } from 'zod'
 
 export const runtime = 'nodejs'
@@ -30,7 +31,11 @@ const requestSchema = z.object({
   schoolName: z.string().min(1, 'School name is required'),
   schoolAddress: z.string().min(1, 'School address is required'),
   schoolEmail: z.string().email('Enter a valid school email address'),
-  schoolCountry: z.string().min(1, 'School country is required'),
+  schoolCountry: z
+    .string()
+    .min(1, 'School country is required')
+    .refine((value) => normalizeToAlpha2CountryCode(value) !== null, 'School country must be a valid 2-letter ISO code')
+    .transform((value) => normalizeToAlpha2CountryCode(value) as string),
   directorName: z.string().min(1, 'Director name is required'),
   directorEmail: z.string().email('Enter a valid director email address'),
   directorPhone: z.string().min(1, 'Director phone number is required'),
@@ -277,4 +282,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

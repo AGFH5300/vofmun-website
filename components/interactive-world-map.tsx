@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Globe } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { countries } from "@/lib/countries"
+import { isAlpha2CountryCode } from "@/lib/countries"
 
 interface CountryData {
   country: string
@@ -25,18 +26,6 @@ function formatDelegateCountInTens(count: number): string {
   return `${floored}+`
 }
 
-const iso3ToIso2: Record<string, string> = {
-  ASM: "AS",
-  AUS: "AU",
-  BGD: "BD",
-  BGR: "BG",
-  EGY: "EG",
-  FRA: "FR",
-  IND: "IN",
-  JOR: "JO",
-  PSE: "PS",
-}
-
 function normalizeCountryCode(rawCode: string): string | null {
   const code = rawCode.trim().toUpperCase()
 
@@ -44,12 +33,8 @@ function normalizeCountryCode(rawCode: string): string | null {
     return null
   }
 
-  if (countries.some((country) => country.code === code)) {
+  if (isAlpha2CountryCode(code)) {
     return code
-  }
-
-  if (iso3ToIso2[code]) {
-    return iso3ToIso2[code]
   }
 
   const byName = countries.find((country) => country.name.toUpperCase() === code)

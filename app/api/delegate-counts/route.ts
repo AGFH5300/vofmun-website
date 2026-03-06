@@ -3,6 +3,7 @@
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { normalizeToAlpha2CountryCode } from '@/lib/countries'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +24,10 @@ export async function GET() {
     
     delegates?.forEach((delegate) => {
       if (delegate.nationality) {
-        const normalizedCode = delegate.nationality.toUpperCase()
+        const normalizedCode = normalizeToAlpha2CountryCode(delegate.nationality)
+        if (!normalizedCode) {
+          return
+        }
         counts[normalizedCode] = (counts[normalizedCode] || 0) + 1
       }
     })
