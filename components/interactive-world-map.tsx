@@ -13,10 +13,10 @@ import { isAlpha2CountryCode } from "@/lib/countries"
 interface CountryData {
   country: string
   countryCode: string
-  delegates: number
+  participants: number
 }
 
-function formatDelegateCountInTens(count: number): string {
+function formatParticipantCountInTens(count: number): string {
   if (count <= 0) {
     return "0+"
   }
@@ -49,32 +49,32 @@ function createFlagFallbackDataUri(countryCode: string): string {
 
 export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) {
   const [participatingCountries, setParticipatingCountries] = useState<CountryData[]>([])
-  const [totalDelegates, setTotalDelegates] = useState(0)
+  const [totalParticipants, setTotalParticipants] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
 
   const totalCountries = participatingCountries.length
-  const displayedTotalDelegates = useMemo(
-    () => formatDelegateCountInTens(totalDelegates),
-    [totalDelegates]
+  const displayedTotalParticipants = useMemo(
+    () => formatParticipantCountInTens(totalParticipants),
+    [totalParticipants]
   )
 
   useEffect(() => {
     let isMounted = true
 
-    async function fetchDelegateCounts() {
+    async function fetchParticipantCounts() {
       let dbCounts: Record<string, number> = {}
 
       try {
         const response = await fetch('/api/delegate-counts', { cache: "no-store" })
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch delegate counts: ${response.status}`)
+          throw new Error(`Failed to fetch participant counts: ${response.status}`)
         }
 
         const data = await response.json()
         dbCounts = data.counts || {}
       } catch (error) {
-        console.error('Error fetching delegate counts:', error)
+        console.error('Error fetching participant counts:', error)
       }
 
       const mergedData: Record<string, number> = {}
@@ -95,25 +95,25 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
           return {
             country: countryInfo?.name || countryCode,
             countryCode: countryCode,
-            delegates: count,
+            participants: count,
           }
         })
-        .filter((c) => c.delegates > 0)
-        .sort((a, b) => b.delegates - a.delegates)
+        .filter((c) => c.participants > 0)
+        .sort((a, b) => b.participants - a.participants)
 
-      const total = countryDataArray.reduce((sum, country) => sum + country.delegates, 0)
+      const total = countryDataArray.reduce((sum, country) => sum + country.participants, 0)
 
       if (!isMounted) {
         return
       }
 
       setParticipatingCountries(countryDataArray)
-      setTotalDelegates(total)
+      setTotalParticipants(total)
       setIsLoading(false)
     }
 
-    fetchDelegateCounts()
-    const intervalId = window.setInterval(fetchDelegateCounts, 30_000)
+    fetchParticipantCounts()
+    const intervalId = window.setInterval(fetchParticipantCounts, 30_000)
 
     return () => {
       isMounted = false
@@ -121,7 +121,7 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
     }
   }, [])
 
-  const showFullList = totalDelegates >= threshold
+  const showFullList = totalParticipants >= threshold
   const displayedCountries = showFullList ? participatingCountries : participatingCountries.slice(0, 5)
 
   return (
@@ -140,16 +140,16 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
           </div>
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <div className="text-2xl font-bold text-green-600">
-              {isLoading ? '...' : displayedTotalDelegates}
+              {isLoading ? '...' : displayedTotalParticipants}
             </div>
-            <div className="text-sm text-gray-600">Delegates</div>
+            <div className="text-sm text-gray-600">Participants</div>
           </div>
         </div>
 
         <div className="space-y-3">
           <h3 className="font-semibold text-gray-800 text-lg">Participating Nationalities</h3>
           {isLoading ? (
-            <div className="text-center py-8 text-gray-500">Loading delegate data...</div>
+            <div className="text-center py-8 text-gray-500">Loading participant data...</div>
           ) : (
             <>
               <div className="grid gap-3">
@@ -175,7 +175,7 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
                     </div>
                     <div className="text-right">
                       <Badge className="bg-[#B22222] text-white border-0 hover:bg-[#8c2222]">
-                        {country.delegates} delegates
+                        {country.participants} participants
                       </Badge>
                     </div>
                   </div>
@@ -192,7 +192,7 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
 
         <div className="text-center pt-4 border-t border-gray-200">
           <p className="text-sm text-gray-600">
-            Join delegates from around the world in diplomatic discussions that shape our future
+            Join participants from around the world in diplomatic discussions that shape our future
           </p>
         </div>
       </CardContent>
