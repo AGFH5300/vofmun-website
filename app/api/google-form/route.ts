@@ -93,6 +93,8 @@ const normalizeCommittee = (value: string) => {
   if (normalized.includes("unodc")) return "unodc"
   if (normalized.includes("ecosoc")) return "ecosoc"
   if (normalized.includes("who")) return "who"
+  if (normalized.includes("unhrc") || normalized.includes("human rights")) return "unhrc"
+  if (normalized.includes("unep") || normalized.includes("environment")) return "unep"
   if (normalized.includes("uncstd")) return "uncstd"
   if (normalized.includes("icj")) return "icj"
   if (normalized.includes("icrcc") || normalized.includes("crisis")) return "icrcc"

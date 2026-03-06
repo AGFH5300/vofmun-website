@@ -1570,6 +1570,8 @@ export function SignupFormNew() {
                   <SelectValue placeholder="Select your grade/year" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="4">Grade 4/Year 5</SelectItem>
+                  <SelectItem value="5">Grade 5/Year 6</SelectItem>
                   <SelectItem value="6">Grade 6/Year 7</SelectItem>
                   <SelectItem value="7">Grade 7/Year 8</SelectItem>
                   <SelectItem value="8">Grade 8/Year 9</SelectItem>
@@ -1679,6 +1681,26 @@ export function SignupFormNew() {
                             }
                           >
                             WHO - Beginner
+                          </SelectItem>
+                          <SelectItem
+                            value="unhrc"
+                            disabled={
+                              [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
+                                "unhrc",
+                              ) && delegateData[key] !== "unhrc"
+                            }
+                          >
+                            UNHRC - Junior
+                          </SelectItem>
+                          <SelectItem
+                            value="unep"
+                            disabled={
+                              [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
+                                "unep",
+                              ) && delegateData[key] !== "unep"
+                            }
+                          >
+                            UNEP - Junior
                           </SelectItem>
                           <SelectItem
                             value="uncstd"
@@ -1886,6 +1908,24 @@ export function SignupFormNew() {
                             }
                           >
                             WHO - Beginner
+                          </SelectItem>
+                          <SelectItem
+                            value="unhrc"
+                            disabled={
+                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("unhrc") &&
+                              chairData[`committee${num}` as keyof typeof chairData] !== "unhrc"
+                            }
+                          >
+                            UNHRC - Junior
+                          </SelectItem>
+                          <SelectItem
+                            value="unep"
+                            disabled={
+                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("unep") &&
+                              chairData[`committee${num}` as keyof typeof chairData] !== "unep"
+                            }
+                          >
+                            UNEP - Junior
                           </SelectItem>
                           <SelectItem
                             value="uncstd"
