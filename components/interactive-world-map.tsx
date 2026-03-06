@@ -13,7 +13,6 @@ interface CountryData {
   country: string
   countryCode: string
   delegates: number
-  displayDelegates: string
 }
 
 function formatDelegateCountInTens(count: number): string {
@@ -26,32 +25,41 @@ function formatDelegateCountInTens(count: number): string {
   return `${floored}+`
 }
 
-const minimumThresholds: Record<string, number> = {
-  IN: 44,
-  PK: 14,
-  PH: 9,
-  EG: 5,
-  LB: 3,
-  JO: 2,
-  SY: 2,
-  PS: 2,
-  IQ: 2,
-  IR: 2,
-  BD: 2,
-  GB: 3,
-  US: 1,
-  CA: 1,
-  DE: 1,
-  FR: 1,
-  RU: 1,
-  CN: 1,
-  YE: 1,
-  SD: 1,
-  LK: 1,
-  NP: 1,
-  JP: 1,
-  KR: 1,
-  AE: 1,
+const iso3ToIso2: Record<string, string> = {
+  ASM: "AS",
+  AUS: "AU",
+  BGD: "BD",
+  BGR: "BG",
+  EGY: "EG",
+  FRA: "FR",
+  IND: "IN",
+  JOR: "JO",
+  PSE: "PS",
+}
+
+function normalizeCountryCode(rawCode: string): string | null {
+  const code = rawCode.trim().toUpperCase()
+
+  if (!code) {
+    return null
+  }
+
+  if (countries.some((country) => country.code === code)) {
+    return code
+  }
+
+  if (iso3ToIso2[code]) {
+    return iso3ToIso2[code]
+  }
+
+  const byName = countries.find((country) => country.name.toUpperCase() === code)
+  return byName?.code || null
+}
+
+function createFlagFallbackDataUri(countryCode: string): string {
+  const code = countryCode.slice(0, 2).toUpperCase()
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='24'><rect width='40' height='24' fill='#f3f4f6'/><rect x='0.5' y='0.5' width='39' height='23' rx='2' ry='2' fill='none' stroke='#d1d5db'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial,sans-serif' font-size='10' fill='#6b7280'>${code}</text></svg>`
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
 }
 
 export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) {
@@ -86,16 +94,14 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
 
       const mergedData: Record<string, number> = {}
 
-      Object.keys(minimumThresholds).forEach((countryCode) => {
-        const dbCount = dbCounts[countryCode] || 0
-        const minCount = minimumThresholds[countryCode]
-        mergedData[countryCode] = Math.max(dbCount, minCount)
-      })
+      Object.entries(dbCounts).forEach(([rawCode, count]) => {
+        const normalizedCode = normalizeCountryCode(rawCode)
 
-      Object.keys(dbCounts).forEach((countryCode) => {
-        if (!mergedData[countryCode]) {
-          mergedData[countryCode] = dbCounts[countryCode]
+        if (!normalizedCode) {
+          return
         }
+
+        mergedData[normalizedCode] = (mergedData[normalizedCode] || 0) + count
       })
 
       const countryDataArray: CountryData[] = Object.entries(mergedData)
@@ -105,7 +111,6 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
             country: countryInfo?.name || countryCode,
             countryCode: countryCode,
             delegates: count,
-            displayDelegates: formatDelegateCountInTens(count),
           }
         })
         .filter((c) => c.delegates > 0)
@@ -175,7 +180,7 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
                           alt={`${country.country} flag`}
                           className="w-8 h-6 object-cover rounded-sm border border-gray-200"
                           onError={(e) => {
-                            e.currentTarget.src = `https://via.placeholder.com/32x24/cccccc/666666?text=${country.countryCode}`;
+                            e.currentTarget.src = createFlagFallbackDataUri(country.countryCode)
                           }}
                         />
                       </div>
@@ -185,7 +190,7 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
                     </div>
                     <div className="text-right">
                       <Badge className="bg-[#B22222] text-white border-0 hover:bg-[#8c2222]">
-                        {country.displayDelegates} delegates
+                        {country.delegates} delegates
                       </Badge>
                     </div>
                   </div>
