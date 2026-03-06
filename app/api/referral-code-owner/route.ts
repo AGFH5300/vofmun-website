@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
         status: 'success',
         owner: staticEntry.owner,
         code: normalizedCode,
+        source: 'static',
       })
     }
 
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
       status: 'success',
       owner: ownerName,
       code: normalizedCode,
+      source: 'delegate',
     })
   } catch (error) {
     console.error('Failed to resolve referral code owner:', error)
