@@ -593,7 +593,7 @@ export function SignupFormNew() {
         ...prev,
         [index]: {
           type: "success",
-          message: owner ? `Referral code belongs to ${owner}.` : "Referral code looks good.",
+          message: owner ? `Referral code belongs to delegate ${owner}.` : "Referral code looks good.",
         },
       }))
       setReferralVerificationState(index, false)
@@ -617,7 +617,7 @@ export function SignupFormNew() {
           ...prev,
           [index]: {
             type: "success",
-            message: `Referral code belongs to ${payload.owner.trim()}.`,
+            message: `Referral code belongs to delegate ${payload.owner.trim()}.`,
           },
         }))
         return
@@ -661,8 +661,8 @@ export function SignupFormNew() {
     setReferralFeedback((prev) => ({
       ...prev,
       [index]: {
-        type: "info",
-        message: "We'll verify this code when you submit the form.",
+        type: "error",
+        message: "We couldn't find that referral code. Please contact conference@vofmun.org for support.",
       },
     }))
   }
@@ -1028,7 +1028,7 @@ export function SignupFormNew() {
                   ? `Did you mean ${matchingEntry.suggestions
                       .map((suggestion: any) => `${suggestion.code} (${suggestion.owner})`)
                       .join(" or ")}?`
-                  : "We couldn't find that referral code."
+                  : "We couldn't find that referral code. Please contact conference@vofmun.org for support."
 
                 next[index] = {
                   type: hasSuggestions ? "info" : "error",
