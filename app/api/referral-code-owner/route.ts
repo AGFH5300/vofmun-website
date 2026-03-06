@@ -43,13 +43,10 @@ export async function POST(request: NextRequest) {
 
     const user = data?.[0]
     if (!user) {
-      return NextResponse.json(
-        {
-          status: 'not_found',
-          code: normalizedCode,
-        },
-        { status: 404 },
-      )
+      return NextResponse.json({
+        status: 'not_found',
+        code: normalizedCode,
+      })
     }
 
     const ownerName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim() || 'a registered delegate'
