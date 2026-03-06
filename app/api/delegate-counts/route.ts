@@ -1,10 +1,12 @@
 // © 2026 Ansh Gupta. All rights reserved.
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 
-export async function GET(request: NextRequest) {
+export const dynamic = 'force-dynamic'
+
+export async function GET() {
   try {
     const supabase = await createClient()
     
@@ -26,7 +28,15 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    return NextResponse.json({ counts }, { status: 200 })
+    return NextResponse.json(
+      { counts },
+      {
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    )
   } catch (error) {
     console.error('Error fetching delegate counts:', error)
     return NextResponse.json(
