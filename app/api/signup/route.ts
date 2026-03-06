@@ -21,6 +21,7 @@ import {
   isValidReferralCode,
   normalizeReferralCode,
 } from '@/lib/referral-codes'
+import { normalizeToAlpha2CountryCode } from '@/lib/countries'
 import { isAdminSignupClosed, isChairSignupClosed } from '@/lib/registration-deadlines'
 import { z } from 'zod'
 
@@ -238,7 +239,7 @@ export async function POST(request: NextRequest) {
       emergencyContactPhone: body.formData?.emergencyPhone,
       agreeTerms: body.formData?.agreeTerms,
       agreePhotos: body.formData?.agreePhotos || false,
-      nationality: body.formData?.nationality?.toUpperCase() ?? null,
+      nationality: normalizeToAlpha2CountryCode(body.formData?.nationality) ?? null,
     }
     
     // Validate with Zod schema

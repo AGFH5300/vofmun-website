@@ -4,9 +4,9 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { insertUserSchema } from "@/lib/db/schema"
-import { countries } from "@/lib/countries"
 import { isChairSignupClosed } from "@/lib/registration-deadlines"
 import { normalizeReferralCode } from "@/lib/referral-codes"
+import { normalizeToAlpha2CountryCode } from "@/lib/countries"
 import { createClient } from "@/utils/supabase/server"
 
 export const runtime = "nodejs"
@@ -54,30 +54,7 @@ const normalizeBoolean = (value: string) => {
 }
 
 const normalizeNationality = (value: string) => {
-  const trimmed = value.trim()
-  if (!trimmed) return ""
-  if (trimmed.length === 2) {
-    return trimmed.toUpperCase()
-  }
-
-  const commonAliases: Record<string, string> = {
-    uae: "AE",
-    "united arab emirates": "AE",
-    uk: "GB",
-    "united kingdom": "GB",
-    usa: "US",
-    "united states": "US",
-    "united states of america": "US",
-  }
-
-  const aliasMatch = commonAliases[trimmed.toLowerCase()]
-  if (aliasMatch) return aliasMatch
-
-  const match = countries.find(
-    (country) => country.name.toLowerCase() === trimmed.toLowerCase(),
-  )
-
-  return match?.code ?? ""
+  return normalizeToAlpha2CountryCode(value) ?? ""
 }
 
 const normalizeDietaryType = (value: string) => {
