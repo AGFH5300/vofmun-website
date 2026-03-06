@@ -52,6 +52,8 @@ export type SignupRecord = {
   agree_photos: boolean | null
   registration_status: string | null
   referral_codes: string[] | null
+  own_referral_code: string | null
+  own_referral_code_generated_at: string | null
   delegate_data:
     | {
         experience?: string | null
@@ -147,6 +149,19 @@ type ReferralLeaderboardEntry = {
   owner: string
   totalUses: number
   codes: string[]
+}
+
+type DelegateReferralLeaderboardEntry = {
+  owner: string
+  code: string
+  totalUses: number
+}
+
+type DelegateReferralCodeDirectoryEntry = {
+  owner: string
+  email: string
+  code: string
+  generatedAt: string | null
 }
 
 type FieldOption<RecordType> = {
@@ -1230,7 +1245,11 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
   const [schoolColumnWidths, setSchoolColumnWidths] = useState<Record<string, number>>({})
   const [copiedLeaderboard, setCopiedLeaderboard] = useState(false)
+  const [copiedDelegateLeaderboard, setCopiedDelegateLeaderboard] = useState(false)
+  const [copiedDelegateDirectory, setCopiedDelegateDirectory] = useState(false)
   const [showReferralLeaderboard, setShowReferralLeaderboard] = useState(false)
+  const [showDelegateReferralLeaderboard, setShowDelegateReferralLeaderboard] = useState(false)
+  const [showDelegateReferralDirectory, setShowDelegateReferralDirectory] = useState(false)
   const resizeState = useRef<{
     key: string
     startX: number
@@ -1368,6 +1387,8 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
           "agree_photos",
           "registration_status",
           "referral_codes",
+          "own_referral_code",
+          "own_referral_code_generated_at",
           "delegate_data",
           "chair_data",
           "admin_data",
@@ -1554,6 +1575,65 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       })
   }, [records])
 
+
+  const delegateReferralCodeOwners = useMemo(() => {
+    const owners = new Map<string, { owner: string; email: string; generatedAt: string | null }>()
+
+    for (const record of records) {
+      if (record.role !== "delegate") continue
+
+      const code = normalizeReferralCode(record.own_referral_code ?? "")
+      if (!code) continue
+
+      const owner = `${record.first_name} ${record.last_name}`.trim() || record.email
+      owners.set(code, {
+        owner,
+        email: record.email,
+        generatedAt: record.own_referral_code_generated_at,
+      })
+    }
+
+    return owners
+  }, [records])
+
+  const delegateReferralLeaderboard = useMemo<DelegateReferralLeaderboardEntry[]>(() => {
+    const usageByCode = new Map<string, number>()
+
+    for (const record of records) {
+      const normalizedCodes = new Set((record.referral_codes ?? []).map((code) => normalizeReferralCode(code)))
+
+      for (const code of normalizedCodes) {
+        if (!code || !delegateReferralCodeOwners.has(code)) continue
+        usageByCode.set(code, (usageByCode.get(code) ?? 0) + 1)
+      }
+    }
+
+    return Array.from(usageByCode.entries())
+      .map(([code, totalUses]) => ({
+        code,
+        totalUses,
+        owner: delegateReferralCodeOwners.get(code)?.owner ?? "Unknown delegate",
+      }))
+      .sort((a, b) => {
+        if (a.totalUses !== b.totalUses) {
+          return b.totalUses - a.totalUses
+        }
+
+        return a.owner.localeCompare(b.owner)
+      })
+  }, [delegateReferralCodeOwners, records])
+
+  const delegateReferralCodeDirectory = useMemo<DelegateReferralCodeDirectoryEntry[]>(() => {
+    return Array.from(delegateReferralCodeOwners.entries())
+      .map(([code, entry]) => ({
+        code,
+        owner: entry.owner,
+        email: entry.email,
+        generatedAt: entry.generatedAt,
+      }))
+      .sort((a, b) => a.owner.localeCompare(b.owner))
+  }, [delegateReferralCodeOwners])
+
   const displayedLastUpdated = activeView === "school" ? schoolLastUpdated : lastUpdated
 
   const handleRefresh = useCallback(() => {
@@ -1579,6 +1659,38 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       console.error("Failed to copy referral leaderboard", cause)
     }
   }, [referralLeaderboard])
+
+  const handleCopyDelegateReferralLeaderboard = useCallback(async () => {
+    if (typeof window === "undefined" || delegateReferralLeaderboard.length === 0) return
+
+    const content = delegateReferralLeaderboard
+      .map((entry, index) => `${index + 1}. ${entry.owner} | Code: ${entry.code} | Uses: ${entry.totalUses}`)
+      .join("\n")
+
+    try {
+      await window.navigator.clipboard.writeText(content)
+      setCopiedDelegateLeaderboard(true)
+      window.setTimeout(() => setCopiedDelegateLeaderboard(false), 2000)
+    } catch (cause) {
+      console.error("Failed to copy delegate referral leaderboard", cause)
+    }
+  }, [delegateReferralLeaderboard])
+
+  const handleCopyDelegateReferralDirectory = useCallback(async () => {
+    if (typeof window === "undefined" || delegateReferralCodeDirectory.length === 0) return
+
+    const content = delegateReferralCodeDirectory
+      .map((entry, index) => `${index + 1}. ${entry.owner} | Email: ${entry.email} | Code: ${entry.code} | Generated: ${formatDateTime(entry.generatedAt)}`)
+      .join("\n")
+
+    try {
+      await window.navigator.clipboard.writeText(content)
+      setCopiedDelegateDirectory(true)
+      window.setTimeout(() => setCopiedDelegateDirectory(false), 2000)
+    } catch (cause) {
+      console.error("Failed to copy delegate referral code directory", cause)
+    }
+  }, [delegateReferralCodeDirectory])
 
   const handleUserFieldToggle = useCallback((view: UserView, fieldKey: string, isChecked: boolean) => {
     setSelectedUserFields((previous) => {
@@ -2124,8 +2236,8 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       </div>
 
       <Card className="w-fit border-none bg-transparent p-0 text-slate-900 shadow-none">
-        <CardContent className="p-0">
-          <div className="mb-2">
+        <CardContent className="space-y-3 p-0">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
               size="sm"
@@ -2136,13 +2248,37 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
               {showReferralLeaderboard ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
               {showReferralLeaderboard ? "Hide referral leaderboard" : "Show referral leaderboard"}
             </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-7 gap-1.5 border-slate-300 px-2.5 text-[11px] text-slate-700 hover:bg-slate-100"
+              onClick={() => setShowDelegateReferralLeaderboard((current) => !current)}
+            >
+              {showDelegateReferralLeaderboard ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              {showDelegateReferralLeaderboard
+                ? "Hide delegate referral leaderboard"
+                : "Show delegate referral leaderboard"}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-7 gap-1.5 border-slate-300 px-2.5 text-[11px] text-slate-700 hover:bg-slate-100"
+              onClick={() => setShowDelegateReferralDirectory((current) => !current)}
+            >
+              {showDelegateReferralDirectory ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              {showDelegateReferralDirectory
+                ? "Hide delegate referral code directory"
+                : "Show delegate referral code directory"}
+            </Button>
           </div>
 
           {showReferralLeaderboard ? (
             referralLeaderboard.length === 0 ? (
-              <div className="py-4 text-sm text-slate-500">No referral code usage has been recorded yet.</div>
+              <div className="py-2 text-sm text-slate-500">No referral code usage has been recorded yet.</div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
                 <div className="mb-1 flex justify-end">
                   <Button
                     type="button"
@@ -2169,15 +2305,101 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                     {referralLeaderboard.map((entry, index) => (
                       <TableRow key={entry.owner} className="border-none">
                         <TableCell className="px-2 py-1 align-middle text-[11px] text-slate-500">{index + 1}</TableCell>
-                        <TableCell className="max-w-[120px] truncate px-2 py-1 align-middle text-xs text-slate-900">
+                        <TableCell className="max-w-[160px] truncate px-2 py-1 align-middle text-xs text-slate-900">
                           {entry.owner}
                         </TableCell>
-                        <TableCell className="max-w-[150px] truncate px-2 py-1 align-middle font-mono text-[11px] text-slate-500">
+                        <TableCell className="max-w-[180px] truncate px-2 py-1 align-middle font-mono text-[11px] text-slate-500">
                           {entry.codes.length > 0 ? entry.codes.join(", ") : "-"}
                         </TableCell>
                         <TableCell className="px-2 py-1 text-right align-middle text-xs font-semibold text-slate-900">
                           {entry.totalUses}
                         </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )
+          ) : null}
+
+          {showDelegateReferralLeaderboard ? (
+            delegateReferralLeaderboard.length === 0 ? (
+              <div className="py-2 text-sm text-slate-500">No delegate referral code usage has been recorded yet.</div>
+            ) : (
+              <div className="overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
+                <div className="mb-1 flex justify-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 gap-1 px-2 text-[11px] text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    onClick={() => void handleCopyDelegateReferralLeaderboard()}
+                    disabled={delegateReferralLeaderboard.length === 0}
+                  >
+                    {copiedDelegateLeaderboard ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                    {copiedDelegateLeaderboard ? "Copied" : "Copy"}
+                  </Button>
+                </div>
+                <Table className="w-auto text-xs text-slate-900">
+                  <TableHeader>
+                    <TableRow className="border-none">
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">#</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Owner</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Code</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-right text-[11px] font-medium text-slate-500">Uses</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {delegateReferralLeaderboard.map((entry, index) => (
+                      <TableRow key={entry.code} className="border-none">
+                        <TableCell className="px-2 py-1 align-middle text-[11px] text-slate-500">{index + 1}</TableCell>
+                        <TableCell className="max-w-[170px] truncate px-2 py-1 align-middle text-xs text-slate-900">{entry.owner}</TableCell>
+                        <TableCell className="px-2 py-1 align-middle font-mono text-[11px] text-slate-500">{entry.code}</TableCell>
+                        <TableCell className="px-2 py-1 text-right align-middle text-xs font-semibold text-slate-900">{entry.totalUses}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )
+          ) : null}
+
+          {showDelegateReferralDirectory ? (
+            delegateReferralCodeDirectory.length === 0 ? (
+              <div className="py-2 text-sm text-slate-500">No delegate referral codes have been generated yet.</div>
+            ) : (
+              <div className="overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
+                <div className="mb-1 flex justify-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 gap-1 px-2 text-[11px] text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    onClick={() => void handleCopyDelegateReferralDirectory()}
+                    disabled={delegateReferralCodeDirectory.length === 0}
+                  >
+                    {copiedDelegateDirectory ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                    {copiedDelegateDirectory ? "Copied" : "Copy"}
+                  </Button>
+                </div>
+                <Table className="w-auto text-xs text-slate-900">
+                  <TableHeader>
+                    <TableRow className="border-none">
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">#</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Owner</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Email</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Code</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Generated</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {delegateReferralCodeDirectory.map((entry, index) => (
+                      <TableRow key={entry.code} className="border-none">
+                        <TableCell className="px-2 py-1 align-middle text-[11px] text-slate-500">{index + 1}</TableCell>
+                        <TableCell className="max-w-[170px] truncate px-2 py-1 align-middle text-xs text-slate-900">{entry.owner}</TableCell>
+                        <TableCell className="max-w-[210px] truncate px-2 py-1 align-middle text-[11px] text-slate-600">{entry.email}</TableCell>
+                        <TableCell className="px-2 py-1 align-middle font-mono text-[11px] text-slate-500">{entry.code}</TableCell>
+                        <TableCell className="px-2 py-1 align-middle text-[11px] text-slate-600">{formatDateTime(entry.generatedAt)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
