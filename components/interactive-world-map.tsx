@@ -6,13 +6,24 @@
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Globe } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { countries } from "@/lib/countries"
 
 interface CountryData {
   country: string
   countryCode: string
   delegates: number
+  displayDelegates: string
+}
+
+function formatDelegateCountInTens(count: number): string {
+  if (count <= 0) {
+    return "0+"
+  }
+
+  const roundedDownToTens = Math.floor(count / 10) * 10
+  const floored = Math.max(10, roundedDownToTens)
+  return `${floored}+`
 }
 
 const minimumThresholds: Record<string, number> = {
@@ -46,57 +57,78 @@ const minimumThresholds: Record<string, number> = {
 export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) {
   const [participatingCountries, setParticipatingCountries] = useState<CountryData[]>([])
   const [totalDelegates, setTotalDelegates] = useState(0)
-  const [totalCountries, setTotalCountries] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
 
+  const totalCountries = participatingCountries.length
+  const displayedTotalDelegates = useMemo(
+    () => formatDelegateCountInTens(totalDelegates),
+    [totalDelegates]
+  )
+
   useEffect(() => {
+    let isMounted = true
+
     async function fetchDelegateCounts() {
       let dbCounts: Record<string, number> = {}
-      
+
       try {
-        const response = await fetch('/api/delegate-counts')
+        const response = await fetch('/api/delegate-counts', { cache: "no-store" })
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch delegate counts: ${response.status}`)
+        }
+
         const data = await response.json()
         dbCounts = data.counts || {}
       } catch (error) {
         console.error('Error fetching delegate counts:', error)
       }
-      
+
       const mergedData: Record<string, number> = {}
-      
+
       Object.keys(minimumThresholds).forEach((countryCode) => {
         const dbCount = dbCounts[countryCode] || 0
         const minCount = minimumThresholds[countryCode]
         mergedData[countryCode] = Math.max(dbCount, minCount)
       })
-      
+
       Object.keys(dbCounts).forEach((countryCode) => {
         if (!mergedData[countryCode]) {
           mergedData[countryCode] = dbCounts[countryCode]
         }
       })
-      
+
       const countryDataArray: CountryData[] = Object.entries(mergedData)
         .map(([countryCode, count]) => {
-          const countryInfo = countries.find(c => c.code === countryCode)
+          const countryInfo = countries.find((c) => c.code === countryCode)
           return {
             country: countryInfo?.name || countryCode,
             countryCode: countryCode,
-            delegates: count
+            delegates: count,
+            displayDelegates: formatDelegateCountInTens(count),
           }
         })
-        .filter(c => c.delegates > 0)
+        .filter((c) => c.delegates > 0)
         .sort((a, b) => b.delegates - a.delegates)
-      
+
       const total = countryDataArray.reduce((sum, country) => sum + country.delegates, 0)
-      const totalCountriesCount = countryDataArray.length
-      
+
+      if (!isMounted) {
+        return
+      }
+
       setParticipatingCountries(countryDataArray)
       setTotalDelegates(total)
-      setTotalCountries(totalCountriesCount)
       setIsLoading(false)
     }
 
     fetchDelegateCounts()
+    const intervalId = window.setInterval(fetchDelegateCounts, 30_000)
+
+    return () => {
+      isMounted = false
+      window.clearInterval(intervalId)
+    }
   }, [])
 
   const showFullList = totalDelegates >= threshold
@@ -118,7 +150,7 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
           </div>
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <div className="text-2xl font-bold text-green-600">
-              {isLoading ? '...' : `100+`}
+              {isLoading ? '...' : displayedTotalDelegates}
             </div>
             <div className="text-sm text-gray-600">Delegates</div>
           </div>
@@ -153,7 +185,7 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
                     </div>
                     <div className="text-right">
                       <Badge className="bg-[#B22222] text-white border-0 hover:bg-[#8c2222]">
-                        {country.delegates} delegates
+                        {country.displayDelegates} delegates
                       </Badge>
                     </div>
                   </div>
