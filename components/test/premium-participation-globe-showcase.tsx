@@ -152,12 +152,6 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
                 arcDashLength={0.45}
                 arcDashGap={0.35}
                 arcDashAnimateTime={2200}
-                pointsData={[{ ...DUBAI, size: 0.9 }]}
-                pointLat="lat"
-                pointLng="lng"
-                pointAltitude="size"
-                pointColor={() => "#f59e0b"}
-                pointRadius={0.5}
                 atmosphereColor="#818cf8"
                 atmosphereAltitude={0.18}
                 speed={0.3}
