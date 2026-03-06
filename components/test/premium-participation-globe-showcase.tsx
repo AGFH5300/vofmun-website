@@ -25,6 +25,7 @@ interface GlobePoint {
   code: string
   name: string
   delegates: number
+  order: number
 }
 
 const DUBAI = {
@@ -63,8 +64,12 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
           delegates,
         }
       })
-      .filter((value): value is GlobePoint => value !== null)
+      .filter((value): value is Omit<GlobePoint, "order"> => value !== null)
       .sort((a, b) => b.delegates - a.delegates)
+      .map((point, index) => ({
+        ...point,
+        order: index,
+      }))
   }, [participation.counts])
 
   const arcData = useMemo(
@@ -74,11 +79,58 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
         startLng: point.lng,
         endLat: DUBAI.lat,
         endLng: DUBAI.lng,
+        order: point.order,
         delegates: point.delegates,
         country: point.name,
       })),
     [points],
   )
+
+  useEffect(() => {
+    if (document.getElementById("vofmun-pin-style")) {
+      return
+    }
+
+    const style = document.createElement("style")
+    style.id = "vofmun-pin-style"
+    style.textContent = `
+      .vofmun-pin {
+        position: relative;
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 35% 30%, #ff7a86 0%, #be123c 55%, #7f1d1d 100%);
+        border: 2px solid #fecdd3;
+        box-shadow: 0 0 0 3px rgba(127, 29, 29, 0.35), 0 10px 24px rgba(127, 29, 29, 0.65);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: translate(-50%, -115%);
+        cursor: pointer;
+        user-select: none;
+        pointer-events: auto;
+      }
+
+      .vofmun-pin::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        width: 11px;
+        height: 11px;
+        background: #7f1d1d;
+        transform: translateX(-50%) rotate(45deg);
+        border-right: 2px solid #fecdd3;
+        border-bottom: 2px solid #fecdd3;
+        border-bottom-right-radius: 3px;
+      }
+    `
+
+    document.head.appendChild(style)
+  }, [])
 
   const formattedLastUpdated = useMemo(
     () =>
@@ -125,25 +177,25 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
                 backgroundColor="rgba(0,0,0,0)"
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
                 bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-                pointsData={points}
-                pointLat="lat"
-                pointLng="lng"
-                pointAltitude={0.018}
-                pointRadius={0.42}
-                pointColor={() => "#8f0410"}
-                pointLabel={(point: object) => {
+                htmlElementsData={points}
+                htmlLat="lat"
+                htmlLng="lng"
+                htmlAltitude={0.032}
+                htmlElement={(point: object) => {
                   const item = point as GlobePoint
-                  return `<div style=\"padding:6px 8px; background:rgba(15,23,42,0.92); border:1px solid rgba(147,197,253,0.5); border-radius:8px; color:#e2e8f0;\">${item.name}<br /><strong>${formatNumber(item.delegates)} delegates</strong></div>`
-                }}
-                onPointHover={(point: object | null) => {
-                  setActiveCountry((point as GlobePoint | null) ?? null)
-                }}
-                onPointClick={(point: object) => {
-                  setActiveCountry(point as GlobePoint)
+                  const pin = document.createElement("div")
+                  pin.className = "vofmun-pin"
+                  pin.innerHTML = `<span>${item.delegates}</span>`
+                  pin.setAttribute("role", "button")
+                  pin.setAttribute("aria-label", `${item.name}: ${formatNumber(item.delegates)} delegates`)
+                  pin.onclick = () => setActiveCountry(item)
+                  pin.onmouseenter = () => setActiveCountry(item)
+                  pin.onmouseleave = () => setActiveCountry((current) => (current?.code === item.code ? null : current))
+                  return pin
                 }}
                 atmosphereColor="#93c5fd"
                 atmosphereAltitude={0.24}
-                speed={1.2}
+                speed={0.28}
               />
               <p className="mt-4 text-center text-sm text-slate-300">
                 {activeCountry
@@ -169,12 +221,15 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
                   return Math.max(0.12, Math.min(0.5, delegates / 20))
                 }}
                 arcCurveResolution={80}
-                arcDashLength={0.78}
-                arcDashGap={1.4}
-                arcDashAnimateTime={2200}
+                arcDashLength={0.3}
+                arcDashGap={1.9}
+                arcDashInitialGap={(arc: object) => {
+                  return ((arc as { order: number }).order ?? 0) * 0.45
+                }}
+                arcDashAnimateTime={4200}
                 atmosphereColor="#818cf8"
                 atmosphereAltitude={0.18}
-                speed={0.3}
+                speed={0.2}
               />
             </GlobeVariantCard>
           </div>
@@ -184,6 +239,7 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
     </section>
   )
 }
+
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
