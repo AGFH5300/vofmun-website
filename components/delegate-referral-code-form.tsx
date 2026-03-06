@@ -92,15 +92,13 @@ export function DelegateReferralCodeForm() {
         <div className="mb-6 space-y-4 rounded-lg border border-[#B22222]/20 bg-[#B22222]/5 p-4">
           <h3 className="text-lg font-semibold text-gray-900">Referral incentive highlights</h3>
           <p className="text-sm leading-relaxed text-gray-700">
-            Your referrals directly help us build a stronger, more diverse MUN community. To recognize delegates and chairs
-            who actively expand VOFMUN&apos;s network, the top three referrers will receive official certificates and be
-            recognized as VOFMUN Ambassadors. Ambassadors will be featured as trusted representatives of our conference,
+            Your referrals directly help us build a stronger, more diverse MUN community. Ambassadors will be featured as trusted representatives of our conference,
             helping promote future editions through their schools, networks, and local communities while strengthening the
             global visibility and impact of VOFMUN.
           </p>
           <ul className="list-disc space-y-2 pl-5 text-sm text-gray-700">
             <li>Top 3 chairs and delegates receive a certificate and are named VOFMUN Ambassadors.</li>
-            <li>Top 1 chair and top 1 delegate receive free admission to the UniHawk program (TBC).</li>
+            {/* <li>Top 1 chair and top 1 delegate receive free admission to the UniHawk program (TBC).</li> */}
           </ul>
         </div>
 
