@@ -7,6 +7,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { ChevronDown, Menu, X, FileText, Building, Calendar, Scale } from "lucide-react"
 
 export function EnhancedNavigation() {
@@ -136,6 +137,15 @@ export function EnhancedNavigation() {
               </div>
             </div>
             <Link
+              href="/delegate-referral-code"
+              className={`font-medium transition-colors hover:text-[#D32F2F] inline-flex items-center gap-2 ${
+                isScrolled ? "text-gray-900 hover:text-[#B22222]" : "text-gray-900 hover:text-[#B22222]"
+              }`}
+            >
+              Delegate Referral
+              <Badge className="bg-[#B22222] text-white hover:bg-[#B22222]">New</Badge>
+            </Link>
+            <Link
               href="/secretariat"
               className={`font-medium transition-colors hover:text-[#D32F2F] ${
                 isScrolled ? "text-gray-900 hover:text-[#B22222]" : "text-gray-900 hover:text-[#B22222]"
@@ -170,6 +180,10 @@ export function EnhancedNavigation() {
               </Link>
               <Link href="/resources" className="block py-2 text-gray-900 hover:text-[#B22222] font-medium">
                 Conference Resources
+              </Link>
+              <Link href="/delegate-referral-code" className="flex items-center justify-between py-2 text-gray-900 hover:text-[#B22222] font-medium">
+                <span>Delegate Referral</span>
+                <Badge className="bg-[#B22222] text-white hover:bg-[#B22222]">New</Badge>
               </Link>
               <Link href="/secretariat" className="block py-2 text-gray-900 hover:text-[#B22222] font-medium">
                 Secretariat
