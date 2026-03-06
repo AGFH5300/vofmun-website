@@ -25,7 +25,6 @@ interface GlobePoint {
   code: string
   name: string
   delegates: number
-  size: number
 }
 
 const DUBAI = {
@@ -60,7 +59,6 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
           code,
           name: country?.name ?? code,
           delegates,
-          size: Math.max(0.22, Math.min(0.8, delegates / 30)),
         }
       })
       .filter((value): value is GlobePoint => value !== null)
@@ -79,8 +77,6 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
       })),
     [points],
   )
-
-  const topCountries = points.slice(0, 20)
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-16 lg:py-20">
@@ -109,39 +105,34 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
           <div className="mt-10 flex flex-col gap-8">
             <GlobeVariantCard
               title="Variant A · Participating Countries"
-              description="A constantly rotating political-style globe with delegate-count pins. Hover each pin for country and delegate totals."
+              description="A rotating political-style globe with dark red pins for each participating country. Hover or tap a pin for country and delegate totals."
             >
               <AutoRotateGlobe
                 width={1200}
                 height={540}
                 backgroundColor="rgba(0,0,0,0)"
-                globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
+                globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
                 bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-                pointsData={points}
-                pointLat="lat"
-                pointLng="lng"
-                pointAltitude="size"
-                pointColor={() => "#38bdf8"}
-                pointRadius={0.2}
-                pointsMerge
-                pointLabel={(point: object) => {
+                htmlElementsData={points}
+                htmlLat="lat"
+                htmlLng="lng"
+                htmlElement={(point: object) => {
                   const item = point as GlobePoint
-                  return `<div style="padding:6px 8px"><strong>${item.name}</strong><br/>Delegates: ${formatNumber(item.delegates)}</div>`
+                  const pin = document.createElement("button")
+                  pin.type = "button"
+                  pin.className =
+                    "grid h-9 w-9 place-items-center rounded-full border border-[#6f0106] bg-[#8f0410] text-xs font-semibold text-white shadow-[0_0_18px_rgba(120,0,0,0.55)] transition hover:scale-110 focus-visible:scale-110 focus-visible:outline-none"
+                  pin.textContent = `${item.delegates}`
+                  pin.title = `${item.name} · ${formatNumber(item.delegates)} delegates`
+                  pin.setAttribute("aria-label", `${item.name}, ${formatNumber(item.delegates)} delegates`)
+                  pin.onclick = () => {
+                    pin.title = `${item.name} · ${formatNumber(item.delegates)} delegates`
+                  }
+                  return pin
                 }}
-                labelsData={topCountries}
-                labelLat="lat"
-                labelLng="lng"
-                labelText={(point: object) => {
-                  const item = point as GlobePoint
-                  return `${formatNumber(item.delegates)}`
-                }}
-                labelSize={1.05}
-                labelDotRadius={0.2}
-                labelColor={() => "#f8fafc"}
-                labelResolution={2}
-                atmosphereColor="#60a5fa"
-                atmosphereAltitude={0.2}
-                speed={0.45}
+                atmosphereColor="#93c5fd"
+                atmosphereAltitude={0.24}
+                speed={1.2}
               />
             </GlobeVariantCard>
 
@@ -167,47 +158,9 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
                 pointAltitude="size"
                 pointColor={() => "#f59e0b"}
                 pointRadius={0.5}
-                labelsData={[DUBAI]}
-                labelLat="lat"
-                labelLng="lng"
-                labelText={(item: object) => (item as { name: string }).name}
-                labelColor={() => "#fde68a"}
-                labelSize={2}
                 atmosphereColor="#818cf8"
                 atmosphereAltitude={0.18}
                 speed={0.3}
-              />
-            </GlobeVariantCard>
-
-            <GlobeVariantCard
-              title="Variant C · Pulse & Presence"
-              description="Simplified dark globe styling with soft pulse rings to spotlight active delegate countries without satellite imagery."
-            >
-              <AutoRotateGlobe
-                width={1200}
-                height={540}
-                backgroundColor="rgba(0,0,0,0)"
-                globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
-                pointsData={points}
-                pointLat="lat"
-                pointLng="lng"
-                pointAltitude={0.1}
-                pointColor={() => "#a78bfa"}
-                pointRadius={0.32}
-                pointLabel={(point: object) => {
-                  const item = point as GlobePoint
-                  return `<div style="padding:6px 8px"><strong>${item.name}</strong><br/>Delegates: ${formatNumber(item.delegates)}</div>`
-                }}
-                ringsData={points}
-                ringLat="lat"
-                ringLng="lng"
-                ringColor={() => (t: number) => `rgba(56, 189, 248, ${1 - t})`}
-                ringMaxRadius={(point: object) => Math.min(6, (point as GlobePoint).delegates * 0.22)}
-                ringPropagationSpeed={1.2}
-                ringRepeatPeriod={1000}
-                atmosphereColor="#c084fc"
-                atmosphereAltitude={0.22}
-                speed={0.55}
               />
             </GlobeVariantCard>
           </div>
@@ -258,6 +211,8 @@ function AutoRotateGlobe(props: Record<string, unknown> & { speed?: number }) {
 
     controls.autoRotate = true
     controls.autoRotateSpeed = speed
+    controls.enablePan = false
+    controls.update()
   }, [speed])
 
   return <Globe ref={globeRef} {...globeProps} />
