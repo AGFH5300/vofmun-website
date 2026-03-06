@@ -550,7 +550,7 @@ export function SignupFormNew() {
     })
   }
 
-  const handleReferralBlur = (index: number) => {
+  const handleReferralBlur = async (index: number) => {
     const rawCode = referralCodes[index] ?? ""
     if (!rawCode.trim()) {
       clearReferralFeedbackForIndex(index)
@@ -572,6 +572,31 @@ export function SignupFormNew() {
         },
       }))
       return
+    }
+
+    try {
+      const response = await fetch("/api/referral-code-owner", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code: normalizedCode }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (response.ok && payload?.status === "success" && typeof payload?.owner === "string" && payload.owner.trim()) {
+        setReferralFeedback((prev) => ({
+          ...prev,
+          [index]: {
+            type: "success",
+            message: `Referral code belongs to ${payload.owner.trim()}.`,
+          },
+        }))
+        return
+      }
+    } catch (error) {
+      console.warn("Unable to verify delegate referral code owner on blur", error)
     }
 
     const suggestions = findReferralSuggestions(normalizedCode, 1)
@@ -1132,11 +1157,11 @@ export function SignupFormNew() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-green-600">Registration Successful!</DialogTitle>
 
-          <DialogDescription className="space-y-3 pt-2">
-            <p>
+          <div className="space-y-3 pt-2 text-muted-foreground text-sm">
+            <DialogDescription>
               Your {roleCards.find((r) => r.role === lastSubmittedRole)?.title.toLowerCase() ?? "application"} application has
               been submitted successfully.
-            </p>
+            </DialogDescription>
 
             <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm">
               {lastSubmittedIsLeadership ? (
@@ -1203,7 +1228,7 @@ export function SignupFormNew() {
                 Need help? Email <a href="mailto:conference@vofmun.org" className="underline">conference@vofmun.org</a>.
               </li>
             </ul>
-          </DialogDescription>
+          </div>
         </DialogHeader>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-3 pt-4">
