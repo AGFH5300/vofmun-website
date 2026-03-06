@@ -148,6 +148,7 @@ type UserSortOption = "created_desc" | "created_asc" | "name_asc" | "name_desc"
 type ReferralLeaderboardEntry = {
   owner: string
   totalUses: number
+  paidUses: number
   codes: string[]
 }
 
@@ -155,6 +156,7 @@ type DelegateReferralLeaderboardEntry = {
   owner: string
   code: string
   totalUses: number
+  paidUses: number
 }
 
 type DelegateReferralCodeDirectoryEntry = {
@@ -1536,10 +1538,10 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const schoolDelegationTotal = schoolDelegations.length
 
   const referralLeaderboard = useMemo<ReferralLeaderboardEntry[]>(() => {
-    const ownerUsage = new Map<string, { totalUses: number; codes: Set<string> }>()
+    const ownerUsage = new Map<string, { totalUses: number; paidUses: number; codes: Set<string> }>()
 
     for (const referral of REFERRAL_CODES) {
-      ownerUsage.set(referral.owner, { totalUses: 0, codes: new Set() })
+      ownerUsage.set(referral.owner, { totalUses: 0, paidUses: 0, codes: new Set() })
     }
 
     for (const record of records) {
@@ -1555,6 +1557,9 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
         if (!ownerRecord) continue
 
         ownerRecord.totalUses += 1
+        if (record.payment_status === "paid" || record.payment_status === "pending") {
+          ownerRecord.paidUses += 1
+        }
         ownerRecord.codes.add(code)
       }
     }
@@ -1563,6 +1568,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       .map(([owner, usage]) => ({
         owner,
         totalUses: usage.totalUses,
+        paidUses: usage.paidUses,
         codes: Array.from(usage.codes.values()).sort(),
       }))
       .filter((entry) => entry.totalUses > 0)
@@ -1597,21 +1603,28 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   }, [records])
 
   const delegateReferralLeaderboard = useMemo<DelegateReferralLeaderboardEntry[]>(() => {
-    const usageByCode = new Map<string, number>()
+    const usageByCode = new Map<string, { totalUses: number; paidUses: number }>()
 
     for (const record of records) {
       const normalizedCodes = new Set((record.referral_codes ?? []).map((code) => normalizeReferralCode(code)))
 
       for (const code of normalizedCodes) {
         if (!code || !delegateReferralCodeOwners.has(code)) continue
-        usageByCode.set(code, (usageByCode.get(code) ?? 0) + 1)
+
+        const entry = usageByCode.get(code) ?? { totalUses: 0, paidUses: 0 }
+        entry.totalUses += 1
+        if (record.payment_status === "paid" || record.payment_status === "pending") {
+          entry.paidUses += 1
+        }
+        usageByCode.set(code, entry)
       }
     }
 
     return Array.from(usageByCode.entries())
-      .map(([code, totalUses]) => ({
+      .map(([code, usage]) => ({
         code,
-        totalUses,
+        totalUses: usage.totalUses,
+        paidUses: usage.paidUses,
         owner: delegateReferralCodeOwners.get(code)?.owner ?? "Unknown delegate",
       }))
       .sort((a, b) => {
@@ -1647,7 +1660,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     const content = referralLeaderboard
       .map((entry, index) => {
         const codeValue = entry.codes.length > 0 ? entry.codes.join(", ") : "-"
-        return `${index + 1}. ${entry.owner} | Uses: ${entry.totalUses} | Code: ${codeValue}`
+        return `${index + 1}. ${entry.owner} | Uses: ${entry.totalUses} | Paid: ${entry.paidUses} | Code: ${codeValue}`
       })
       .join("\n")
 
@@ -1664,7 +1677,10 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
     if (typeof window === "undefined" || delegateReferralLeaderboard.length === 0) return
 
     const content = delegateReferralLeaderboard
-      .map((entry, index) => `${index + 1}. ${entry.owner} | Code: ${entry.code} | Uses: ${entry.totalUses}`)
+      .map(
+        (entry, index) =>
+          `${index + 1}. ${entry.owner} | Code: ${entry.code} | Uses: ${entry.totalUses} | Paid: ${entry.paidUses}`,
+      )
       .join("\n")
 
     try {
@@ -2299,6 +2315,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                       <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Owner</TableHead>
                       <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Codes</TableHead>
                       <TableHead className="h-auto px-2 py-1 text-right text-[11px] font-medium text-slate-500">Uses</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-right text-[11px] font-medium text-slate-500">Paid</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -2313,6 +2330,9 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                         </TableCell>
                         <TableCell className="px-2 py-1 text-right align-middle text-xs font-semibold text-slate-900">
                           {entry.totalUses}
+                        </TableCell>
+                        <TableCell className="px-2 py-1 text-right align-middle text-xs font-semibold text-emerald-700">
+                          {entry.paidUses}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -2347,6 +2367,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                       <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Owner</TableHead>
                       <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Code</TableHead>
                       <TableHead className="h-auto px-2 py-1 text-right text-[11px] font-medium text-slate-500">Uses</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-right text-[11px] font-medium text-slate-500">Paid</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -2356,6 +2377,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                         <TableCell className="max-w-[170px] truncate px-2 py-1 align-middle text-xs text-slate-900">{entry.owner}</TableCell>
                         <TableCell className="px-2 py-1 align-middle font-mono text-[11px] text-slate-500">{entry.code}</TableCell>
                         <TableCell className="px-2 py-1 text-right align-middle text-xs font-semibold text-slate-900">{entry.totalUses}</TableCell>
+                        <TableCell className="px-2 py-1 text-right align-middle text-xs font-semibold text-emerald-700">{entry.paidUses}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
