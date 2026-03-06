@@ -613,11 +613,17 @@ export function SignupFormNew() {
       const payload = await response.json().catch(() => null)
 
       if (response.ok && payload?.status === "success" && typeof payload?.owner === "string" && payload.owner.trim()) {
+        const ownerName = payload.owner.trim()
+        const ownerMessage =
+          payload?.source === "delegate"
+            ? `Referral code belongs to delegate ${ownerName}.`
+            : `Referral code belongs to ${ownerName}.`
+
         setReferralFeedback((prev) => ({
           ...prev,
           [index]: {
             type: "success",
-            message: `Referral code belongs to ${payload.owner.trim()}.`,
+            message: ownerMessage,
           },
         }))
         return
