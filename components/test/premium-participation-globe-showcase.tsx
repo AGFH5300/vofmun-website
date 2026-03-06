@@ -80,7 +80,7 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
     [points],
   )
 
-  const topCountries = points.slice(0, 6)
+  const topCountries = points.slice(0, 20)
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-16 lg:py-20">
@@ -106,14 +106,14 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
             Could not render globe data yet because no valid country codes were found in the live participation dataset.
           </div>
         ) : (
-          <div className="mt-10 grid gap-8 xl:grid-cols-3">
+          <div className="mt-10 flex flex-col gap-8">
             <GlobeVariantCard
               title="Variant A · Participating Countries"
-              description="Rotating globe with luminous participation beacons sized by delegate count."
+              description="A constantly rotating political-style globe with delegate-count pins. Hover each pin for country and delegate totals."
             >
               <AutoRotateGlobe
-                width={420}
-                height={320}
+                width={1200}
+                height={540}
                 backgroundColor="rgba(0,0,0,0)"
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
                 bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
@@ -122,17 +122,21 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
                 pointLng="lng"
                 pointAltitude="size"
                 pointColor={() => "#38bdf8"}
-                pointRadius={0.36}
+                pointRadius={0.2}
                 pointsMerge
+                pointLabel={(point: object) => {
+                  const item = point as GlobePoint
+                  return `<div style="padding:6px 8px"><strong>${item.name}</strong><br/>Delegates: ${formatNumber(item.delegates)}</div>`
+                }}
                 labelsData={topCountries}
                 labelLat="lat"
                 labelLng="lng"
                 labelText={(point: object) => {
                   const item = point as GlobePoint
-                  return `${item.name} · ${item.delegates}`
+                  return `${formatNumber(item.delegates)}`
                 }}
-                labelSize={1.4}
-                labelDotRadius={0.28}
+                labelSize={1.05}
+                labelDotRadius={0.2}
                 labelColor={() => "#f8fafc"}
                 labelResolution={2}
                 atmosphereColor="#60a5fa"
@@ -146,8 +150,8 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
               description="Animated arcs from each participating country toward Dubai, representing international convergence."
             >
               <AutoRotateGlobe
-                width={420}
-                height={320}
+                width={1200}
+                height={540}
                 backgroundColor="rgba(0,0,0,0)"
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
                 arcsData={arcData}
@@ -177,19 +181,23 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
 
             <GlobeVariantCard
               title="Variant C · Pulse & Presence"
-              description="Rings and glow pulses for each country to create a hero-grade, event-launch visual moment."
+              description="Simplified dark globe styling with soft pulse rings to spotlight active delegate countries without satellite imagery."
             >
               <AutoRotateGlobe
-                width={420}
-                height={320}
+                width={1200}
+                height={540}
                 backgroundColor="rgba(0,0,0,0)"
-                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+                globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
                 pointsData={points}
                 pointLat="lat"
                 pointLng="lng"
                 pointAltitude={0.1}
                 pointColor={() => "#a78bfa"}
                 pointRadius={0.32}
+                pointLabel={(point: object) => {
+                  const item = point as GlobePoint
+                  return `<div style="padding:6px 8px"><strong>${item.name}</strong><br/>Delegates: ${formatNumber(item.delegates)}</div>`
+                }}
                 ringsData={points}
                 ringLat="lat"
                 ringLng="lng"
@@ -230,10 +238,10 @@ function GlobeVariantCard({
   children: ReactNode
 }) {
   return (
-    <article className="rounded-2xl border border-slate-200/10 bg-slate-950/35 p-5 backdrop-blur-sm">
+    <article className="w-full rounded-2xl border border-slate-200/10 bg-slate-950/35 p-6 backdrop-blur-sm lg:p-8">
       <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-sky-100/90">{title}</h2>
-      <p className="mt-2 min-h-10 text-sm text-slate-300">{description}</p>
-      <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-slate-900/40">{children}</div>
+      <p className="mt-2 text-sm text-slate-300 lg:text-base">{description}</p>
+      <div className="mt-5 flex justify-center overflow-hidden rounded-xl border border-white/10 bg-slate-900/40">{children}</div>
     </article>
   )
 }
