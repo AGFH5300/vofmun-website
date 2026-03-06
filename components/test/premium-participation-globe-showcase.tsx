@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { useEffect, useMemo, useRef, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import worldCountries from "world-countries"
 import { getCountryByCode } from "@/lib/countries"
 
@@ -44,6 +44,8 @@ function formatNumber(value: number): string {
 }
 
 export function PremiumParticipationGlobeShowcase({ participation }: Props) {
+  const [activeCountry, setActiveCountry] = useState<GlobePoint | null>(null)
+
   const points = useMemo<GlobePoint[]>(() => {
     return Object.entries(participation.counts)
       .map(([code, delegates]) => {
@@ -76,6 +78,16 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
         country: point.name,
       })),
     [points],
+  )
+
+  const formattedLastUpdated = useMemo(
+    () =>
+      `${new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeStyle: "medium",
+        timeZone: "UTC",
+      }).format(new Date(participation.lastUpdated))} UTC`,
+    [participation.lastUpdated],
   )
 
   return (
@@ -113,27 +125,31 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
                 backgroundColor="rgba(0,0,0,0)"
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
                 bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-                htmlElementsData={points}
-                htmlLat="lat"
-                htmlLng="lng"
-                htmlElement={(point: object) => {
+                pointsData={points}
+                pointLat="lat"
+                pointLng="lng"
+                pointAltitude={0.018}
+                pointRadius={0.42}
+                pointColor={() => "#8f0410"}
+                pointLabel={(point: object) => {
                   const item = point as GlobePoint
-                  const pin = document.createElement("button")
-                  pin.type = "button"
-                  pin.className =
-                    "grid h-9 w-9 place-items-center rounded-full border border-[#6f0106] bg-[#8f0410] text-xs font-semibold text-white shadow-[0_0_18px_rgba(120,0,0,0.55)] transition hover:scale-110 focus-visible:scale-110 focus-visible:outline-none"
-                  pin.textContent = `${item.delegates}`
-                  pin.title = `${item.name} · ${formatNumber(item.delegates)} delegates`
-                  pin.setAttribute("aria-label", `${item.name}, ${formatNumber(item.delegates)} delegates`)
-                  pin.onclick = () => {
-                    pin.title = `${item.name} · ${formatNumber(item.delegates)} delegates`
-                  }
-                  return pin
+                  return `<div style=\"padding:6px 8px; background:rgba(15,23,42,0.92); border:1px solid rgba(147,197,253,0.5); border-radius:8px; color:#e2e8f0;\">${item.name}<br /><strong>${formatNumber(item.delegates)} delegates</strong></div>`
+                }}
+                onPointHover={(point: object | null) => {
+                  setActiveCountry((point as GlobePoint | null) ?? null)
+                }}
+                onPointClick={(point: object) => {
+                  setActiveCountry(point as GlobePoint)
                 }}
                 atmosphereColor="#93c5fd"
                 atmosphereAltitude={0.24}
                 speed={1.2}
               />
+              <p className="mt-4 text-center text-sm text-slate-300">
+                {activeCountry
+                  ? `${activeCountry.name} · ${formatNumber(activeCountry.delegates)} delegates`
+                  : "Hover or click a red marker to inspect delegates by country."}
+              </p>
             </GlobeVariantCard>
 
             <GlobeVariantCard
@@ -147,10 +163,14 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
                 arcsData={arcData}
                 arcColor={() => ["#22d3ee", "#a78bfa"]}
-                arcStroke={0.55}
-                arcAltitude={(arc: object) => Math.min(0.55, ((arc as { delegates: number }).delegates || 1) / 22)}
-                arcDashLength={0.45}
-                arcDashGap={0.35}
+                arcStroke={0.9}
+                arcAltitude={(arc: object) => {
+                  const delegates = (arc as { delegates: number }).delegates || 1
+                  return Math.max(0.12, Math.min(0.5, delegates / 20))
+                }}
+                arcCurveResolution={80}
+                arcDashLength={0.78}
+                arcDashGap={1.4}
                 arcDashAnimateTime={2200}
                 atmosphereColor="#818cf8"
                 atmosphereAltitude={0.18}
@@ -159,8 +179,7 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
             </GlobeVariantCard>
           </div>
         )}
-
-        <p className="mt-8 text-xs text-slate-400">Live data timestamp: {new Date(participation.lastUpdated).toLocaleString()}</p>
+        <p className="mt-8 text-xs text-slate-400">Live data timestamp: {formattedLastUpdated}</p>
       </div>
     </section>
   )
