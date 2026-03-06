@@ -7,6 +7,19 @@ export interface Country {
   phoneCode: string
 }
 
+const countryCodeSet = new Set<string>()
+const countryNameToCode = new Map<string, string>()
+
+const commonCountryAliases: Record<string, string> = {
+  uae: "AE",
+  "united arab emirates": "AE",
+  uk: "GB",
+  "united kingdom": "GB",
+  usa: "US",
+  "united states": "US",
+  "united states of america": "US",
+}
+
 export const countries: Country[] = [
   { code: "AD", name: "Andorra", phoneCode: "+376" },
   { code: "AE", name: "United Arab Emirates", phoneCode: "+971" },
@@ -258,6 +271,38 @@ export const countries: Country[] = [
   { code: "ZM", name: "Zambia", phoneCode: "+260" },
   { code: "ZW", name: "Zimbabwe", phoneCode: "+263" },
 ]
+
+countries.forEach((country) => {
+  countryCodeSet.add(country.code)
+  countryNameToCode.set(country.name.toLowerCase(), country.code)
+})
+
+export const isAlpha2CountryCode = (value: string | null | undefined): value is string => {
+  const normalized = (value ?? "").trim().toUpperCase()
+  return /^[A-Z]{2}$/.test(normalized) && countryCodeSet.has(normalized)
+}
+
+export const normalizeToAlpha2CountryCode = (value: string | null | undefined): string | null => {
+  const trimmed = (value ?? "").trim()
+  if (!trimmed) return null
+
+  const uppercase = trimmed.toUpperCase()
+  if (isAlpha2CountryCode(uppercase)) {
+    return uppercase
+  }
+
+  const aliasCode = commonCountryAliases[trimmed.toLowerCase()]
+  if (aliasCode && isAlpha2CountryCode(aliasCode)) {
+    return aliasCode
+  }
+
+  const byCountryName = countryNameToCode.get(trimmed.toLowerCase())
+  if (byCountryName && isAlpha2CountryCode(byCountryName)) {
+    return byCountryName
+  }
+
+  return null
+}
 
 export const getCountryByCode = (code: string): Country | undefined => {
   return countries.find((country) => country.code === code)

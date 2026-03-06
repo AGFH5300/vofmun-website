@@ -4,6 +4,7 @@
 import { pgTable, text, varchar, integer, timestamp, jsonb, boolean, serial } from 'drizzle-orm/pg-core'
 import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
+import { isAlpha2CountryCode, normalizeToAlpha2CountryCode } from '@/lib/countries'
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -12,7 +13,7 @@ export const users = pgTable('users', {
   lastName: varchar('last_name', { length: 100 }).notNull(),
   phone: varchar('phone', { length: 20 }).notNull(),
   role: varchar('role', { length: 20 }).notNull(),
-  nationality: varchar('nationality', { length: 3 }),
+  nationality: varchar('nationality', { length: 2 }),
   
   // Basic Information
   school: varchar('school', { length: 255 }),
@@ -104,7 +105,11 @@ export const insertUserSchema = z.object({
   emergencyContactPhone: z.string().min(1, 'Emergency contact phone is required'),
   agreeTerms: z.boolean().refine(val => val === true, 'You must agree to terms and conditions'),
   agreePhotos: z.boolean().optional(),
-  nationality: z.string().length(2),
+  nationality: z
+    .string()
+    .length(2)
+    .transform((value) => value.toUpperCase())
+    .refine((value) => isAlpha2CountryCode(value), 'Nationality must be a valid 2-letter ISO code'),
 })
 
 export const selectUserSchema = createSelectSchema(users)
@@ -113,7 +118,11 @@ export const insertSchoolDelegationSchema = z.object({
   schoolName: z.string().min(1, 'School name is required'),
   schoolAddress: z.string().min(1, 'School address is required'),
   schoolEmail: z.string().email('Enter a valid school email address'),
-  schoolCountry: z.string().min(1, 'School country is required'),
+  schoolCountry: z
+    .string()
+    .min(1, 'School country is required')
+    .transform((value) => normalizeToAlpha2CountryCode(value) ?? '')
+    .refine((value) => isAlpha2CountryCode(value), 'School country must be a valid 2-letter ISO code'),
   directorName: z.string().min(1, 'Director name is required'),
   directorEmail: z.string().email('Enter a valid director email address'),
   directorPhone: z.string().min(1, 'Director phone number is required'),
