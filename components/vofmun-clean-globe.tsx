@@ -212,10 +212,63 @@ function rectsOverlap(
   return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
 }
 
+function wrapTextToLines(text: string, maxCharsPerLine: number, maxLines: number) {
+  const words = text.trim().split(/\s+/).filter(Boolean)
+
+  if (words.length === 0) {
+    return [text]
+  }
+
+  const lines: string[] = []
+  let currentLine = ""
+
+  for (const word of words) {
+    const candidate = currentLine ? `${currentLine} ${word}` : word
+
+    if (candidate.length <= maxCharsPerLine || currentLine.length === 0) {
+      currentLine = candidate
+      continue
+    }
+
+    lines.push(currentLine)
+    currentLine = word
+
+    if (lines.length === maxLines - 1) {
+      break
+    }
+  }
+
+  const remainingWords = words.slice(lines.join(" ").split(/\s+/).filter(Boolean).length)
+  const trailing = [currentLine, ...remainingWords].filter(Boolean).join(" ")
+
+  if (trailing) {
+    lines.push(trailing)
+  }
+
+  if (lines.length > maxLines) {
+    return [...lines.slice(0, maxLines - 1), `${lines[maxLines - 1]}…`]
+  }
+
+  if (lines.length === maxLines && remainingWords.length > 0) {
+    lines[maxLines - 1] = `${lines[maxLines - 1]}…`
+  }
+
+  return lines.slice(0, maxLines)
+}
+
 function getTooltipPlacement(cluster: PinCluster, clusters: PinCluster[]) {
-  const lines = cluster.pins.length === 1 ? 2 : Math.min(cluster.pins.length + 1, 6)
-  const width = cluster.pins.length === 1 ? 300 : 400
-  const height = cluster.pins.length === 1 ? 98 : 52 + lines * 30
+  const singleClusterNameLines =
+    cluster.pins.length === 1 ? wrapTextToLines(cluster.pins[0].name, 22, 3) : []
+
+  const lines =
+    cluster.pins.length === 1
+      ? singleClusterNameLines.length + 1
+      : Math.min(cluster.pins.length + 1, 6)
+  const width = cluster.pins.length === 1 ? 540 : 620
+  const height =
+    cluster.pins.length === 1
+      ? 60 + singleClusterNameLines.length * 46 + 48
+      : 62 + lines * 34
 
   const candidates = [
     { tx: cluster.x, ty: cluster.y - 120 },
@@ -298,7 +351,7 @@ function getTooltipPlacement(cluster: PinCluster, clusters: PinCluster[]) {
     tx: clamp(best.tx, best.width / 2 + 12, SVG_SIZE - best.width / 2 - 12),
     ty: clamp(best.ty, best.height + 12, SVG_SIZE - 12),
     rectX: -best.width / 2,
-    rectY: -68,
+    rectY: -82,
     width: best.width,
     height: best.height,
   }
@@ -424,6 +477,8 @@ export default function VofmunCleanGlobePreview({
   const activeCluster = hoveredCluster ?? selectedCluster
   const activeCountryIds = new Set(activeCluster?.pins.map((pin) => pin.countryId) ?? [])
   const tooltipPlacement = activeCluster ? getTooltipPlacement(activeCluster, globeData.clusters) : null
+  const singleClusterNameLines =
+    activeCluster?.pins.length === 1 ? wrapTextToLines(activeCluster.pins[0].name, 22, 3) : []
 
   const handlePointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
     setSelectedCluster(null)
@@ -599,24 +654,34 @@ export default function VofmunCleanGlobePreview({
               />
               {activeCluster.pins.length === 1 ? (
                 <>
+                  {singleClusterNameLines.map((line, index) => (
+                    <text
+                      key={`${line}-${index}`}
+                      x="0"
+                      y={tooltipPlacement.rectY + 42 + index * 42}
+                      style={{ userSelect: "none", WebkitUserSelect: "none" }}
+                      textAnchor="middle"
+                      fontSize="38"
+                      fontWeight="800"
+                      fill="white"
+                      stroke="rgba(2,6,23,0.9)"
+                      strokeWidth="1.15"
+                      paintOrder="stroke"
+                    >
+                      {line}
+                    </text>
+                  ))}
                   <text
                     x="0"
-                    y="-36"
+                    y={tooltipPlacement.rectY + 42 + singleClusterNameLines.length * 42 + 28}
                     style={{ userSelect: "none", WebkitUserSelect: "none" }}
                     textAnchor="middle"
-                    fontSize="30"
-                    fontWeight="700"
-                    fill="white"
-                  >
-                    {activeCluster.pins[0].name}
-                  </text>
-                  <text
-                    x="0"
-                    y="-6"
-                    style={{ userSelect: "none", WebkitUserSelect: "none" }}
-                    textAnchor="middle"
-                    fontSize="22"
-                    fill="rgba(255,255,255,0.72)"
+                    fontSize="28"
+                    fontWeight="650"
+                    fill="rgba(255,255,255,0.88)"
+                    stroke="rgba(2,6,23,0.8)"
+                    strokeWidth="0.85"
+                    paintOrder="stroke"
                   >
                     {activeCluster.pins[0].count} participants
                   </text>
@@ -628,9 +693,12 @@ export default function VofmunCleanGlobePreview({
                     y="-36"
                     style={{ userSelect: "none", WebkitUserSelect: "none" }}
                     textAnchor="middle"
-                    fontSize="26"
-                    fontWeight="700"
+                    fontSize="34"
+                    fontWeight="800"
                     fill="white"
+                    stroke="rgba(2,6,23,0.9)"
+                    strokeWidth="1"
+                    paintOrder="stroke"
                   >
                     {activeCluster.pins.length} countries · {activeCluster.totalCount} participants
                   </text>
@@ -642,11 +710,15 @@ export default function VofmunCleanGlobePreview({
                       <text
                         key={pin.code}
                         x="0"
-                        y={-4 + index * 26}
+                        y={2 + index * 32}
                         style={{ userSelect: "none", WebkitUserSelect: "none" }}
                         textAnchor="middle"
-                        fontSize="20"
-                        fill="rgba(255,255,255,0.78)"
+                        fontSize="24"
+                        fontWeight="600"
+                        fill="rgba(255,255,255,0.9)"
+                        stroke="rgba(2,6,23,0.8)"
+                        strokeWidth="0.75"
+                        paintOrder="stroke"
                       >
                         {pin.name} · {pin.count}
                       </text>
