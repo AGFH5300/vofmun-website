@@ -12,77 +12,77 @@ const founders = [
    {
     name: "Tala Swaidan",
     role: "Founder & Secretary-General",
-    image: "/founders/TalaSwaidan_SG.jpg",
+    image: "/founders/TalaSwaidan_SG.webp",
   },
   {
     name: "Vihaan Shukla",
     role: "Co-Founder & Director General",
-    image: "/founders/VihaanShukla_DG.png",
+    image: "/founders/VihaanShukla_DG.webp",
   },
   {
     name: "Ansh Gupta",
     role: "Co-Founder & Head of Technology",
-    image: "/founders/AnshGupta_Tech.png",
+    image: "/founders/AnshGupta_Tech.webp",
   },
   {
     name: "Vaibhav Kiran Mundanat",
     role: "Co-Head of Committees",
-    image: "/founders/VaibhavMundanat_Media.png",
+    image: "/founders/VaibhavMundanat_Media.webp",
   },
   {
     name: "Vidur Aravind Kumar",
     role: "Co-Head of Committees",
-    image: "/founders/VidurKumar_Committees.jpeg",
+    image: "/founders/VidurKumar_Committees.webp",
   },
   {
     name: "Arsh Saxena",
     role: "Deputy of Committees",
-    image: "/founders/ArshSaxena_Committees.jpeg",
+    image: "/founders/ArshSaxena_Committees.webp",
   },
   {
     name: "Vyom Patel",
     role: "Co-Head of Logistics",
-    image: "/founders/VyomPatel_Logistics.png",
+    image: "/founders/VyomPatel_Logistics.webp",
   },
   {
     name: "Aryan Shah",
     role: "Co-Head of Logistics",
-    image: "/founders/AryanShah_Logistics.jpg",
+    image: "/founders/AryanShah_Logistics.webp",
   },
   {
     name: "Vihaan Harrison",
     role: "Deputy of Logistics",
-    image: "/founders/VihaanHarrison_Logistics.jpeg",
+    image: "/founders/VihaanHarrison_Logistics.webp",
   },
   {
     name: "Armaghan Siddiqui",
     role: "Head of Finance",
-    image: "/founders/MuhammadArmaghanSiddiqui_Finance.png",
+    image: "/founders/MuhammadArmaghanSiddiqui_Finance.webp",
   },
   {
     name: "Pranav Verma",
     role: "Deputy of Finance",
-    image: "/founders/PranavVerma_Finance.jpg",
+    image: "/founders/PranavVerma_Finance.webp",
   },
   {
     name: "Noaf Qassem",
     role: "Deputy of Finance",
-    image: "/founders/NoafQassem_Finance.png",
+    image: "/founders/NoafQassem_Finance.webp",
   },
   {
     name: "Saira Shirvaikar",
     role: "Head of Media & Marketing",
-    image: "/founders/SairaShirvaikar_Media.jpeg",
+    image: "/founders/SairaShirvaikar_Media.webp",
   },
   {
     name: "Tamara Moshawrab",
     role: "Deputy of Media & Marketing",
-    image: "/founders/TamaraMoshawrab_Media.png",
+    image: "/founders/TamaraMoshawrab_Media.webp",
   },
   {
     name: "Prakhar Sinha",
     role: "Deputy of Media & Marketing",
-    image: "/founders/PrakharSinha_Media.jpeg",
+    image: "/founders/PrakharSinha_Media.webp",
   },
 ]
 
