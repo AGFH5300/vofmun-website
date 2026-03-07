@@ -26,7 +26,6 @@ export function NationalitiesVariantC() {
       participants,
     }))
     .sort((a, b) => b.participants - a.participants)
-    .slice(0, 9)
 
   useEffect(() => {
     let isMounted = true
@@ -81,10 +80,10 @@ export function NationalitiesVariantC() {
       {isLoading ? <p className="mt-3 text-sm text-gray-500">Loading live nationalities...</p> : null}
       {error ? <p className="mt-3 text-sm text-[#B22222]">{error}</p> : null}
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(320px,0.9fr)_minmax(420px,1.1fr)] lg:items-start lg:gap-5">
-        <div className="max-w-xl">
+      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(300px,0.88fr)_minmax(360px,1fr)] lg:items-start lg:gap-4">
+        <div className="flex h-[400px] min-h-0 flex-col sm:h-[440px] lg:h-[520px]">
           <h4 className="mb-3 text-lg font-semibold text-gray-900">Participating Nationalities</h4>
-          <div className="space-y-1.5">
+          <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
             {rows.map((row) => (
               <div
                 key={row.code}
@@ -106,7 +105,7 @@ export function NationalitiesVariantC() {
           </div>
         </div>
 
-        <div className="h-[400px] w-full overflow-hidden rounded-xl border border-black/5 bg-[#020617] sm:h-[440px] lg:h-[520px] lg:w-full">
+        <div className="h-[400px] w-full overflow-hidden rounded-xl border border-black/5 bg-[#020617] sm:h-[440px] lg:h-[520px]">
           <VofmunCleanGlobe counts={counts} />
         </div>
       </div>
