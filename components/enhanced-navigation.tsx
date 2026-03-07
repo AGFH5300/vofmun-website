@@ -3,16 +3,38 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, type MouseEvent } from "react"
+import { usePathname } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronDown, Menu, X, FileText, Building, Calendar, Scale } from "lucide-react"
+import { ChevronDown, Menu, X, FileText, Building, Calendar, Scale, BookOpen } from "lucide-react"
 
 export function EnhancedNavigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
+
+  const navigateToResourceSection = (event: MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    if (pathname !== "/resources") {
+      return
+    }
+
+    event.preventDefault()
+
+    const element = document.getElementById(sectionId)
+    if (!element) {
+      return
+    }
+
+    const offset = 120
+    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+    window.scrollTo({
+      top: elementPosition - offset,
+      behavior: "smooth",
+    })
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,18 +93,7 @@ export function EnhancedNavigation() {
                   <Link
                     href="/resources#schedule"
                     className="flex items-center space-x-3 px-4 py-3 text-gray-900 hover:bg-[#B22222] hover:text-white rounded-md transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const element = document.getElementById('schedule');
-                      if (element) {
-                        const offset = 120;
-                        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-                        window.scrollTo({
-                          top: elementPosition - offset,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
+                    onClick={(event) => navigateToResourceSection(event, "schedule")}
                   >
                     <Calendar className="w-4 h-4" />
                     <span>Schedule & Timeline</span>
@@ -90,45 +101,23 @@ export function EnhancedNavigation() {
                   <Link
                     href="/resources#committees"
                     className="flex items-center space-x-3 px-4 py-3 text-gray-900 hover:bg-[#B22222] hover:text-white rounded-md transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault();
-
-                      // Check if we're already on the resources page
-                      if (window.location.pathname === '/resources') {
-                        // Just scroll to the committees section
-                        const element = document.getElementById('committees');
-                        if (element) {
-                          const offset = 120;
-                          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-                          window.scrollTo({
-                            top: elementPosition - offset,
-                            behavior: 'smooth'
-                          });
-                        }
-                      } else {
-                        // Navigate to resources page with hash
-                        window.location.href = '/resources#committees';
-                      }
-                    }}
+                    onClick={(event) => navigateToResourceSection(event, "committees")}
                   >
                     <Building className="w-4 h-4" />
                     <span>All Committees</span>
                   </Link>
                   <Link
+                    href="/resources#handbooks"
+                    className="flex items-center space-x-3 px-4 py-3 text-gray-900 hover:bg-[#B22222] hover:text-white rounded-md transition-colors"
+                    onClick={(event) => navigateToResourceSection(event, "handbooks")}
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    <span>Handbooks</span>
+                  </Link>
+                  <Link
                     href="/resources#rules"
                     className="flex items-center space-x-3 px-4 py-3 text-gray-900 hover:bg-[#B22222] hover:text-white rounded-md transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const element = document.getElementById('rules');
-                      if (element) {
-                        const offset = 120;
-                        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-                        window.scrollTo({
-                          top: elementPosition - offset,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
+                    onClick={(event) => navigateToResourceSection(event, "rules")}
                   >
                     <Scale className="w-4 h-4" />
                     <span>Rules & Procedures</span>
