@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     const { data: matchingUsers, error: lookupError } = await supabase
       .from('users')
-      .select('id, role, payment_proof_storage_path')
+      .select('id, role, registration_status, payment_proof_storage_path')
       .ilike('email', escapedEmailPattern)
       .eq('role', payload.role)
 
@@ -66,6 +66,19 @@ export async function POST(request: NextRequest) {
     }
 
     const existingUser = matchingUsers[0]
+    const normalizedRegistrationStatus = `${existingUser.registration_status ?? 'pending'}`.toLowerCase()
+    const isLeadershipRole = payload.role === 'chair' || payload.role === 'admin'
+
+    if (isLeadershipRole && normalizedRegistrationStatus !== 'confirmed') {
+      return NextResponse.json(
+        {
+          status: 'registration_not_confirmed',
+          message:
+            'Your registration was found, but chair/admin payment proof uploads are only available after your registration status is confirmed. If you believe this is a mistake, please contact support.',
+        },
+        { status: 403 }
+      )
+    }
 
     const [, base64Data] = payload.paymentProof.dataUrl.split(',')
     if (!base64Data) {
