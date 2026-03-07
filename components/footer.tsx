@@ -41,10 +41,19 @@ const partners = [
 ]
 
 export function Footer() {
+  const documentLinks = [
+    { label: "Terms & Conditions", href: "/pdfs/T&Cs.pdf" },
+    { label: "Rules of Procedure", href: "/pdfs/Rules.pdf" },
+    { label: "Chair & Admin Responsibilities", href: "/pdfs/Responsibilities.pdf" },
+    { label: "Delegate Handbook", href: "/pdfs/delegate-handbook.pdf" },
+    { label: "Chair Handbook", href: "/pdfs/chair-handbook.pdf" },
+    { label: "Code of Conduct", href: "/pdfs/CoConduct.pdf" },
+  ]
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12 sm:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8">
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center space-x-2 mb-3 sm:mb-4">
@@ -169,6 +178,25 @@ export function Footer() {
                   Instagram
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          {/* Documents */}
+          <div>
+            <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Documents</h3>
+            <ul className="space-y-1.5 sm:space-y-2">
+              {documentLinks.map((document) => (
+                <li key={document.label}>
+                  <Link
+                    href={document.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm"
+                  >
+                    {document.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
