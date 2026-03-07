@@ -155,6 +155,25 @@ export function Footer() {
             </ul>
           </div>
 
+          {/* Documents */}
+          <div>
+            <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Documents</h3>
+            <ul className="space-y-1.5 sm:space-y-2">
+              {documentLinks.map((document) => (
+                <li key={document.label}>
+                  <Link
+                    href={document.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm"
+                  >
+                    {document.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* Contact */}
           <div>
             <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Contact</h3>
@@ -178,25 +197,6 @@ export function Footer() {
                   Instagram
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          {/* Documents */}
-          <div>
-            <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Documents</h3>
-            <ul className="space-y-1.5 sm:space-y-2">
-              {documentLinks.map((document) => (
-                <li key={document.label}>
-                  <Link
-                    href={document.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm"
-                  >
-                    {document.label}
-                  </Link>
-                </li>
-              ))}
             </ul>
           </div>
         </div>

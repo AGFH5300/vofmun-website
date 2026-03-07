@@ -441,7 +441,7 @@ export default function SecretariatPage() {
                   src={member.image}
                   alt={member.name}
                   fill
-                  className="object-cover"
+                  className={`object-cover ${member.name === "Vihaan Harrison" ? "object-[center_58%]" : "object-center"}`}
                 />
               </div>
             </div>
