@@ -15,7 +15,7 @@ import { ClientScripts } from "@/components/client-scripts";
 import { FeaturesSlideshow } from "@/components/features-slideshow";
 import { LiveCountdownTimer } from "@/components/live-countdown-timer";
 import { FoundersInfiniteCarousel } from "@/components/founders-infinite-carousel";
-import { NationalitiesVariantC } from "@/components/nationalities-variant-c";
+import { NationalitiesSection } from "@/components/nationalities-section";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
@@ -221,7 +221,7 @@ export default function HomePage() {
               VOFMUN is a celebration of global thinking, where debate and diplomacy connect people to make a true difference.
             </p>
             <div className="mt-10 max-w-6xl mx-auto">
-              <NationalitiesVariantC />
+              <NationalitiesSection />
             </div>
           </div>
         </section>

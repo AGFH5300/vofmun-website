@@ -214,8 +214,8 @@ function rectsOverlap(
 
 function getTooltipPlacement(cluster: PinCluster, clusters: PinCluster[]) {
   const lines = cluster.pins.length === 1 ? 2 : Math.min(cluster.pins.length + 1, 6)
-  const width = cluster.pins.length === 1 ? 320 : 420
-  const height = cluster.pins.length === 1 ? 104 : 54 + lines * 28
+  const width = cluster.pins.length === 1 ? 300 : 400
+  const height = cluster.pins.length === 1 ? 98 : 52 + lines * 30
 
   const candidates = [
     { tx: cluster.x, ty: cluster.y - 120 },
@@ -567,7 +567,7 @@ export default function VofmunCleanGlobePreview({
                   y={isGroup ? "1" : "0.2"}
                   style={{ userSelect: "none", WebkitUserSelect: "none" }}
                   textAnchor="middle"
-                  fontSize={isGroup ? "22" : "24"}
+                  fontSize={isGroup ? "24" : "26"}
                   fontWeight="900"
                   fill="white"
                   stroke="rgba(20,20,20,0.35)"
@@ -604,7 +604,7 @@ export default function VofmunCleanGlobePreview({
                     y="-36"
                     style={{ userSelect: "none", WebkitUserSelect: "none" }}
                     textAnchor="middle"
-                    fontSize="28"
+                    fontSize="30"
                     fontWeight="700"
                     fill="white"
                   >
@@ -615,10 +615,10 @@ export default function VofmunCleanGlobePreview({
                     y="-6"
                     style={{ userSelect: "none", WebkitUserSelect: "none" }}
                     textAnchor="middle"
-                    fontSize="20"
+                    fontSize="22"
                     fill="rgba(255,255,255,0.72)"
                   >
-                    {activeCluster.pins[0].count} users
+                    {activeCluster.pins[0].count} participants
                   </text>
                 </>
               ) : (
@@ -628,11 +628,11 @@ export default function VofmunCleanGlobePreview({
                     y="-36"
                     style={{ userSelect: "none", WebkitUserSelect: "none" }}
                     textAnchor="middle"
-                    fontSize="24"
+                    fontSize="26"
                     fontWeight="700"
                     fill="white"
                   >
-                    {activeCluster.pins.length} countries · {activeCluster.totalCount} users
+                    {activeCluster.pins.length} countries · {activeCluster.totalCount} participants
                   </text>
                   {activeCluster.pins
                     .slice()
@@ -642,10 +642,10 @@ export default function VofmunCleanGlobePreview({
                       <text
                         key={pin.code}
                         x="0"
-                        y={-4 + index * 24}
+                        y={-4 + index * 26}
                         style={{ userSelect: "none", WebkitUserSelect: "none" }}
                         textAnchor="middle"
-                        fontSize="18"
+                        fontSize="20"
                         fill="rgba(255,255,255,0.78)"
                       >
                         {pin.name} · {pin.count}
