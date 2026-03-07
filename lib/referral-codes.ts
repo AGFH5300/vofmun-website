@@ -12,7 +12,6 @@ export const REFERRAL_CODES: ReferralCodeEntry[] = [
   { code: 'TSW67', owner: 'Tala Swaidan' },
   { code: 'KA123', owner: 'Kabeer Anil' },
   { code: 'VM284', owner: 'Vaibhav Kiran Mundanat' },
-  { code: 'GM777', owner: 'Gibran Malaeb' },
   { code: 'AS831', owner: 'Armaghan Siddiqui' },
   { code: 'VP804', owner: 'Vyom Patel' },
   { code: 'VK245', owner: 'Vidur Aravind Kumar' },
