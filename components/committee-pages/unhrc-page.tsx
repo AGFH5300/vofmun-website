@@ -28,6 +28,17 @@ export function UNHRCPage() {
 
               <div className="flex items-center space-x-4 mb-6">
                 <div className="relative w-16 h-16 bg-white rounded-xl shadow-md border border-gray-200 flex items-center justify-center overflow-hidden">
+                  <Image
+                    src="/svgs/UNHRC.svg"
+                    alt="UNHRC logo"
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                    }}
+                  />
                   <Shield className="h-10 w-10 text-emerald-600" />
                 </div>
                 <div>
