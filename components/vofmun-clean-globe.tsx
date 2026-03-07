@@ -221,24 +221,27 @@ function wrapTextToLines(text: string, maxCharsPerLine: number, maxLines: number
 
   const lines: string[] = []
   let currentLine = ""
+  let consumedWords = 0
 
   for (const word of words) {
     const candidate = currentLine ? `${currentLine} ${word}` : word
 
     if (candidate.length <= maxCharsPerLine || currentLine.length === 0) {
       currentLine = candidate
+      consumedWords += 1
       continue
     }
 
     lines.push(currentLine)
     currentLine = word
+    consumedWords += 1
 
     if (lines.length === maxLines - 1) {
       break
     }
   }
 
-  const remainingWords = words.slice(lines.join(" ").split(/\s+/).filter(Boolean).length)
+  const remainingWords = words.slice(consumedWords)
   const trailing = [currentLine, ...remainingWords].filter(Boolean).join(" ")
 
   if (trailing) {
