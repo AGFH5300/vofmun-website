@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft, FileText, ChevronRight, Globe } from "lucide-react"
+import Image from "next/image"
 
 export function UNEPPage() {
   return (
@@ -39,7 +40,7 @@ export function UNEPPage() {
                       e.currentTarget.nextElementSibling?.classList.remove('hidden')
                     }}
                   />
-                  <Globe className="h-10 w-10 text-emerald-600" />
+                  <Globe className="h-10 w-10 text-emerald-600 hidden" />
                 </div>
                 <div>
                   <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#B22222]">United Nations Environment Programme</h1>
