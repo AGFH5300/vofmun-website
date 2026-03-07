@@ -100,6 +100,21 @@ const countryMetaByCode = new Map<string, GlobeCountryMeta>(
     ]),
 )
 
+const worldFeatureCollection = feature(world as any, (world as any).objects.countries) as any
+const worldDisplayFeatures = (worldFeatureCollection.features ?? [])
+  .map((country: any) => {
+    const geometry = sanitizeGeometry(country.geometry)
+    return geometry ? { ...country, geometry } : null
+  })
+  .filter(Boolean)
+
+const worldLandFeatureCollection = {
+  type: "FeatureCollection",
+  features: worldDisplayFeatures,
+} as any
+
+const worldBordersMesh = mesh(world as any, (world as any).objects.countries, (a: any, b: any) => a !== b) as any
+
 function buildPinLocations(counts: Record<string, number>): PinLocation[] {
   return Object.entries(counts)
     .map(([rawCode, count]) => {
@@ -302,23 +317,43 @@ export default function VofmunCleanGlobePreview({
   const hoveredClusterRef = useRef<PinCluster | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef({ active: false, lastX: 0, lastY: 0 })
+  const animationFrameRef = useRef<number | null>(null)
+  const lastTickRef = useRef<number | null>(null)
 
   useEffect(() => {
     hoveredClusterRef.current = hoveredCluster
   }, [hoveredCluster])
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      if (dragRef.current.active || hoveredClusterRef.current || Date.now() < pauseUntil) return
-      setRotation((prev) => (prev - 0.25) % 360)
-      setTilt((prev) => {
-        const delta = DEFAULT_TILT - prev
-        if (Math.abs(delta) < 0.05) return DEFAULT_TILT
-        return prev + delta * 0.06
-      })
-    }, 40)
+    const tick = (timestamp: number) => {
+      if (lastTickRef.current === null) {
+        lastTickRef.current = timestamp
+      }
 
-    return () => window.clearInterval(timer)
+      const deltaMs = Math.min(timestamp - lastTickRef.current, 64)
+      lastTickRef.current = timestamp
+
+      if (!dragRef.current.active && !hoveredClusterRef.current && Date.now() >= pauseUntil) {
+        setRotation((prev) => (prev - deltaMs * 0.007) % 360)
+        setTilt((prev) => {
+          const delta = DEFAULT_TILT - prev
+          if (Math.abs(delta) < 0.04) return DEFAULT_TILT
+          return prev + delta * Math.min(deltaMs / 560, 0.12)
+        })
+      }
+
+      animationFrameRef.current = window.requestAnimationFrame(tick)
+    }
+
+    animationFrameRef.current = window.requestAnimationFrame(tick)
+
+    return () => {
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current)
+      }
+      animationFrameRef.current = null
+      lastTickRef.current = null
+    }
   }, [pauseUntil])
 
   const pinLocations = useMemo(
@@ -327,34 +362,20 @@ export default function VofmunCleanGlobePreview({
   )
 
   const globeData = useMemo(() => {
-    const projection = geoOrthographic().scale(720).translate([800, 800]).rotate([rotation, tilt, 0]).clipAngle(90)
+    const projection = geoOrthographic().scale(760).translate([800, 800]).rotate([rotation, tilt, 0]).clipAngle(90)
 
     const path = geoPath(projection)
-    const countries = feature(world as any, (world as any).objects.countries)
-    const rawFeatures = (countries as any).features ?? []
 
-    const displayFeatures = rawFeatures
-      .map((country: any) => {
-        const geometry = sanitizeGeometry(country.geometry)
-        return geometry ? { ...country, geometry } : null
-      })
-      .filter(Boolean)
-
-    const displayCountryPaths: CountryPath[] = displayFeatures
+    const displayCountryPaths: CountryPath[] = worldDisplayFeatures
       .map((country: any) => ({
         id: String(country.id),
         path: path(country) || "",
       }))
       .filter((country: CountryPath) => Boolean(country.path))
 
-    const borders =
-      path(mesh(world as any, (world as any).objects.countries, (a: any, b: any) => a !== b) as any) || ""
+    const borders = path(worldBordersMesh) || ""
 
-    const land =
-      path({
-        type: "FeatureCollection",
-        features: displayFeatures,
-      } as any) || ""
+    const land = path(worldLandFeatureCollection) || ""
 
     const pins = pinLocations.map((location) => {
       const point = projection([location.lng, location.lat])
