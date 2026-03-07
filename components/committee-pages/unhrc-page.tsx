@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft, FileText, ChevronRight, Shield } from "lucide-react"
+import Image from "next/image"
 
 export function UNHRCPage() {
   return (
@@ -39,7 +40,7 @@ export function UNHRCPage() {
                       e.currentTarget.nextElementSibling?.classList.remove('hidden')
                     }}
                   />
-                  <Shield className="h-10 w-10 text-emerald-600" />
+                  <Shield className="h-10 w-10 text-emerald-600 hidden" />
                 </div>
                 <div>
                   <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#B22222]">United Nations Human Rights Council</h1>
