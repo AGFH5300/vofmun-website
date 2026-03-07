@@ -160,6 +160,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
   const [search, setSearch] = useState("")
   const [committeeFilter, setCommitteeFilter] = useState<string>("all")
   const [nameSort, setNameSort] = useState<"name_asc" | "name_desc">("name_asc")
+  const [allocationSort, setAllocationSort] = useState<"default" | "unallocated_first">("default")
   const [visibleColumns, setVisibleColumns] = useState<ColumnKey[]>(DEFAULT_COLUMNS)
   const [columnsHydrated, setColumnsHydrated] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -305,12 +306,26 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
 
   const sortedRows = useMemo(() => {
     return [...filteredRows].sort((a, b) => {
+      if (allocationSort === "unallocated_first") {
+        const aDraft = drafts[a.id]
+        const bDraft = drafts[b.id]
+
+        const isAAllocated = Boolean(aDraft?.allocated_committee_code ?? a.allocated_committee_code) &&
+          Boolean(aDraft?.allocated_country_code ?? a.allocated_country ?? a.allocated_country_code)
+        const isBAllocated = Boolean(bDraft?.allocated_committee_code ?? b.allocated_committee_code) &&
+          Boolean(bDraft?.allocated_country_code ?? b.allocated_country ?? b.allocated_country_code)
+
+        if (isAAllocated !== isBAllocated) {
+          return isAAllocated ? 1 : -1
+        }
+      }
+
       const firstNameCompare = a.first_name.localeCompare(b.first_name)
       const lastNameCompare = a.last_name.localeCompare(b.last_name)
       const result = firstNameCompare !== 0 ? firstNameCompare : lastNameCompare
       return nameSort === "name_asc" ? result : -result
     })
-  }, [filteredRows, nameSort])
+  }, [allocationSort, drafts, filteredRows, nameSort])
 
   const getAuthorizationHeader = useCallback(async (): Promise<Record<string, string>> => {
     const supabase = createClient()
@@ -517,7 +532,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
           </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-4">
+        <div className="grid gap-3 md:grid-cols-5">
           <Input
             placeholder="Search name, email, school"
             value={search}
@@ -545,6 +560,19 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
             <SelectContent>
               <SelectItem value="name_asc">Name (A-Z)</SelectItem>
               <SelectItem value="name_desc">Name (Z-A)</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={allocationSort}
+            onValueChange={(value) => setAllocationSort(value as "default" | "unallocated_first")}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Allocation order" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">Default allocation order</SelectItem>
+              <SelectItem value="unallocated_first">Unallocated first</SelectItem>
             </SelectContent>
           </Select>
 
