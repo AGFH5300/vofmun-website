@@ -72,7 +72,7 @@ export function NationalitiesVariantC() {
 
   return (
     <div className="rounded-2xl border border-[#B22222]/15 bg-white p-3 shadow-md sm:p-5 lg:p-6">
-      <h3 className="text-2xl font-bold text-[#B22222] font-serif">Where Our Delegates Come From</h3>
+      <h3 className="text-2xl font-bold text-[#B22222] font-serif">Where Our Participants Come From</h3>
       <p className="mt-2 text-sm text-gray-600 sm:text-base">
         A live snapshot of the countries shaping this year&apos;s debates, ideas, and diplomacy.
       </p>
