@@ -31,8 +31,6 @@ export function ProofOfPaymentForm() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const dragDepthRef = useRef(0)
-  const uploadsLockedForLeadership = role === "chair" || role === "admin"
-
   const isFileDrag = (event: DragEvent | React.DragEvent<HTMLElement>) =>
     Array.from(event.dataTransfer?.types ?? []).includes("Files")
 
@@ -71,13 +69,6 @@ export function ProofOfPaymentForm() {
   }
 
   const handlePaymentProofSelect = (file: File) => {
-    if (uploadsLockedForLeadership) {
-      toast.info(
-        "Payment proof uploads for chair and admin applicants are disabled until selections are announced.",
-      )
-      return
-    }
-
     const isImage = file.type.startsWith("image/")
     const isPdf = file.type === "application/pdf"
 
@@ -148,7 +139,7 @@ export function ProofOfPaymentForm() {
 
 
   useEffect(() => {
-    if (uploadsLockedForLeadership || hasPaid !== "yes") {
+    if (hasPaid !== "yes") {
       dragDepthRef.current = 0
       setIsDragActive(false)
       return
@@ -206,7 +197,7 @@ export function ProofOfPaymentForm() {
       window.removeEventListener("dragleave", onDragLeave)
       window.removeEventListener("drop", onDrop)
     }
-  }, [hasPaid, uploadsLockedForLeadership])
+  }, [hasPaid])
 
   const fileToDataURL = (file: File) =>
     new Promise<string>((resolve, reject) => {
@@ -248,10 +239,6 @@ export function ProofOfPaymentForm() {
 
       if (!role) {
         newErrors.role = "Please select the role associated with this payment"
-      }
-
-      if (uploadsLockedForLeadership) {
-        newErrors.role = "Chair and admin payment proof uploads are paused until selections are announced"
       }
 
       if (!paymentProofFile) {
@@ -354,8 +341,8 @@ export function ProofOfPaymentForm() {
           </p>
           <p>If you have already paid, fill in the details below and upload your receipt.</p>
           <p className="text-amber-800 font-medium">
-            Chair and admin applicants: payment uploads are paused until the deadline and selections are announced. Please
-            wait to pay or upload a receipt until you are confirmed.
+            Chair and admin applicants can upload payment proof only after their registration status is confirmed. If your
+            registration is not confirmed yet, please wait for confirmation or contact support.
           </p>
           <p>Enter the same email you used to register so we can match your payment to your application.</p>
         </div>
@@ -443,12 +430,8 @@ export function ProofOfPaymentForm() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="delegate">Delegate</SelectItem>
-                      <SelectItem value="chair" disabled>
-                        Chair (uploads paused)
-                      </SelectItem>
-                      <SelectItem value="admin" disabled>
-                        Admin (uploads paused)
-                      </SelectItem>
+                      <SelectItem value="chair">Chair</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
@@ -460,9 +443,7 @@ export function ProofOfPaymentForm() {
                   Upload Proof of Payment <span className="text-red-500">*</span>
                 </Label>
                 <div
-                  className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors duration-200 ${
-                    uploadsLockedForLeadership ? "cursor-not-allowed opacity-70" : "cursor-pointer"
-                  } ${
+                  className={`relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors duration-200 ${
                     isDragActive
                       ? "border-[#B22222] bg-[#B22222]/5"
                       : errors.paymentProof
@@ -471,13 +452,11 @@ export function ProofOfPaymentForm() {
                           ? "border-green-500 bg-green-50"
                           : "border-gray-300 bg-white"
                   }`}
-                  aria-disabled={uploadsLockedForLeadership}
-                  onDragOver={uploadsLockedForLeadership ? undefined : handleDragOver}
-                  onDragEnter={uploadsLockedForLeadership ? undefined : handleDragOver}
-                  onDragLeave={uploadsLockedForLeadership ? undefined : handleDragLeave}
-                  onDrop={uploadsLockedForLeadership ? undefined : handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
                   onClick={() => {
-                    if (uploadsLockedForLeadership) return
                     fileInputRef.current?.click()
                   }}
                 >
@@ -492,8 +471,7 @@ export function ProofOfPaymentForm() {
                       ref={fileInputRef}
                       type="file"
                       accept="image/*,.pdf"
-                    className="hidden"
-                    disabled={uploadsLockedForLeadership}
+                      className="hidden"
                     onChange={(event) => {
                       const file = event.target.files?.[0]
                       if (file) {
@@ -503,12 +481,7 @@ export function ProofOfPaymentForm() {
                     }}
                   />
 
-                  {uploadsLockedForLeadership ? (
-                    <div className="flex flex-col items-center space-y-3 text-center text-sm text-amber-800">
-                      <p className="font-semibold">Payment uploads are disabled for chairs and admins.</p>
-                      <p>Please wait until selections are announced before paying or sending receipts.</p>
-                    </div>
-                  ) : paymentProofPreview ? (
+                  {paymentProofPreview ? (
                     <div className="w-full flex flex-col items-center space-y-3">
                       {paymentProofFile?.type === "application/pdf" ? (
                         <div className="w-full max-w-sm rounded-lg border border-green-200 bg-white p-6 text-center shadow-sm space-y-4">
@@ -598,7 +571,7 @@ export function ProofOfPaymentForm() {
             <Button
               type="submit"
               className="vofmun-gradient text-white"
-              disabled={hasPaid !== "yes" || isSubmitting || uploadsLockedForLeadership}
+              disabled={hasPaid !== "yes" || isSubmitting}
             >
               {isSubmitting ? (
                 <>
