@@ -136,15 +136,13 @@ I hope to see all of you at VOFMUN 2026 because it is an incredible experience f
     writeup: `Hi I'm Aryan Shah, Co-Head of Logistics for VOFMUN 2026! I have previously participated in 2 MUN conferences, and have received an honorable mention in one of them. I am currently a Year 11 student at Dubai International Academy. I am also Vice-President of my school's Cubing and AI club. Outside of school I have organised and hosted multiple internationally recognized and licensed Rubik's Cube Competitions that have attracted the attention of some of the best cubers in the MENA region. At VOFMUN my goal is to ensure that all the delegates have an amazing experience at VOFMUN by handling all committee-related matters that range from finalising topics to country allocation and communication with all delegates.`,
   },
   {
-    name: "Gibran Malaeb",
+    name: "Saira Shirvaikar",
     role: "<strong>Head of Media & Marketing</strong>",
     department: "Media",
-    image: "/founders/GibranMalaeb_Media.jpeg",
+    image: "/founders/SairaShirvaikar_Media.jpeg",
     bio: "Leading media initiatives that highlight VOFMUN’s community and impact.",
-    linkedin: "https://www.linkedin.com/in/gibran-m-a99153298",
-    writeup: `Hello everyone! My name is Gibran and I am a Year 10 student at GEMS Metropole School Motor City, passionate about STEM, especially mathematics and computer science. As Co-Head of Media at Voices of the Future MUN, I keep the Media team organized and focused, helping maintain a strong media presence. I am enthusiastic about Model UN and look forward to taking on more active roles in future conferences.
-
-Beyond academics and MUN, I serve as house captain and student council member, contribute to my school's robotics club, and participate in debate, public speaking, and cross country. Music is essential to me; I play the violin, saxophone, and piano. I am fluent in French, Arabic, and English, and hold beginner to intermediate proficiency in German and Spanish. Inspired by Maya Angelou’s words, “I rise,” I am motivated to persevere and support my team at VOFMUN and beyond.`,
+    linkedin: "https://www.linkedin.com/in/saira-shirvaikar-49839431b",
+    writeup: `Hi, I’m Saira Shirvaikar, the Head of Media and Marketing for VOFMUN 2026. I am a Year 12 student at Jumeirah College and currently serve as Deputy Head of Media for JCMUN. I have also participated in F1 in Schools, working as a Graphic Designer in 2024, where I supported my team in winning the national Best Marketing award, and as a Business Manager in 2025, achieving a second-place national finish.`,
   },
   {
     name: "Armaghan Siddiqui",
@@ -184,15 +182,6 @@ As Deputy Head of Committees, I support the Co-Heads in managing committee quali
 Beyond delegating, leadership is where I’ve grown the most. I currently serve in senior Secretariat roles including Head of Outreach, Head of Crisis, and USG of Committees across various conferences. These experiences have strengthened my ability to manage teams, oversee academic standards, and handle high-pressure committee environments with structure and clarity. I’ve also chaired committees such as UNHRC and UNODC, focusing on maintaining competitive yet respectful debate.
 
 I’m a Grade 10 student at Delhi Private School, Sharjah, and I approach MUN with strategic thinking, strong research, and composed diplomacy. At VOFMUN 2026, my goal is to help design a conference that challenges delegates, sharpens their skills, and creates an environment where serious debate and meaningful growth go hand in hand. Get to know me more at vihaanharrison.lovable.app.`,
-  },
-  {
-    name: "Saira Shirvaikar",
-    role: "<strong>Deputy of Media & Marketing</strong>",
-    department: "Media",
-    image: "/founders/SairaShirvaikar_Media.jpeg",
-    bio: "Amplifying VOFMUN's mission through multilingual media and outreach efforts.",
-    linkedin: "https://www.linkedin.com/in/saira-shirvaikar-49839431b",
-    writeup: `Hi, I’m Saira Shirvaikar, the Deputy Head of Media and Marketing for VOFMUN 2026. I am a Year 12 student at Jumeirah College and currently serve as Deputy Head of Media for JCMUN. I have also participated in F1 in Schools, working as a Graphic Designer in 2024, where I supported my team in winning the national Best Marketing award, and as a Business Manager in 2025, achieving a second-place national finish.`,
   },
   {
     name: "Prakhar Sinha",
