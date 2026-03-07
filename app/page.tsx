@@ -15,7 +15,6 @@ import { ClientScripts } from "@/components/client-scripts";
 import { FeaturesSlideshow } from "@/components/features-slideshow";
 import { LiveCountdownTimer } from "@/components/live-countdown-timer";
 import { FoundersInfiniteCarousel } from "@/components/founders-infinite-carousel";
-import { InteractiveWorldMap } from "@/components/interactive-world-map";
 import { NationalitiesVariantC } from "@/components/nationalities-variant-c";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -221,11 +220,7 @@ export default function HomePage() {
               Our conference brings together a diverse community of delegates, each bringing unique perspectives shaped by their cultures and backgrounds.
               VOFMUN is a celebration of global thinking, where debate and diplomacy connect people to make a true difference.
             </p>
-            <div className="max-w-4xl mx-auto">
-              <InteractiveWorldMap />
-            </div>
-
-            <div className="mt-10 max-w-5xl mx-auto">
+            <div className="mt-10 max-w-6xl mx-auto">
               <NationalitiesVariantC />
             </div>
           </div>
