@@ -4,6 +4,7 @@ import dynamic from "next/dynamic"
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import worldCountries from "world-countries"
 import { getCountryByCode } from "@/lib/countries"
+import VofmunCleanGlobePreview from "@/components/test/vofmun-clean-globe-preview"
 
 const Globe = dynamic(() => import("react-globe.gl"), { ssr: false })
 
@@ -231,6 +232,15 @@ export function PremiumParticipationGlobeShowcase({ participation }: Props) {
                 atmosphereAltitude={0.18}
                 speed={0.2}
               />
+            </GlobeVariantCard>
+
+            <GlobeVariantCard
+              title="Variant C · Clean SVG Frost Globe"
+              description="High-fidelity SVG orthographic globe with clustering pins, country highlighting, drag controls, and adaptive tooltips."
+            >
+              <div className="h-[540px] w-full">
+                <VofmunCleanGlobePreview />
+              </div>
             </GlobeVariantCard>
           </div>
         )}
