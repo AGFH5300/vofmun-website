@@ -39,7 +39,7 @@ const foundingSecretariat: SecretariatMember[] = [
     name: "Tala Swaidan",
     role: "<strong>Founder <br/>Secretary-General</strong>",
     department: "Core",
-    image: "/founders/TalaSwaidan_SG.jpg",
+    image: "/founders/TalaSwaidan_SG.webp",
     bio: "Co-founder guiding VOFMUN's vision for inclusive and empowering youth diplomacy.",
     linkedin: "https://www.linkedin.com/in/tala-swaidan-401547216",
     writeup: `Hello! I’m Tala Swaidan, and I’m honored to serve as Founder and Secretary-General of Voices of the Future Model United Nations (VOFMUN), alongside an incredible founding secretariat team.
@@ -56,7 +56,7 @@ As VOFMUN continues to grow, I hope it remains a space where young leaders find 
     name: "Vihaan Shukla",
     role: "<strong>Co-Founder <br/>Director-General</strong>",
     department: "Core ",
-    image: "/founders/VihaanShukla_DG.png",
+    image: "/founders/VihaanShukla_DG.webp",
     bio: "Co-founder overseeing conference operations, logistics, and delegate experience design.",
     linkedin: "https://www.linkedin.com/in/vihaanshukla",
     writeup: `Hi, I’m Vihaan Shukla, Co-Founder and Director General at VOFMUN 2026!
@@ -73,7 +73,7 @@ At VOFMUN, I oversee conference operations, logistics, and committee affairs, en
     name: "Ansh Gupta",
     role: "<strong>Co-Founder <br/>Head of Technology</strong>",
     department: "Core",
-    image: "/founders/AnshGupta_Tech.png",
+    image: "/founders/AnshGupta_Tech.webp",
     bio: "Co-founder leading VOFMUN's technology and digital experience across the conference.",
     linkedin: "https://www.linkedin.com/in/anshvg",
     writeup: `Hi, I’m Ansh Gupta, Co-Founder and Head of Technology at VOFMUN 2026. I’m a Year 11 student at Dubai International Academy Emirates Hills and a self-taught web developer who loves turning ideas into clean, useful digital products. I work across the stack with HTML, CSS, JavaScript, React, TypeScript, and PHP, and I’m always experimenting with new tools to improve performance, reliability, and user experience.
@@ -92,7 +92,7 @@ const leadershipTeam: SecretariatMember[] = [
     name: "Vaibhav Kiran Mundanat",
     role: "<strong>Co-Head of Committees</strong>",
     department: "Committees",
-    image: "/founders/VaibhavMundanat_Media.png",
+    image: "/founders/VaibhavMundanat_Media.webp",
     bio: "Co-leading committee strategy, quality, and delegate experience for VOFMUN 2026.",
     linkedin: "https://www.linkedin.com/in/vaibhav-mundanat-7045b3379",
     writeup: `Hi, my name is Vaibhav Mundanat (aka “V”) and I am in Year 11 at Dubai International Academy Emirates Hills. I have had 8+ MUN Conferences as a Delegate, 2 experiences as a Chair, and am Deputy Head of Admin for DIAMUN’26. I am currently part of the Media & Marketing Team. I enjoy playing the piano, baking, discussing socio-economic factors, and anything medicine/biology related. I cannot wait to see you at VOFMUN I 2026.`,
@@ -101,7 +101,7 @@ const leadershipTeam: SecretariatMember[] = [
     name: "Vidur Aravind Kumar",
     role: "<strong>Co-Head of Committees</strong>",
     department: "Committees",
-    image: "/founders/VidurKumar_Committees.jpeg",
+    image: "/founders/VidurKumar_Committees.webp",
     bio: "Overseeing committee quality, background guide direction, and delegate experience.",
     linkedin: "https://www.linkedin.com/in/vidur-ak",
     writeup: `Hi, I'm Vidur Kumar, Co-Head of Committees at VOFMUN 2026 and a Year 11 student at Dubai International Academy, Emirates Hills. I'm a student leader with experience in multiple school organisations, including Water for Life, World Scholars Cup Club, and DIAMUN 2026.
@@ -114,7 +114,7 @@ As Co-Head of Committees at VOFMUN 2026, I oversee committee quality, background
     name: "Vyom Patel",
     role: "<strong>Co-Head of Logistics</strong>",
     department: "Logistics",
-    image: "/founders/VyomPatel_Logistics.png",
+    image: "/founders/VyomPatel_Logistics.webp",
     bio: "Leading logistics planning to deliver a smooth and engaging conference experience.",
     linkedin: "https://www.linkedin.com/in/vyom-patel-6b55393b4/",
     writeup: `Hey everyone, my name is Vyom Patel and it is my pleasure to serve as the Head of Logistics for VOFMUN 2026.
@@ -131,7 +131,7 @@ I hope to see all of you at VOFMUN 2026 because it is an incredible experience f
     name: "Aryan Shah",
     role: "<strong>Co-Head of Logistics</strong>",
     department: "Logistics",
-    image: "/founders/AryanShah_Logistics.jpg",
+    image: "/founders/AryanShah_Logistics.webp",
     bio: "Supporting logistical planning, coordination, and on-site readiness for VOFMUN.",
     writeup: `Hi I'm Aryan Shah, Co-Head of Logistics for VOFMUN 2026! I have previously participated in 2 MUN conferences, and have received an honorable mention in one of them. I am currently a Year 11 student at Dubai International Academy. I am also Vice-President of my school's Cubing and AI club. Outside of school I have organised and hosted multiple internationally recognized and licensed Rubik's Cube Competitions that have attracted the attention of some of the best cubers in the MENA region. At VOFMUN my goal is to ensure that all the delegates have an amazing experience at VOFMUN by handling all committee-related matters that range from finalising topics to country allocation and communication with all delegates.`,
   },
@@ -139,7 +139,7 @@ I hope to see all of you at VOFMUN 2026 because it is an incredible experience f
     name: "Saira Shirvaikar",
     role: "<strong>Head of Media & Marketing</strong>",
     department: "Media",
-    image: "/founders/SairaShirvaikar_Media.jpeg",
+    image: "/founders/SairaShirvaikar_Media.webp",
     bio: "Leading media initiatives that highlight VOFMUN’s community and impact.",
     linkedin: "https://www.linkedin.com/in/saira-shirvaikar-49839431b",
     writeup: `Hi, I’m Saira Shirvaikar, the Head of Media and Marketing for VOFMUN 2026. I am a Year 12 student at Jumeirah College and currently serve as Deputy Head of Media for JCMUN. I have also participated in F1 in Schools, working as a Graphic Designer in 2024, where I supported my team in winning the national Best Marketing award, and as a Business Manager in 2025, achieving a second-place national finish.`,
@@ -148,7 +148,7 @@ I hope to see all of you at VOFMUN 2026 because it is an incredible experience f
     name: "Armaghan Siddiqui",
     role: "<strong>Head of Finance</strong>",
     department: "Finance",
-    image: "/founders/MuhammadArmaghanSiddiqui_Finance.png",
+    image: "/founders/MuhammadArmaghanSiddiqui_Finance.webp",
     bio: "Overseeing budgeting, partnerships, and sustainable growth for the conference.",
     linkedin: "https://www.linkedin.com/in/armaghan-siddiqui-000309345",
     writeup: `Hi, my name is Armaghan Siddiqui and I’m excited to be part of the Finance Team for VOFMUN this year. I’ve always been passionate about taking on challenges that push me to think creatively, lead with purpose, and work collaboratively with others. Over the years, I’ve participated in a range of MUNs, debate competitions, and student-led initiatives that have helped me develop my skills in communication, organization, and leadership.
@@ -162,7 +162,7 @@ const deputies: SecretariatMember[] = [
     name: "Arsh Saxena",
     role: "<strong>Deputy of Committees</strong>",
     department: "Committees",
-    image: "/founders/ArshSaxena_Committees.jpeg",
+    image: "/founders/ArshSaxena_Committees.webp",
     bio: "Supporting committee quality, alignment, and delegate experience initiatives.",
     linkedin: "https://www.linkedin.com/in/arsh-saxena-798408290/",
     writeup: `Hi, I'm Arsh Saxena, Deputy Head of Committees at VOMUN 2026 and a Year 11 student at Dubai International Academy, Emirates Hills. I’m an active student leader involved in multiple school initiatives, from academic clubs to service-based organisations. These experiences have shaped how I approach leadership: with purpose, curiosity, and a focus on elevating the people around me.
@@ -175,7 +175,7 @@ As Deputy Head of Committees, I support the Co-Heads in managing committee quali
     name: "Vihaan Harrison",
     role: "<strong>Deputy of Logistics</strong>",
     department: "Logistics",
-    image: "/founders/VihaanHarrison_Logistics.jpeg",
+    image: "/founders/VihaanHarrison_Logistics.webp",
     bio: "Supporting logistics operations to deliver a structured, high-impact delegate experience.",
     writeup: `Hi, I’m Vihaan Harrison, a debater, public speaker, and Secretariat member at VOFMUN 2026. Since beginning my MUN journey in January 2024, I’ve participated in 20+ conferences across the UAE, earning multiple Best Delegate awards along with distinctions such as Best Researcher, Runner-Up Best Delegate, and Honourable Mention.
 
@@ -187,7 +187,7 @@ I’m a Grade 10 student at Delhi Private School, Sharjah, and I approach MUN wi
     name: "Prakhar Sinha",
     role: "<strong>Deputy of Media & Marketing</strong>",
     department: "Media",
-    image: "/founders/PrakharSinha_Media.jpeg",
+    image: "/founders/PrakharSinha_Media.webp",
     bio: "Amplifying VOFMUN's mission through multilingual media and outreach efforts.",
     linkedin: "https://www.linkedin.com/in/prakhar-sinha-5b00b23a7/",
     writeup: `I’m Prakhar Sinha, a Grade 11 student at Bright Riders School, Abu Dhabi, and a member of the Media Team for VOFMUN. I’ve gained extensive prior experience in marketing through internships, managing my school’s Student Council social media page, and working with multiple non-profit organizations. Through these experiences, I’ve grown a genuine interest in communication, design, and using media to create impact. These experiences have also helped strengthen my teamwork, organization, and leadership abilities. I’m excited to be part of the VOFMUN Media Team and contribute by capturing the moments and atmosphere that make the conference memorable.`,
@@ -196,7 +196,7 @@ I’m a Grade 10 student at Delhi Private School, Sharjah, and I approach MUN wi
     name: "Tamara Moshawrab",
     role: "<strong>Deputy of Media & Marketing</strong>",
     department: "Media",
-    image: "/founders/TamaraMoshawrab_Media.png",
+    image: "/founders/TamaraMoshawrab_Media.webp",
     bio: "Supporting media strategy with business insight and a passion for storytelling.",
     writeup: `Hello! My name is Tamara Moshawrab, and I’m a Year 11 student at SABIS International School of Choueifat Dubai. I’m thrilled to serve as Deputy of Media for Voices of the Future MUN 2026, where I help manage communications and create engaging content to connect with delegates and showcase the conference experience.
 
@@ -206,7 +206,7 @@ Academically, I study IGCSE Business and AP Economics, which have strengthened m
     name: "Pranav Verma",
     role: "<strong>Deputy of Finance</strong>",
     department: "Finance",
-    image: "/founders/PranavVerma_Finance.jpg",
+    image: "/founders/PranavVerma_Finance.webp",
     bio: "Managing sponsorships, partnerships, and budgeting for a resilient conference.",
     linkedin: "https://www.linkedin.com/in/pranav-verma-136309371",
     writeup: `Hi, I’m Pranav Verma, a member of the Finance Team at VOFMUN 2026, where I help manage budgeting, sponsorship, and partnerships to ensure the smooth execution and financial sustainability of the conference.
@@ -221,7 +221,7 @@ At VOFMUN, I aim to bring that same precision and initiative - ensuring every fi
     name: "Noaf Qassem",
     role: "<strong>Deputy of Finance</strong>",
     department: "Finance",
-    image: "/founders/NoafQassem_Finance.png",
+    image: "/founders/NoafQassem_Finance.webp",
     bio: "Supporting strategic planning and financial stewardship for VOFMUN.",
     writeup: `I'm Noaf Qassem, a Year 11 student at SABIS International School of Choueifat Dubai, and I'm incredibly proud to be serving as the Deputy of Finance of Voices of the Future 2026! Being part of the VOFMUN leadership has given me the opportunity to contribute to something meaningful while building valuable skills in organization, teamwork, and strategic planning. I've chosen to take IGCSE Business, AP Economics, and AP Statistics - subjects that reflect my deep interest in global systems, economic theory, and data-driven decision-making.
 
