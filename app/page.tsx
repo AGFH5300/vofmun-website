@@ -16,6 +16,7 @@ import { FeaturesSlideshow } from "@/components/features-slideshow";
 import { LiveCountdownTimer } from "@/components/live-countdown-timer";
 import { FoundersInfiniteCarousel } from "@/components/founders-infinite-carousel";
 import { InteractiveWorldMap } from "@/components/interactive-world-map";
+import { NationalitiesVariantC } from "@/components/nationalities-variant-c";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
@@ -222,6 +223,10 @@ export default function HomePage() {
             </p>
             <div className="max-w-4xl mx-auto">
               <InteractiveWorldMap />
+            </div>
+
+            <div className="mt-10 max-w-5xl mx-auto">
+              <NationalitiesVariantC />
             </div>
           </div>
         </section>

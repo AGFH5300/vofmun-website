@@ -10,8 +10,10 @@ import {
 import { geoArea, geoDistance, geoOrthographic, geoPath } from "d3-geo"
 import { feature, mesh } from "topojson-client"
 import world from "world-atlas/countries-110m.json"
+import worldCountries from "world-countries"
+import { getCountryByCode } from "@/lib/countries"
 
-type PinLocation = {
+export type PinLocation = {
   code: string
   name: string
   count: number
@@ -42,7 +44,7 @@ const FROST = {
   glow: "rgba(191,219,254,0.10)",
 }
 
-const PIN_LOCATIONS: PinLocation[] = [
+const FALLBACK_PIN_LOCATIONS: PinLocation[] = [
   { code: "IN", name: "India", count: 122, lat: 22.5937, lng: 78.9629, countryId: "356" },
   { code: "JO", name: "Jordan", count: 14, lat: 30.5852, lng: 36.2384, countryId: "400" },
   { code: "EG", name: "Egypt", count: 11, lat: 26.8206, lng: 30.8025, countryId: "818" },
@@ -78,6 +80,47 @@ const PIN_LOCATIONS: PinLocation[] = [
   { code: "UM", name: "US Minor Outlying Islands", count: 1, lat: 19.2823, lng: 166.647, countryId: "581" },
   { code: "ZA", name: "South Africa", count: 1, lat: -30.5595, lng: 22.9375, countryId: "710" },
 ]
+
+type GlobeCountryMeta = {
+  lat: number
+  lng: number
+  countryId: string
+}
+
+const countryMetaByCode = new Map<string, GlobeCountryMeta>(
+  worldCountries
+    .filter((country) => country.cca2 && country.latlng?.length === 2 && country.ccn3)
+    .map((country) => [
+      country.cca2.toUpperCase(),
+      {
+        lat: country.latlng[0],
+        lng: country.latlng[1],
+        countryId: country.ccn3,
+      },
+    ]),
+)
+
+function buildPinLocations(counts: Record<string, number>): PinLocation[] {
+  return Object.entries(counts)
+    .map(([rawCode, count]) => {
+      const code = rawCode.toUpperCase()
+      const meta = countryMetaByCode.get(code)
+
+      if (!meta || count <= 0) {
+        return null
+      }
+
+      return {
+        code,
+        name: getCountryByCode(code)?.name ?? code,
+        count,
+        lat: meta.lat,
+        lng: meta.lng,
+        countryId: meta.countryId,
+      }
+    })
+    .filter((location): location is PinLocation => location !== null)
+}
 
 const SVG_SIZE = 1600
 const TINY_POLYGON_AREA = 0.000005
@@ -246,7 +289,11 @@ function getTooltipPlacement(cluster: PinCluster, clusters: PinCluster[]) {
   }
 }
 
-export default function VofmunCleanGlobePreview() {
+export default function VofmunCleanGlobePreview({
+  counts,
+}: {
+  counts?: Record<string, number>
+}) {
   const [rotation, setRotation] = useState(-18)
   const [tilt, setTilt] = useState(DEFAULT_TILT)
   const [hoveredCluster, setHoveredCluster] = useState<PinCluster | null>(null)
@@ -273,6 +320,11 @@ export default function VofmunCleanGlobePreview() {
 
     return () => window.clearInterval(timer)
   }, [pauseUntil])
+
+  const pinLocations = useMemo(
+    () => (counts ? buildPinLocations(counts) : FALLBACK_PIN_LOCATIONS),
+    [counts],
+  )
 
   const globeData = useMemo(() => {
     const projection = geoOrthographic().scale(720).translate([800, 800]).rotate([rotation, tilt, 0]).clipAngle(90)
@@ -304,7 +356,7 @@ export default function VofmunCleanGlobePreview() {
         features: displayFeatures,
       } as any) || ""
 
-    const pins = PIN_LOCATIONS.map((location) => {
+    const pins = pinLocations.map((location) => {
       const point = projection([location.lng, location.lat])
       const center: [number, number] = [-rotation, -tilt]
       const visible = geoDistance([location.lng, location.lat], center) <= Math.PI / 2 - 0.01
@@ -328,7 +380,7 @@ export default function VofmunCleanGlobePreview() {
       countryPaths: displayCountryPaths,
       clusters,
     }
-  }, [rotation, tilt])
+  }, [pinLocations, rotation, tilt])
 
   useEffect(() => {
     if (!hoveredCluster) return
