@@ -14,7 +14,7 @@ type NationalitiesGlobeResponse = {
   counts: Record<string, number>
 }
 
-export function NationalitiesVariantC() {
+export function NationalitiesSection() {
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
