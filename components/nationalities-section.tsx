@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import VofmunCleanGlobe from "@/components/vofmun-clean-globe"
+import { Badge } from "@/components/ui/badge"
 import { getCountryByCode } from "@/lib/countries"
 
 type NationalityRow = {
@@ -105,7 +106,10 @@ export function NationalitiesSection() {
           </div>
         </div>
 
-        <div className="h-[400px] w-full overflow-hidden rounded-xl border border-black/5 bg-[#020617] sm:h-[440px] lg:h-[520px]">
+        <div className="relative h-[400px] w-full overflow-hidden rounded-xl border border-black/5 bg-[#020617] sm:h-[440px] lg:h-[520px]">
+          <Badge className="pointer-events-none absolute left-3 top-3 z-10 bg-[#B22222] text-white hover:bg-[#B22222]">
+            Beta
+          </Badge>
           <VofmunCleanGlobe counts={counts} />
         </div>
       </div>
