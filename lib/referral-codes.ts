@@ -24,6 +24,31 @@ export const REFERRAL_CODES: ReferralCodeEntry[] = [
   { code: 'TM123', owner: 'Tamara Moshawrab' },
   { code: 'PV556', owner: 'Pranav Verma' },
   { code: 'NQ123', owner: 'Noaf Qassem' },
+
+  // Chair referral codes
+  { code: 'MA123', owner: 'Manahil Ahmed' },
+  { code: 'RM041', owner: 'Rayan Makwana' },
+  { code: 'RA069', owner: 'Rimas Alama' },
+  { code: 'AR123', owner: 'Adithya Rajesh' },
+  { code: 'MD161', owner: 'Milind Deepak' },
+  { code: 'SK420', owner: 'Shraddha Krishnan' },
+  { code: 'SP123', owner: 'Sanithi Perera' },
+  { code: 'PM123', owner: 'Parth Menon' },
+  { code: 'SA667', owner: 'Sarang Anilkumar' },
+  { code: 'RA679', owner: 'Rudra Adwani' },
+  { code: 'SM025', owner: 'Saanchi Moudgil' },
+  { code: 'MH670', owner: 'Mariyam Hafiza' },
+  { code: 'FK123', owner: 'Faiz Khan' },
+  { code: 'VS034', owner: 'Vishesh Shah' },
+  { code: 'RJ067', owner: 'Rohith John Saldanha' },
+  { code: 'AR067', owner: 'Aditya Rajesh' },
+  { code: 'OT500', owner: 'Oshian Thada' },
+  { code: 'DB241', owner: 'David Botros' },
+  { code: 'HC123', owner: 'Hussain Chandra' },
+  { code: 'YD272', owner: 'Yuvraj Dewan' },
+  { code: 'AP005', owner: 'Arnav AjayKumar Payyaram' },
+  { code: 'AA100', owner: 'Avyukta Pragnya Raja Ankam' },
+  { code: 'AA123', owner: 'Anaika Agarwal' },
 ]
 
 const normalizedLookup = new Map(
