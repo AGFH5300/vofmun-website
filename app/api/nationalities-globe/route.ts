@@ -43,7 +43,7 @@ export async function GET() {
   try {
     const supabase = await createClient()
 
-    const { data, error } = await supabase.from('nationalities').select('*')
+    const { data, error } = await supabase.from('users').select('nationality')
 
     if (error) {
       throw error
@@ -52,7 +52,7 @@ export async function GET() {
     const counts: Record<string, number> = {}
 
     ;(data as NationalityRow[] | null)?.forEach((row) => {
-      const rawCountry = pickText(row, ['country_code', 'countryCode', 'code', 'nationality', 'country', 'name'])
+      const rawCountry = pickText(row, ['nationality'])
 
       if (!rawCountry) {
         return
