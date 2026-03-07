@@ -39,9 +39,9 @@ type PinCluster = {
 }
 
 const FROST = {
-  land: "#8aa0b3",
-  border: "rgba(248,250,252,0.60)",
-  glow: "rgba(191,219,254,0.10)",
+  land: "#9cb4c8",
+  border: "rgba(248,250,252,0.72)",
+  glow: "rgba(191,219,254,0.18)",
 }
 
 const FALLBACK_PIN_LOCATIONS: PinLocation[] = [
@@ -491,13 +491,7 @@ export default function VofmunCleanGlobePreview({
 
           <path d={globeData.land} fill={FROST.land} stroke="none" />
 
-          <path
-            d={globeData.borders}
-            fill="none"
-            stroke={FROST.border}
-            strokeWidth="0.95"
-            filter="url(#softGlow)"
-          />
+          <path d={globeData.borders} fill="none" stroke={FROST.border} strokeWidth="1.18" filter="url(#softGlow)" />
 
           {globeData.countryPaths
             .filter((country) => activeCountryIds.has(country.id))
