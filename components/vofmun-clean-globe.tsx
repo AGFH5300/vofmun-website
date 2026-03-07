@@ -100,6 +100,12 @@ const countryMetaByCode = new Map<string, GlobeCountryMeta>(
     ]),
 )
 
+const SVG_SIZE = 1600
+const TINY_POLYGON_AREA = 0.000005
+const CLUSTER_DISTANCE = 42
+const DEFAULT_TILT = -14
+const RESUME_DELAY_MS = 700
+
 const worldFeatureCollection = feature(world as any, (world as any).objects.countries) as any
 const worldDisplayFeatures = (worldFeatureCollection.features ?? [])
   .map((country: any) => {
@@ -136,12 +142,6 @@ function buildPinLocations(counts: Record<string, number>): PinLocation[] {
     })
     .filter((location): location is PinLocation => location !== null)
 }
-
-const SVG_SIZE = 1600
-const TINY_POLYGON_AREA = 0.000005
-const CLUSTER_DISTANCE = 42
-const DEFAULT_TILT = -14
-const RESUME_DELAY_MS = 700
 
 function sanitizeGeometry(geometry: any): any | null {
   if (!geometry) return null
