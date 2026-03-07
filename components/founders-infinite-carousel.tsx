@@ -70,19 +70,14 @@ const founders = [
     image: "/founders/NoafQassem_Finance.png",
   },
   {
-    name: "Gibran Malaeb",
+    name: "Saira Shirvaikar",
     role: "Head of Media & Marketing",
-    image: "/founders/GibranMalaeb_Media.jpeg",
+    image: "/founders/SairaShirvaikar_Media.jpeg",
   },
   {
     name: "Tamara Moshawrab",
     role: "Deputy of Media & Marketing",
     image: "/founders/TamaraMoshawrab_Media.png",
-  },
-  {
-    name: "Saira Shirvaikar",
-    role: "Deputy of Media & Marketing",
-    image: "/founders/SairaShirvaikar_Media.jpeg",
   },
   {
     name: "Prakhar Sinha",
