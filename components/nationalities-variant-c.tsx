@@ -59,7 +59,7 @@ export function NationalitiesVariantC() {
     <div className="rounded-2xl border border-[#B22222]/15 bg-white p-4 shadow-md sm:p-6">
       <h3 className="text-2xl font-bold text-[#B22222] font-serif">Variant C · Live Nationalities Globe</h3>
       <p className="mt-2 text-sm text-gray-600 sm:text-base">
-        This globe uses live data from the Supabase <span className="font-semibold">nationalities</span> table.
+        This globe uses live data from the Supabase <span className="font-semibold">users.nationality</span> column.
       </p>
 
       {isLoading ? <p className="mt-3 text-sm text-gray-500">Loading live nationalities...</p> : null}
