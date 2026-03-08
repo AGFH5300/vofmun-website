@@ -73,7 +73,35 @@ export function UNEPPage() {
                         <ChevronRight className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                         <h3 className="font-semibold text-emerald-600">Agenda</h3>
                       </div>
-                      <p className="text-gray-700 leading-relaxed ml-7">TBC</p>
+                      <ol className="text-gray-700 leading-relaxed ml-12 list-decimal space-y-2">
+                        <li>Regulating the environmental impact of artificial intelligence systems on global energy consumption</li>
+                        <li>Tackling microplastic contamination in food chains and water systems</li>
+                      </ol>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-lg border-0">
+                  <CardHeader>
+                    <CardTitle className="text-[#B22222]">Background Information</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-[#B22222] mb-2">Committee Overview</h4>
+                      <p className="text-gray-700 leading-relaxed">
+                        The United Nations Environment Programme (UNEP) is the leading global environmental authority,
+                        coordinating international action on climate, biodiversity, and pollution. UNEP supports member
+                        states by advancing science-based policy and fostering cooperation for sustainable development.
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-[#B22222] mb-2">Key Focus Areas</h4>
+                      <ul className="list-disc list-inside space-y-1 text-gray-700">
+                        <li>Climate change mitigation and adaptation</li>
+                        <li>Reducing pollution and waste across ecosystems</li>
+                        <li>Protecting marine and freshwater environments</li>
+                        <li>Promoting sustainable consumption and production</li>
+                      </ul>
                     </div>
                   </CardContent>
                 </Card>
