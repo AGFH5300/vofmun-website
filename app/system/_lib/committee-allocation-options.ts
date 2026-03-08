@@ -3,9 +3,8 @@
 
 import ecosocMatrix from "@/lib/country-matrix/ecosoc.json"
 import ga1Matrix from "@/lib/country-matrix/ga1.json"
-import icjMatrix from "@/lib/country-matrix/icj.json"
 import icrccMatrix from "@/lib/country-matrix/icrcc.json"
-import uncstdMatrix from "@/lib/country-matrix/uncstd.json"
+import unscMatrix from "@/lib/country-matrix/unsc.json"
 import unodcMatrix from "@/lib/country-matrix/unodc.json"
 import whoMatrix from "@/lib/country-matrix/who.json"
 
@@ -14,8 +13,7 @@ const committeeMatrixOptions = {
   unodc: unodcMatrix,
   ecosoc: ecosocMatrix,
   who: whoMatrix,
-  uncstd: uncstdMatrix,
-  icj: icjMatrix,
+  unsc: unscMatrix,
   icrcc: icrccMatrix,
 } as const
 

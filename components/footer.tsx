@@ -128,8 +128,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/committees/uncstd" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                  UNCSTD
+                <Link href="/committees/unsc" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
+                  UNSC
                 </Link>
               </li>
               <li>
@@ -140,11 +140,6 @@ export function Footer() {
               <li>
                 <Link href="/committees/unep" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
                   UNEP
-                </Link>
-              </li>
-              <li>
-                <Link href="/committees/icj" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                  ICJ
                 </Link>
               </li>
               <li>
