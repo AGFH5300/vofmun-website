@@ -4,7 +4,6 @@
 "use client"
 
 import { useState, useEffect, type MouseEvent } from "react"
-import { usePathname } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -14,10 +13,9 @@ import { ChevronDown, Menu, X, FileText, Building, Calendar, Scale, BookOpen } f
 export function EnhancedNavigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const pathname = usePathname()
 
   const navigateToResourceSection = (event: MouseEvent<HTMLAnchorElement>, sectionId: string) => {
-    if (pathname !== "/resources") {
+    if (window.location.pathname !== "/resources") {
       return
     }
 
@@ -91,38 +89,38 @@ export function EnhancedNavigation() {
                     <FileText className="w-4 h-4" />
                     <span>Conference Overview</span>
                   </Link>
-                  <Link
+                  <a
                     href="/resources#schedule"
                     className="flex items-center space-x-3 px-4 py-3 text-gray-900 hover:bg-[#B22222] hover:text-white rounded-md transition-colors"
                     onClick={(event) => navigateToResourceSection(event, "schedule")}
                   >
                     <Calendar className="w-4 h-4" />
                     <span>Schedule & Timeline</span>
-                  </Link>
-                  <Link
+                  </a>
+                  <a
                     href="/resources#committees"
                     className="flex items-center space-x-3 px-4 py-3 text-gray-900 hover:bg-[#B22222] hover:text-white rounded-md transition-colors"
                     onClick={(event) => navigateToResourceSection(event, "committees")}
                   >
                     <Building className="w-4 h-4" />
                     <span>All Committees</span>
-                  </Link>
-                  <Link
+                  </a>
+                  <a
                     href="/resources#handbooks"
                     className="flex items-center space-x-3 px-4 py-3 text-gray-900 hover:bg-[#B22222] hover:text-white rounded-md transition-colors"
                     onClick={(event) => navigateToResourceSection(event, "handbooks")}
                   >
                     <BookOpen className="w-4 h-4" />
                     <span>Handbooks</span>
-                  </Link>
-                  <Link
+                  </a>
+                  <a
                     href="/resources#rules"
                     className="flex items-center space-x-3 px-4 py-3 text-gray-900 hover:bg-[#B22222] hover:text-white rounded-md transition-colors"
                     onClick={(event) => navigateToResourceSection(event, "rules")}
                   >
                     <Scale className="w-4 h-4" />
                     <span>Rules & Procedures</span>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
