@@ -97,6 +97,8 @@ export function DelegateReferralCodeForm() {
             global visibility and impact of VOFMUN.
           </p>
           <ul className="list-disc space-y-2 pl-5 text-sm text-gray-700">
+            <li>Referral reward: every 10 confirmed delegate sign-ups using your code earns you AED 50.</li>
+            <li>Examples: 10 delegates = AED 50, 20 delegates = AED 100, 30 delegates = AED 150, and so on.</li>
             <li>Top 3 chairs and delegates receive a certificate and are named VOFMUN Ambassadors.</li>
             {/* <li>Top 1 chair and top 1 delegate receive free admission to the UniHawk program (TBC).</li> */}
           </ul>
