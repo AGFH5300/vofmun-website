@@ -74,8 +74,8 @@ export function UNEPPage() {
                         <h3 className="font-semibold text-emerald-600">Agenda</h3>
                       </div>
                       <ol className="text-gray-700 leading-relaxed ml-12 list-decimal space-y-2">
-                        <li>Regulating the environmental impact of artificial intelligence systems on global energy consumption</li>
-                        <li>Tackling microplastic contamination in food chains and water systems</li>
+                        <li>Regulating the Environmental Impact of Artificial Intelligence Systems on Global Energy Consumption</li>
+                        <li>Tackling Microplastic Contamination in Food Chains and Water Systems</li>
                       </ol>
                     </div>
                   </CardContent>

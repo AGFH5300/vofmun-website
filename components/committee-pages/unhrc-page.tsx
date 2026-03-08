@@ -74,8 +74,8 @@ export function UNHRCPage() {
                         <h3 className="font-semibold text-emerald-600">Agenda</h3>
                       </div>
                       <ol className="text-gray-700 leading-relaxed ml-12 list-decimal space-y-2">
-                        <li>Addressing the misuse of artificial intelligence and surveillance technology in violation of human rights</li>
-                        <li>Protecting the rights of migrant workers in global supply chains</li>
+                        <li>Addressing the Misuse of Artificial Intelligence and Surveillance Technology in Violation of Human Rights</li>
+                        <li>Protecting the Rights of Migrant Workers in Global Supply Chains</li>
                       </ol>
                     </div>
                   </CardContent>

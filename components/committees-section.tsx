@@ -49,8 +49,8 @@ const committees = [
     icon: Shield,
     logo:"/svgs/UNHRC.svg",
     topics: [
-      "Addressing the misuse of artificial intelligence and surveillance technology in violation of human rights",
-      "Protecting the rights of migrant workers in global supply chains",
+      "Addressing the Misuse of Artificial Intelligence and Surveillance Technology in Violation of Human Rights",
+      "Protecting the Rights of Migrant Workers in Global Supply Chains",
     ],
     difficulty: "Junior",
     delegates: "20-25",
@@ -63,8 +63,8 @@ const committees = [
     icon: Globe,
     logo:"/svgs/UNEP.svg",
     topics: [
-      "Regulating the environmental impact of artificial intelligence systems on global energy consumption",
-      "Tackling microplastic contamination in food chains and water systems",
+      "Regulating the Environmental Impact of Artificial Intelligence Systems on Global Energy Consumption",
+      "Tackling Microplastic Contamination in Food Chains and Water Systems",
     ],
     difficulty: "Junior",
     delegates: "20-25",
