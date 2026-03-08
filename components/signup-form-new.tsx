@@ -1690,7 +1690,7 @@ export function SignupFormNew() {
                               ) && delegateData[key] !== "unhrc"
                             }
                           >
-                            UNHRC - Junior
+                            UNHRC - Intermediate
                           </SelectItem>
                           <SelectItem
                             value="unep"
@@ -1906,7 +1906,7 @@ export function SignupFormNew() {
                               chairData[`committee${num}` as keyof typeof chairData] !== "unhrc"
                             }
                           >
-                            UNHRC - Junior
+                            UNHRC - Intermediate
                           </SelectItem>
                           <SelectItem
                             value="unep"
