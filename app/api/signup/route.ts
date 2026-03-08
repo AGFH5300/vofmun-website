@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
       }
       
       // Validate allowed committee values
-      const allowedCommittees = ['ga1', 'unodc', 'ecosoc', 'who', 'unhrc', 'unep', 'icj', 'icrcc', 'uncstd']
+      const allowedCommittees = ['ga1', 'unodc', 'ecosoc', 'who', 'unhrc', 'unep', 'icrcc', 'unsc']
       for (const committee of committees) {
         if (committee && !allowedCommittees.includes(committee)) {
           throw new Error('Invalid committee selection')

@@ -1703,24 +1703,14 @@ export function SignupFormNew() {
                             UNEP - Junior
                           </SelectItem>
                           <SelectItem
-                            value="uncstd"
+                            value="unsc"
                             disabled={
                               [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
-                                "uncstd",
-                              ) && delegateData[key] !== "uncstd"
+                                "unsc",
+                              ) && delegateData[key] !== "unsc"
                             }
                           >
-                            UNCSTD - Advanced
-                          </SelectItem>
-                          <SelectItem
-                            value="icj"
-                            disabled={
-                              [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
-                                "icj",
-                              ) && delegateData[key] !== "icj"
-                            }
-                          >
-                            ICJ - Special Procedure
+                            UNSC - Advanced
                           </SelectItem>
                           <SelectItem
                             value="icrcc"
@@ -1928,22 +1918,13 @@ export function SignupFormNew() {
                             UNEP - Junior
                           </SelectItem>
                           <SelectItem
-                            value="uncstd"
+                            value="unsc"
                             disabled={
-                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("uncstd") &&
-                              chairData[`committee${num}` as keyof typeof chairData] !== "uncstd"
+                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("unsc") &&
+                              chairData[`committee${num}` as keyof typeof chairData] !== "unsc"
                             }
                           >
-                            UNCSTD - Advanced
-                          </SelectItem>
-                          <SelectItem
-                            value="icj"
-                            disabled={
-                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("icj") &&
-                              chairData[`committee${num}` as keyof typeof chairData] !== "icj"
-                            }
-                          >
-                            ICJ - Advanced
+                            UNSC - Advanced
                           </SelectItem>
                           <SelectItem
                             value="icrcc"

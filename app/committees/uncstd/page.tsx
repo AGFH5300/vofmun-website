@@ -1,9 +1,8 @@
 // © 2026 Ansh Gupta. All rights reserved.
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
+import { redirect } from "next/navigation"
 
-import { UNCSTDPage } from "@/components/committee-pages/uncstd-page"
-
-export default function UNCSTD() {
-  return <UNCSTDPage />
+export default function UNSCLegacyRedirect() {
+  redirect("/committees/unsc")
 }
