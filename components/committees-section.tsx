@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Users, ExternalLink, Globe, Heart, Shield, Gavel, ChevronRight } from "lucide-react"
+import { Users, ExternalLink, Globe, Heart, Shield, ChevronRight } from "lucide-react"
 import Image from "next/image"
 
 const committees = [
@@ -100,18 +100,18 @@ const committees = [
   },
   // Advanced Level
   {
-    name: "UN Commission on Science and Tech for Development",
-    fullName: "UN Commission on Science and Technology for Development",
-    acronym: "UNCSTD",
+    name: "United Nations Security Council",
+    fullName: "United Nations Security Council",
+    acronym: "UNSC",
     icon: Shield,
-    logo:"/svgs/UNCSTD.svg",
+    logo:"/svgs/UNSC.svg",
     topics: [
-      "Preventing Crises from Autonomous AI Governing Critical Infrastructure",
-      "Promoting Global Data Sharing to Support Research & Development",
+      "The Security Implications of Deepfake Technology in Conflict Zones",
+      "The Risk of Bio-Terrorism in the Post-Pandemic Era",
     ],
     difficulty: "Advanced",
-    delegates: "20-25",
-    href: "/committees/uncstd",
+    delegates: "15-20",
+    href: "/committees/unsc",
   },
   // Special Procedure
   {
@@ -126,19 +126,6 @@ const committees = [
     difficulty: "Crisis",
     delegates: "20-25",
     href: "/committees/icrcc",
-  },
-  {
-    name: "International Court of Justice",
-    fullName: "International Court of Justice",
-    acronym: "ICJ",
-    icon: Gavel,
-    logo:"/svgs/ICJ.svg",
-    topics: [
-      "Violations of Sovereign Rights & Jurisdiction in South China Sea (Philippines vs. P.R. China)",
-    ],
-    difficulty: "Special Procedure",
-    delegates: "15-20",
-    href: "/committees/icj",
   },
 ]
 

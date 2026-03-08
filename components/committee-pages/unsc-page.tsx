@@ -14,9 +14,9 @@ import { CountryMatrixDialog } from "@/components/country-matrix-dialog"
 import Link from "next/link"
 import { ArrowLeft, Shield, FileText, Calendar, ExternalLink, ChevronRight } from "lucide-react"
 import Image from "next/image"
-import uncstdMatrix from "@/lib/country-matrix/uncstd.json"
+import unscMatrix from "@/lib/country-matrix/unsc.json"
 
-export function UNCSTDPage() {
+export function UNSCPage() {
   return (
     <div className="min-h-screen bg-[#ffecdd]">
       <EnhancedNavigation />
@@ -35,8 +35,8 @@ export function UNCSTDPage() {
               <div className="flex items-center space-x-4 mb-6">
                 <div className="relative w-16 h-16 bg-white rounded-xl shadow-md border border-gray-200 flex items-center justify-center overflow-hidden">
                   <Image
-                    src="/svgs/UNCSTD.svg"
-                    alt="UNCSTD logo"
+                    src="/svgs/UNSC.svg"
+                    alt="UNSC logo"
                     width={40}
                     height={40}
                     className="w-10 h-10 object-contain"
@@ -49,16 +49,15 @@ export function UNCSTDPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#B22222]">
-                    UN Commission on Science and Technology for Development
+                    United Nations Security Council
                   </h1>
-                  <p className="text-gray-600">UNCSTD</p>
+                  <p className="text-gray-600">UNSC</p>
                 </div>
                 <Badge className="bg-red-100 text-red-800">Advanced</Badge>
               </div>
 
               <p className="text-lg text-gray-700 leading-relaxed">
-                UNCSTD serves as a focal point for science and technology matters within the UN system, providing 
-                leadership in developing policies and strategies for harnessing technology for development.
+                The UNSC is tasked with maintaining international peace and security. This committee addresses urgent, high-stakes crises requiring decisive multilateral action.
               </p>
             </div>
           </div>
@@ -87,7 +86,7 @@ export function UNCSTDPage() {
                           <h3 className="font-semibold text-purple-600">Topic</h3>
                         </div>
                         <p className="text-gray-700 leading-relaxed ml-7">
-                          Preventing Ethical and Economic Crises from Autonomous AI Systems Governing Critical Infrastructure and Workforces
+                          The Security Implications of Deepfake Technology in Conflict Zones
                         </p>
                       </div>
                       <div className="p-4 bg-indigo-50 rounded-lg border-l-4 border-indigo-500">
@@ -96,7 +95,7 @@ export function UNCSTDPage() {
                           <h3 className="font-semibold text-indigo-600">Topic</h3>
                         </div>
                         <p className="text-gray-700 leading-relaxed ml-7">
-                          Promoting Global Data Sharing Policies to Support Scientific Research and Development
+                          The Risk of Bio-Terrorism in the Post-Pandemic Era
                         </p>
                       </div>
                     </div>
@@ -112,21 +111,20 @@ export function UNCSTDPage() {
                     <div>
                       <h4 className="font-semibold text-[#B22222] mb-2">Committee Overview</h4>
                       <p className="text-gray-700 leading-relaxed">
-                        The UN Commission on Science and Technology for Development (CSTD) is a subsidiary body of the 
-                        Economic and Social Council (ECOSOC). Established in 1992, CSTD serves as the UN's focal point 
-                        for science, technology, and innovation matters within the United Nations system, providing 
-                        leadership in developing policies and strategies for harnessing science, technology and innovation for development.
+                        The United Nations Security Council (UNSC) is one of the six principal organs of the United Nations,
+                        with primary responsibility for maintaining international peace and security. It responds to threats
+                        through resolutions, sanctions, peacekeeping mandates, and coordinated diplomatic action among member states.
                       </p>
                     </div>
                     <div>
                       <h4 className="font-semibold text-[#B22222] mb-2">Key Focus Areas</h4>
                       <ul className="list-disc list-inside space-y-1 text-gray-700">
-                        <li>Artificial intelligence governance and ethics</li>
-                        <li>Digital transformation and infrastructure</li>
-                        <li>Science, technology and innovation policy</li>
-                        <li>Data governance and privacy</li>
-                        <li>Emerging technologies assessment</li>
-                        <li>Technology transfer and capacity building</li>
+                        <li>Conflict prevention and international security</li>
+                        <li>Disinformation and information warfare</li>
+                        <li>Counter-terrorism and non-state threats</li>
+                        <li>Biological threat preparedness and response</li>
+                        <li>Crisis diplomacy and emergency decision-making</li>
+                        <li>Sanctions, mandates, and peacekeeping tools</li>
                       </ul>
                     </div>
                   </CardContent>
@@ -147,11 +145,11 @@ export function UNCSTDPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-700">Expected Delegates:</span>
-                      <span className="text-gray-600">20-25</span>
+                      <span className="text-gray-600">15-20</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-700">Session Type:</span>
-                      <span className="text-gray-600">Formal Debate</span>
+                      <span className="text-gray-600">Security Council Session</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-700">Language:</span>
@@ -176,8 +174,8 @@ export function UNCSTDPage() {
                       </Button>
                     </ComingSoonDialog>
                     <CountryMatrixDialog
-                      committeeName="UNCSTD"
-                      matrix={uncstdMatrix}
+                      committeeName="UNSC"
+                      matrix={unscMatrix}
                       buttonClassName="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
                     />
                     <ComingSoonDialog label="Position Paper Guide">
