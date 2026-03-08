@@ -1653,6 +1653,36 @@ export function SignupFormNew() {
                             General Assembly (GA1) - Beginner
                           </SelectItem>
                           <SelectItem
+                            value="who"
+                            disabled={
+                              [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
+                                "who",
+                              ) && delegateData[key] !== "who"
+                            }
+                          >
+                            WHO - Beginner
+                          </SelectItem>
+                          <SelectItem
+                            value="unep"
+                            disabled={
+                              [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
+                                "unep",
+                              ) && delegateData[key] !== "unep"
+                            }
+                          >
+                            UNEP - Junior
+                          </SelectItem>
+                          <SelectItem
+                            value="unhrc"
+                            disabled={
+                              [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
+                                "unhrc",
+                              ) && delegateData[key] !== "unhrc"
+                            }
+                          >
+                            UNHRC - Intermediate
+                          </SelectItem>
+                          <SelectItem
                             value="unodc"
                             disabled={
                               [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
@@ -1671,36 +1701,6 @@ export function SignupFormNew() {
                             }
                           >
                             ECOSOC - Intermediate
-                          </SelectItem>
-                          <SelectItem
-                            value="who"
-                            disabled={
-                              [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
-                                "who",
-                              ) && delegateData[key] !== "who"
-                            }
-                          >
-                            WHO - Beginner
-                          </SelectItem>
-                          <SelectItem
-                            value="unhrc"
-                            disabled={
-                              [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
-                                "unhrc",
-                              ) && delegateData[key] !== "unhrc"
-                            }
-                          >
-                            UNHRC - Junior
-                          </SelectItem>
-                          <SelectItem
-                            value="unep"
-                            disabled={
-                              [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
-                                "unep",
-                              ) && delegateData[key] !== "unep"
-                            }
-                          >
-                            UNEP - Junior
                           </SelectItem>
                           <SelectItem
                             value="unsc"
@@ -1873,6 +1873,33 @@ export function SignupFormNew() {
                             General Assembly (GA1) - Beginner
                           </SelectItem>
                           <SelectItem
+                            value="who"
+                            disabled={
+                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("who") &&
+                              chairData[`committee${num}` as keyof typeof chairData] !== "who"
+                            }
+                          >
+                            WHO - Beginner
+                          </SelectItem>
+                          <SelectItem
+                            value="unep"
+                            disabled={
+                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("unep") &&
+                              chairData[`committee${num}` as keyof typeof chairData] !== "unep"
+                            }
+                          >
+                            UNEP - Junior
+                          </SelectItem>
+                          <SelectItem
+                            value="unhrc"
+                            disabled={
+                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("unhrc") &&
+                              chairData[`committee${num}` as keyof typeof chairData] !== "unhrc"
+                            }
+                          >
+                            UNHRC - Intermediate
+                          </SelectItem>
+                          <SelectItem
                             value="unodc"
                             disabled={
                               [chairData.committee1, chairData.committee2, chairData.committee3].includes("unodc") &&
@@ -1891,33 +1918,6 @@ export function SignupFormNew() {
                             ECOSOC - Intermediate
                           </SelectItem>
                           <SelectItem
-                            value="who"
-                            disabled={
-                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("who") &&
-                              chairData[`committee${num}` as keyof typeof chairData] !== "who"
-                            }
-                          >
-                            WHO - Beginner
-                          </SelectItem>
-                          <SelectItem
-                            value="unhrc"
-                            disabled={
-                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("unhrc") &&
-                              chairData[`committee${num}` as keyof typeof chairData] !== "unhrc"
-                            }
-                          >
-                            UNHRC - Junior
-                          </SelectItem>
-                          <SelectItem
-                            value="unep"
-                            disabled={
-                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("unep") &&
-                              chairData[`committee${num}` as keyof typeof chairData] !== "unep"
-                            }
-                          >
-                            UNEP - Junior
-                          </SelectItem>
-                          <SelectItem
                             value="unsc"
                             disabled={
                               [chairData.committee1, chairData.committee2, chairData.committee3].includes("unsc") &&
@@ -1933,7 +1933,7 @@ export function SignupFormNew() {
                               chairData[`committee${num}` as keyof typeof chairData] !== "icrcc"
                             }
                           >
-                            ICRCC - Intermediate
+                            ICRCC - Crisis
                           </SelectItem>
                         </SelectContent>
                       </Select>
