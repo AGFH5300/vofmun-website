@@ -52,7 +52,7 @@ const committees = [
       "Addressing the Misuse of Artificial Intelligence and Surveillance Technology in Violation of Human Rights",
       "Protecting the Rights of Migrant Workers in Global Supply Chains",
     ],
-    difficulty: "Junior",
+    difficulty: "Intermediate",
     delegates: "20-25",
     href: "/committees/unhrc",
   },

@@ -47,11 +47,11 @@ export function UNHRCPage() {
                   <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#B22222]">United Nations Human Rights Council</h1>
                   <p className="text-gray-600">UNHRC</p>
                 </div>
-                <Badge className="bg-emerald-100 text-emerald-800">Junior</Badge>
+                <Badge className="bg-emerald-100 text-emerald-800">Intermediate</Badge>
               </div>
 
               <p className="text-lg text-gray-700 leading-relaxed">
-                UNHRC is a junior committee focused on human rights dialogue and collaboration.
+                UNHRC is an intermediate committee focused on human rights dialogue and collaboration.
               </p>
             </div>
           </div>
@@ -116,7 +116,7 @@ export function UNHRCPage() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-700">Difficulty Level:</span>
-                      <Badge className="bg-emerald-100 text-emerald-800">Junior</Badge>
+                      <Badge className="bg-emerald-100 text-emerald-800">Intermediate</Badge>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-700">Expected Delegates:</span>
