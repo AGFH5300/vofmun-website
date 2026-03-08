@@ -8,8 +8,9 @@ import { Footer } from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ComingSoonDialog } from "@/components/coming-soon-dialog"
 import Link from "next/link"
-import { ArrowLeft, FileText, ChevronRight, Globe } from "lucide-react"
+import { ArrowLeft, FileText, ChevronRight, Globe, Calendar } from "lucide-react"
 import Image from "next/image"
 
 export function UNEPPage() {
@@ -122,9 +123,48 @@ export function UNEPPage() {
                       <span className="text-gray-600">20-25</span>
                     </div>
                     <div className="flex items-center justify-between">
+                      <span className="text-gray-700">Session Type:</span>
+                      <span className="text-gray-600">Environmental Assembly</span>
+                    </div>
+                    <div className="flex items-center justify-between">
                       <span className="text-gray-700">Language:</span>
                       <span className="text-gray-600">English</span>
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-lg border-0">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-[#B22222]">Resources</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <ComingSoonDialog label="Background Guide">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Background Guide
+                      </Button>
+                    </ComingSoonDialog>
+                    <ComingSoonDialog label="Country Matrix">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Country Matrix
+                      </Button>
+                    </ComingSoonDialog>
+                    <ComingSoonDialog label="Position Paper Guide">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-transparent border-gray-200 hover:bg-gray-50"
+                      >
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Position Paper Guide
+                      </Button>
+                    </ComingSoonDialog>
                   </CardContent>
                 </Card>
 
