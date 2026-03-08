@@ -73,7 +73,35 @@ export function UNHRCPage() {
                         <ChevronRight className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                         <h3 className="font-semibold text-emerald-600">Agenda</h3>
                       </div>
-                      <p className="text-gray-700 leading-relaxed ml-7">TBC</p>
+                      <ol className="text-gray-700 leading-relaxed ml-12 list-decimal space-y-2">
+                        <li>Addressing the misuse of artificial intelligence and surveillance technology in violation of human rights</li>
+                        <li>Protecting the rights of migrant workers in global supply chains</li>
+                      </ol>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-lg border-0">
+                  <CardHeader>
+                    <CardTitle className="text-[#B22222]">Background Information</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-[#B22222] mb-2">Committee Overview</h4>
+                      <p className="text-gray-700 leading-relaxed">
+                        The United Nations Human Rights Council (UNHRC) is an intergovernmental body responsible for
+                        promoting and protecting human rights globally. It addresses urgent violations, reviews member
+                        state practices, and develops recommendations to strengthen international human rights standards.
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-[#B22222] mb-2">Key Focus Areas</h4>
+                      <ul className="list-disc list-inside space-y-1 text-gray-700">
+                        <li>Civil, political, economic, social, and cultural rights</li>
+                        <li>Protection of vulnerable and displaced populations</li>
+                        <li>Responsible governance of digital and surveillance technologies</li>
+                        <li>Accountability mechanisms for rights violations</li>
+                      </ul>
                     </div>
                   </CardContent>
                 </Card>

@@ -49,7 +49,8 @@ const committees = [
     icon: Shield,
     logo:"/svgs/UNHRC.svg",
     topics: [
-      "TBC",
+      "Addressing the misuse of artificial intelligence and surveillance technology in violation of human rights",
+      "Protecting the rights of migrant workers in global supply chains",
     ],
     difficulty: "Junior",
     delegates: "20-25",
@@ -62,7 +63,8 @@ const committees = [
     icon: Globe,
     logo:"/svgs/UNEP.svg",
     topics: [
-      "TBC",
+      "Regulating the environmental impact of artificial intelligence systems on global energy consumption",
+      "Tackling microplastic contamination in food chains and water systems",
     ],
     difficulty: "Junior",
     delegates: "20-25",
