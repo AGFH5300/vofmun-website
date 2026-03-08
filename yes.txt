@@ -1,9 +1,5 @@
 Essential PDF Documents Required
 
-Rules & Procedures Documents
-1.1 Complete Rules & Procedures PDF - Comprehensive conference rules document
-1.2 Code of Conduct PDF - Behavioral guidelines and disciplinary procedures
-
 Committee-Specific Documents
 GA1
 2.1 Background Guide PDF - Detailed committee information and topics
@@ -21,14 +17,6 @@ UNODC
 2.10 Background Guide PDF - Detailed committee information and topics
 2.11 Position Paper Guide PDF - Instructions for writing position papers
 2.12 Country Matrix PDF - Country assignments for delegates
-UNCSTD
-2.13 Background Guide PDF - Detailed committee information and topics
-2.14 Position Paper Guide PDF - Instructions for writing position papers
-2.15 Country Matrix PDF - Country assignments for delegates
-ICJ
-2.16 Background Guide PDF - Detailed committee information and topics
-2.17 Position Paper Guide PDF - Instructions for writing position papers
-2.18 Country Matrix PDF - Country assignments for delegates
 ICRCC
 2.19 Background Guide PDF - Detailed committee information and topics
 2.20 Position Paper Guide PDF - Instructions for writing position papers
@@ -41,7 +29,5 @@ Registration & Conference Materials
 3.4 Certificate Template PDF - Participation certificates for delegates
 
 Additional Resources
-4.1 Delegate Handbook PDF - Comprehensive guide for participants
-4.2 Chair Training Manual PDF - Guidelines for committee chairs
 4.3 Awards Ceremony Program PDF - Recognition and achievement details
 4.4 Emergency Procedures PDF - Safety and emergency contact information
