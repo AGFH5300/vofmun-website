@@ -28,7 +28,7 @@ export const REFERRAL_CODES: ReferralCodeEntry[] = [
   // Chair referral codes
   { code: 'MA123', owner: 'Manahil Ahmed' },
   { code: 'RM041', owner: 'Rayan Makwana' },
-  { code: 'RA069', owner: 'Rimas Alama' },
+  { code: 'JA069', owner: 'Jay Alama' },
   { code: 'AR123', owner: 'Adithya Rajesh' },
   { code: 'MD161', owner: 'Milind Deepak' },
   { code: 'SK420', owner: 'Shraddha Krishnan' },
