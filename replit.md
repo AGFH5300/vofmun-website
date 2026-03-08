@@ -33,7 +33,7 @@ credentials. The new email automation relies on `RESEND_API_KEY` being present s
 - **Resources Page**: Conference schedule, committee information, rules and procedures
 - **Signup Page**: Comprehensive registration form with validation and information sections
 - **Founders Page**: Team profiles and organizational information
-- **Committee Pages**: Detailed information for each UN committee (GA1, ECOSOC, WHO, UNODC, UNSC, ICJ)
+- **Committee Pages**: Detailed information for each UN committee (GA1, ECOSOC, WHO, UNODC, UNSC)
 
 ### State Management
 - **React Hooks**: useState and useEffect for local component state management
