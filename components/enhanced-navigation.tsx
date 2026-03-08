@@ -73,6 +73,7 @@ export function EnhancedNavigation() {
             </Link>
             <div className="relative group">
               <button
+                type="button"
                 className={`font-medium transition-colors hover:text-[#D32F2F] flex items-center space-x-1 ${
                   isScrolled ? "text-gray-900 hover:text-[#B22222]" : "text-gray-900 hover:text-[#B22222]"
                 }`}
@@ -81,8 +82,8 @@ export function EnhancedNavigation() {
                 <ChevronDown className="w-4 h-4" />
               </button>
 
-              <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                <div className="p-2">
+              <div className="absolute top-full left-0 w-64 pt-2 opacity-0 invisible translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0">
+                <div className="rounded-lg border border-gray-200 bg-white p-2 shadow-xl">
                   <Link
                     href="/resources"
                     className="flex items-center space-x-3 px-4 py-3 text-gray-900 hover:bg-[#B22222] hover:text-white rounded-md transition-colors"
