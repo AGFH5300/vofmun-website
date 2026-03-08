@@ -41,21 +41,7 @@ const committees = [
     delegates: "30-35",
     href: "/committees/who",
   },
-  // Intermediate Level
-  {
-    name: "United Nations Human Rights Council",
-    fullName: "United Nations Human Rights Council",
-    acronym: "UNHRC",
-    icon: Shield,
-    logo:"/svgs/UNHRC.svg",
-    topics: [
-      "Addressing the Misuse of Artificial Intelligence and Surveillance Technology in Violation of Human Rights",
-      "Protecting the Rights of Migrant Workers in Global Supply Chains",
-    ],
-    difficulty: "Junior",
-    delegates: "20-25",
-    href: "/committees/unhrc",
-  },
+  // Junior Level
   {
     name: "United Nations Environment Programme",
     fullName: "United Nations Environment Programme",
@@ -69,6 +55,21 @@ const committees = [
     difficulty: "Junior",
     delegates: "20-25",
     href: "/committees/unep",
+  },
+  // Intermediate Level
+  {
+    name: "United Nations Human Rights Council",
+    fullName: "United Nations Human Rights Council",
+    acronym: "UNHRC",
+    icon: Shield,
+    logo:"/svgs/UNHRC.svg",
+    topics: [
+      "Addressing the Misuse of Artificial Intelligence and Surveillance Technology in Violation of Human Rights",
+      "Protecting the Rights of Migrant Workers in Global Supply Chains",
+    ],
+    difficulty: "Intermediate",
+    delegates: "20-25",
+    href: "/committees/unhrc",
   },
   {
     name: "UN Office on Drugs and Crime",
@@ -106,8 +107,8 @@ const committees = [
     icon: Shield,
     logo:"/svgs/UNSC.svg",
     topics: [
-      "The Security Implications of Deepfake Technology in Conflict Zones",
-      "The Risk of Bio-Terrorism in the Post-Pandemic Era",
+      "Preventing Escalation of Border Disputes and Regional Conflicts in High-Risk Areas",
+      "The Geopolitical Implications of Nuclear, Chemical and Biological Weapons in Modern Conflicts",
     ],
     difficulty: "Advanced",
     delegates: "15-20",

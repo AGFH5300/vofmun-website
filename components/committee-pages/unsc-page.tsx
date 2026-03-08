@@ -86,7 +86,7 @@ export function UNSCPage() {
                           <h3 className="font-semibold text-purple-600">Topic</h3>
                         </div>
                         <p className="text-gray-700 leading-relaxed ml-7">
-                          The Security Implications of Deepfake Technology in Conflict Zones
+                          Preventing Escalation of Border Disputes and Regional Conflicts in High-Risk Areas
                         </p>
                       </div>
                       <div className="p-4 bg-indigo-50 rounded-lg border-l-4 border-indigo-500">
@@ -95,7 +95,7 @@ export function UNSCPage() {
                           <h3 className="font-semibold text-indigo-600">Topic</h3>
                         </div>
                         <p className="text-gray-700 leading-relaxed ml-7">
-                          The Risk of Bio-Terrorism in the Post-Pandemic Era
+                          The Geopolitical Implications of Nuclear, Chemical and Biological Weapons in Modern Conflicts
                         </p>
                       </div>
                     </div>
