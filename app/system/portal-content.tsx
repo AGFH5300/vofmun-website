@@ -22,7 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { REFERRAL_CODES, normalizeReferralCode } from "@/lib/referral-codes"
+import { CHAIR_REFERRAL_CODES, SEC_REFERRAL_CODES, normalizeReferralCode } from "@/lib/referral-codes"
 import { createClient } from "@/utils/supabase/client"
 
 export type SignupRecord = {
@@ -150,6 +150,13 @@ type ReferralLeaderboardEntry = {
   totalUses: number
   paidUses: number
   codes: string[]
+}
+
+type ChairReferralLeaderboardEntry = {
+  owner: string
+  code: string
+  totalUses: number
+  paidUses: number
 }
 
 type DelegateReferralLeaderboardEntry = {
@@ -1247,9 +1254,11 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
   const [schoolColumnWidths, setSchoolColumnWidths] = useState<Record<string, number>>({})
   const [copiedLeaderboard, setCopiedLeaderboard] = useState(false)
+  const [copiedChairLeaderboard, setCopiedChairLeaderboard] = useState(false)
   const [copiedDelegateLeaderboard, setCopiedDelegateLeaderboard] = useState(false)
   const [copiedDelegateDirectory, setCopiedDelegateDirectory] = useState(false)
   const [showReferralLeaderboard, setShowReferralLeaderboard] = useState(false)
+  const [showChairReferralLeaderboard, setShowChairReferralLeaderboard] = useState(false)
   const [showDelegateReferralLeaderboard, setShowDelegateReferralLeaderboard] = useState(false)
   const [showDelegateReferralDirectory, setShowDelegateReferralDirectory] = useState(false)
   const resizeState = useRef<{
@@ -1537,10 +1546,20 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   )
   const schoolDelegationTotal = schoolDelegations.length
 
+  const secReferralOwnerByCode = useMemo(
+    () => new Map(SEC_REFERRAL_CODES.map((entry) => [entry.code, entry.owner])),
+    [],
+  )
+
+  const chairReferralOwnerByCode = useMemo(
+    () => new Map(CHAIR_REFERRAL_CODES.map((entry) => [entry.code, entry.owner])),
+    [],
+  )
+
   const referralLeaderboard = useMemo<ReferralLeaderboardEntry[]>(() => {
     const ownerUsage = new Map<string, { totalUses: number; paidUses: number; codes: Set<string> }>()
 
-    for (const referral of REFERRAL_CODES) {
+    for (const referral of SEC_REFERRAL_CODES) {
       ownerUsage.set(referral.owner, { totalUses: 0, paidUses: 0, codes: new Set() })
     }
 
@@ -1550,7 +1569,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       for (const code of normalizedCodes) {
         if (!code) continue
 
-        const referralOwner = REFERRAL_CODES.find((entry) => entry.code === code)?.owner
+        const referralOwner = secReferralOwnerByCode.get(code)
         if (!referralOwner) continue
 
         const ownerRecord = ownerUsage.get(referralOwner)
@@ -1579,7 +1598,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
 
         return a.owner.localeCompare(b.owner)
       })
-  }, [records])
+  }, [records, secReferralOwnerByCode])
 
 
   const delegateReferralCodeOwners = useMemo(() => {
@@ -1601,6 +1620,40 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
 
     return owners
   }, [records])
+
+  const chairReferralLeaderboard = useMemo<ChairReferralLeaderboardEntry[]>(() => {
+    const usageByCode = new Map<string, { totalUses: number; paidUses: number }>()
+
+    for (const record of records) {
+      const normalizedCodes = new Set((record.referral_codes ?? []).map((code) => normalizeReferralCode(code)))
+
+      for (const code of normalizedCodes) {
+        if (!code || !chairReferralOwnerByCode.has(code)) continue
+
+        const entry = usageByCode.get(code) ?? { totalUses: 0, paidUses: 0 }
+        entry.totalUses += 1
+        if (record.payment_status === "paid" || record.payment_status === "pending") {
+          entry.paidUses += 1
+        }
+        usageByCode.set(code, entry)
+      }
+    }
+
+    return Array.from(usageByCode.entries())
+      .map(([code, usage]) => ({
+        code,
+        totalUses: usage.totalUses,
+        paidUses: usage.paidUses,
+        owner: chairReferralOwnerByCode.get(code) ?? "Unknown chair",
+      }))
+      .sort((a, b) => {
+        if (a.totalUses !== b.totalUses) {
+          return b.totalUses - a.totalUses
+        }
+
+        return a.owner.localeCompare(b.owner)
+      })
+  }, [chairReferralOwnerByCode, records])
 
   const delegateReferralLeaderboard = useMemo<DelegateReferralLeaderboardEntry[]>(() => {
     const usageByCode = new Map<string, { totalUses: number; paidUses: number }>()
@@ -1672,6 +1725,25 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       console.error("Failed to copy referral leaderboard", cause)
     }
   }, [referralLeaderboard])
+
+  const handleCopyChairReferralLeaderboard = useCallback(async () => {
+    if (typeof window === "undefined" || chairReferralLeaderboard.length === 0) return
+
+    const content = chairReferralLeaderboard
+      .map(
+        (entry, index) =>
+          `${index + 1}. ${entry.owner} | Code: ${entry.code} | Uses: ${entry.totalUses} | Paid: ${entry.paidUses}`,
+      )
+      .join("\n")
+
+    try {
+      await window.navigator.clipboard.writeText(content)
+      setCopiedChairLeaderboard(true)
+      window.setTimeout(() => setCopiedChairLeaderboard(false), 2000)
+    } catch (cause) {
+      console.error("Failed to copy chair referral leaderboard", cause)
+    }
+  }, [chairReferralLeaderboard])
 
   const handleCopyDelegateReferralLeaderboard = useCallback(async () => {
     if (typeof window === "undefined" || delegateReferralLeaderboard.length === 0) return
@@ -2269,6 +2341,18 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
               size="sm"
               variant="outline"
               className="h-7 gap-1.5 border-slate-300 px-2.5 text-[11px] text-slate-700 hover:bg-slate-100"
+              onClick={() => setShowChairReferralLeaderboard((current) => !current)}
+            >
+              {showChairReferralLeaderboard ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              {showChairReferralLeaderboard
+                ? "Hide chair referral leaderboard"
+                : "Show chair referral leaderboard"}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-7 gap-1.5 border-slate-300 px-2.5 text-[11px] text-slate-700 hover:bg-slate-100"
               onClick={() => setShowDelegateReferralLeaderboard((current) => !current)}
             >
               {showDelegateReferralLeaderboard ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -2334,6 +2418,50 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
                         <TableCell className="px-2 py-1 text-right align-middle text-xs font-semibold text-emerald-700">
                           {entry.paidUses}
                         </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )
+          ) : null}
+
+          {showChairReferralLeaderboard ? (
+            chairReferralLeaderboard.length === 0 ? (
+              <div className="py-2 text-sm text-slate-500">No chair referral code usage has been recorded yet.</div>
+            ) : (
+              <div className="overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
+                <div className="mb-1 flex justify-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 gap-1 px-2 text-[11px] text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    onClick={() => void handleCopyChairReferralLeaderboard()}
+                    disabled={chairReferralLeaderboard.length === 0}
+                  >
+                    {copiedChairLeaderboard ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                    {copiedChairLeaderboard ? "Copied" : "Copy"}
+                  </Button>
+                </div>
+                <Table className="w-auto text-xs text-slate-900">
+                  <TableHeader>
+                    <TableRow className="border-none">
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">#</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Owner</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-[11px] font-medium text-slate-500">Code</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-right text-[11px] font-medium text-slate-500">Uses</TableHead>
+                      <TableHead className="h-auto px-2 py-1 text-right text-[11px] font-medium text-slate-500">Paid</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {chairReferralLeaderboard.map((entry, index) => (
+                      <TableRow key={entry.code} className="border-none">
+                        <TableCell className="px-2 py-1 align-middle text-[11px] text-slate-500">{index + 1}</TableCell>
+                        <TableCell className="max-w-[170px] truncate px-2 py-1 align-middle text-xs text-slate-900">{entry.owner}</TableCell>
+                        <TableCell className="px-2 py-1 align-middle font-mono text-[11px] text-slate-500">{entry.code}</TableCell>
+                        <TableCell className="px-2 py-1 text-right align-middle text-xs font-semibold text-slate-900">{entry.totalUses}</TableCell>
+                        <TableCell className="px-2 py-1 text-right align-middle text-xs font-semibold text-emerald-700">{entry.paidUses}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
