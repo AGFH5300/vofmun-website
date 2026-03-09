@@ -24,8 +24,9 @@ export const REFERRAL_CODES: ReferralCodeEntry[] = [
   { code: 'TM123', owner: 'Tamara Moshawrab' },
   { code: 'PV556', owner: 'Pranav Verma' },
   { code: 'NQ123', owner: 'Noaf Qassem' },
+]
 
-  // Chair referral codes
+export const CHAIR_REFERRAL_CODES: ReferralCodeEntry[] = [
   { code: 'MA123', owner: 'Manahil Ahmed' },
   { code: 'RM041', owner: 'Rayan Makwana' },
   { code: 'JA069', owner: 'Jay Alama' },
@@ -51,8 +52,15 @@ export const REFERRAL_CODES: ReferralCodeEntry[] = [
   { code: 'AA123', owner: 'Anaika Agarwal' },
 ]
 
+export const SEC_REFERRAL_CODES: ReferralCodeEntry[] = REFERRAL_CODES
+
+export const ALL_REFERRAL_CODES: ReferralCodeEntry[] = [
+  ...SEC_REFERRAL_CODES,
+  ...CHAIR_REFERRAL_CODES,
+]
+
 const normalizedLookup = new Map(
-  REFERRAL_CODES.map((entry) => [entry.code.toUpperCase(), entry]),
+  ALL_REFERRAL_CODES.map((entry) => [entry.code.toUpperCase(), entry]),
 )
 
 export const DEFAULT_REFERRAL_SUGGESTION_DISTANCE = 2
@@ -78,7 +86,7 @@ export function findReferralSuggestions(
   const normalized = normalizeReferralCode(input)
   if (!normalized) return []
 
-  const distances = REFERRAL_CODES.map((entry) => ({
+  const distances = ALL_REFERRAL_CODES.map((entry) => ({
     entry,
     distance: levenshtein(normalized, entry.code),
   }))
