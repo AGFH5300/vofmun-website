@@ -2378,7 +2378,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
             referralLeaderboard.length === 0 ? (
               <div className="py-2 text-sm text-slate-500">No referral code usage has been recorded yet.</div>
             ) : (
-              <div className="overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
+              <div className="inline-block max-w-full overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
                 <div className="mb-1 flex justify-end">
                   <Button
                     type="button"
@@ -2430,7 +2430,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
             chairReferralLeaderboard.length === 0 ? (
               <div className="py-2 text-sm text-slate-500">No chair referral code usage has been recorded yet.</div>
             ) : (
-              <div className="overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
+              <div className="inline-block max-w-full overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
                 <div className="mb-1 flex justify-end">
                   <Button
                     type="button"
@@ -2474,7 +2474,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
             delegateReferralLeaderboard.length === 0 ? (
               <div className="py-2 text-sm text-slate-500">No delegate referral code usage has been recorded yet.</div>
             ) : (
-              <div className="overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
+              <div className="inline-block max-w-full overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
                 <div className="mb-1 flex justify-end">
                   <Button
                     type="button"
@@ -2518,7 +2518,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
             delegateReferralCodeDirectory.length === 0 ? (
               <div className="py-2 text-sm text-slate-500">No delegate referral codes have been generated yet.</div>
             ) : (
-              <div className="overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
+              <div className="inline-block max-w-full overflow-x-auto rounded-md border border-slate-200 bg-white p-2">
                 <div className="mb-1 flex justify-end">
                   <Button
                     type="button"
