@@ -15,7 +15,7 @@ const getDefaultAdminCutoff = () => {
   const year = now.getUTCFullYear()
 
   // Feb = month 1
-  const cutoffUtc = new Date(Date.UTC(year, 1, 28, 19, 59, 59))
+  const cutoffUtc = new Date(Date.UTC(year, 2, 15, 19, 59, 59))
   return cutoffUtc.toISOString()
 }
 
