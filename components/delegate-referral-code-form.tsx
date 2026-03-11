@@ -96,11 +96,23 @@ export function DelegateReferralCodeForm() {
             helping promote future editions through their schools, networks, and local communities while strengthening the
             global visibility and impact of VOFMUN.
           </p>
-          <ul className="list-disc space-y-2 pl-5 text-sm text-gray-700">
-            <li>Referral reward: every 10 confirmed delegate sign-ups using your code earns you AED 50.</li>
-            <li>Examples: 10 delegates = AED 50, 20 delegates = AED 100, 30 delegates = AED 150, and so on.</li>
-            <li>Top 3 chairs and delegates receive a certificate and are named VOFMUN Ambassadors.</li>
-            {/* <li>Top 1 chair and top 1 delegate receive free admission to the UniHawk program (TBC).</li> */}
+          <ul className="space-y-2 text-sm text-gray-800">
+            <li className="rounded-md border border-[#B22222]/30 bg-white px-3 py-2 shadow-sm">
+              <span className="inline-block rounded-full bg-[#B22222]/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[#8f1b1b]">Referral reward</span>
+              <p className="mt-1 font-medium">Every 10 confirmed delegate sign-ups using your code earns you <span className="font-bold">AED 50</span>.</p>
+            </li>
+            <li className="rounded-md border border-[#B22222]/30 bg-white px-3 py-2 shadow-sm">
+              <span className="inline-block rounded-full bg-[#B22222]/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[#8f1b1b]">Payout examples</span>
+              <p className="mt-1 font-medium">10 delegates = <span className="font-bold">AED 50</span>, 20 delegates = <span className="font-bold">AED 100</span>, 30 delegates = <span className="font-bold">AED 150</span>, and so on.</p>
+            </li>
+            <li className="rounded-md border border-[#B22222]/30 bg-white px-3 py-2 shadow-sm">
+              <span className="inline-block rounded-full bg-[#B22222]/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[#8f1b1b]">Recognition prize</span>
+              <p className="mt-1 font-medium">Top 3 chairs and top 3 delegates receive a certificate and are named <span className="font-bold">VOFMUN Ambassadors</span>.</p>
+            </li>
+            <li className="rounded-md border border-[#B22222] bg-[#B22222]/10 px-3 py-2 shadow-sm">
+              <span className="inline-block rounded-full bg-[#B22222] px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-white">Confirmed</span>
+              <p className="mt-1 font-semibold">Top 1 chair and top 1 delegate receive <span className="font-bold">free admission to the UniHawk program</span>.</p>
+            </li>
           </ul>
         </div>
 
