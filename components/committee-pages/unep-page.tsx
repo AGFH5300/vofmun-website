@@ -68,16 +68,24 @@ export function UNEPPage() {
                       <span>Committee Topic</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-4">
+                    <div className="p-4 bg-lime-50 rounded-lg border-l-4 border-lime-500">
+                      <div className="flex items-start space-x-2 mb-2">
+                        <ChevronRight className="h-5 w-5 text-lime-600 mt-0.5 flex-shrink-0" />
+                        <h3 className="font-semibold text-lime-600">Agenda</h3>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed ml-7">
+                        Regulating the Environmental Impact of Artificial Intelligence Systems on Global Energy Consumption
+                      </p>
+                    </div>
                     <div className="p-4 bg-emerald-50 rounded-lg border-l-4 border-emerald-500">
                       <div className="flex items-start space-x-2 mb-2">
                         <ChevronRight className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                         <h3 className="font-semibold text-emerald-600">Agenda</h3>
                       </div>
-                      <ol className="text-gray-700 leading-relaxed ml-12 list-decimal space-y-2">
-                        <li>Regulating the Environmental Impact of Artificial Intelligence Systems on Global Energy Consumption</li>
-                        <li>Tackling Microplastic Contamination in Food Chains and Water Systems</li>
-                      </ol>
+                      <p className="text-gray-700 leading-relaxed ml-7">
+                        Tackling Microplastic Contamination in Food Chains and Water Systems
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
