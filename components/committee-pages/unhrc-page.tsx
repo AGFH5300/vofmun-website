@@ -68,16 +68,24 @@ export function UNHRCPage() {
                       <span>Committee Topic</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="p-4 bg-emerald-50 rounded-lg border-l-4 border-emerald-500">
+                  <CardContent className="space-y-4">
+                    <div className="p-4 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
                       <div className="flex items-start space-x-2 mb-2">
-                        <ChevronRight className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                        <h3 className="font-semibold text-emerald-600">Agenda</h3>
+                        <ChevronRight className="h-5 w-5 text-cyan-600 mt-0.5 flex-shrink-0" />
+                        <h3 className="font-semibold text-cyan-600">Agenda</h3>
                       </div>
-                      <ol className="text-gray-700 leading-relaxed ml-12 list-decimal space-y-2">
-                        <li>Addressing the Misuse of Artificial Intelligence and Surveillance Technology in Violation of Human Rights</li>
-                        <li>Protecting the Rights of Migrant Workers in Global Supply Chains</li>
-                      </ol>
+                      <p className="text-gray-700 leading-relaxed ml-7">
+                        Addressing the Misuse of Artificial Intelligence and Surveillance Technology in Violation of Human Rights
+                      </p>
+                    </div>
+                    <div className="p-4 bg-violet-50 rounded-lg border-l-4 border-violet-500">
+                      <div className="flex items-start space-x-2 mb-2">
+                        <ChevronRight className="h-5 w-5 text-violet-600 mt-0.5 flex-shrink-0" />
+                        <h3 className="font-semibold text-violet-600">Agenda</h3>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed ml-7">
+                        Protecting the Rights of Migrant Workers in Global Supply Chains
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
