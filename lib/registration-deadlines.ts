@@ -55,7 +55,7 @@ const getAdminCutoffTimestamp = () => {
 export const CHAIR_SIGNUP_CUTOFF_GST = getChairCutoffTimestamp()
 export const CHAIR_SIGNUP_CUTOFF_DISPLAY = "10th January"
 export const ADMIN_SIGNUP_CUTOFF_GST = getAdminCutoffTimestamp()
-export const ADMIN_SIGNUP_CUTOFF_DISPLAY = "28th February"
+export const ADMIN_SIGNUP_CUTOFF_DISPLAY = "15th March"
 
 export const isChairSignupClosed = (reference: Date = new Date()) =>
   reference.getTime() > CHAIR_SIGNUP_CUTOFF_GST.getTime()
