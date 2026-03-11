@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 import { Users, ExternalLink, Globe, Heart, Shield, ChevronRight } from "lucide-react"
 import Image from "next/image"
 
@@ -122,7 +123,7 @@ const committees = [
     icon: Shield,
     logo:"/svgs/ICRCC.svg",
     topics: [
-      "Classified! Keep an eye on our website, Instagram, and LinkedIn for updates and teasers :)",
+      "Classified! Keep an eye here and on our socials for updates and teasers...",
     ],
     difficulty: "Crisis",
     delegates: "20-25",
@@ -152,6 +153,35 @@ const getDifficultyColor = (difficulty: string) => {
 }
 
 export function CommitteesSection() {
+  const [icrccCountdown, setIcrccCountdown] = useState("T-00:00:00:00")
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const releaseDate = new Date("2026-03-27T09:00:00").getTime()
+      const now = new Date().getTime()
+      const remaining = releaseDate - now
+
+      if (remaining <= 0) {
+        setIcrccCountdown("T-00:00:00:00")
+        return
+      }
+
+      const days = Math.floor(remaining / (1000 * 60 * 60 * 24))
+      const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
+      const seconds = Math.floor((remaining % (1000 * 60)) / 1000)
+
+      setIcrccCountdown(
+        `T-${String(days).padStart(2, "0")}:${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`,
+      )
+    }
+
+    updateCountdown()
+    const timer = setInterval(updateCountdown, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
   return (
     <section id="committees" className="py-12" style={{ backgroundColor: "#f5f5f0" }}>
       <div className="container mx-auto px-4">
@@ -202,6 +232,9 @@ export function CommitteesSection() {
                             <span className="leading-relaxed">{topic}</span>
                           </div>
                         ))}
+                        {committee.acronym === "ICRCC" && (
+                          <p className="text-primary font-semibold tracking-wide">Time till next update: {icrccCountdown}</p>
+                        )}
                       </div>
                     </div>
 
