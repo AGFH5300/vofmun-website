@@ -206,7 +206,7 @@ export function CommitteesSection() {
                           alt={`${committee.acronym} logo`}
                           width={48}
                           height={48}
-                          className="w-12 h-12 object-contain"
+                          className="w-16 h-16 object-contain"
                           onError={(e) => {
                             // Fallback to icon if logo fails to load
                             e.currentTarget.style.display = 'none'
