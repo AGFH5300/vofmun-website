@@ -1,41 +1,69 @@
 {
-  "headers": ["Country", "Allocation"],
-  "rows": [
-    ["United States of America", "Pending allocation"],
-    ["United Mexican States", "Pending allocation"],
-    ["People's Republic of China", "Pending allocation"],
-    ["Republic of Panama", "Pending allocation"],
-    ["Republic of Colombia", "Pending allocation"],
-    ["Bolivarian Republic of Venezuela", "Pending allocation"],
-    ["Russian Federation", "Pending allocation"],
-    ["United Kingdom", "Pending allocation"],
-    ["Democratic People's Republic of Korea", "Pending allocation"],
-    ["Republic of India", "Pending allocation"],
-    ["French Republic", "Pending allocation"],
-    ["Argentine Republic", "Pending allocation"],
-    ["Democratic Socialist Republic of Sri Lanka", "Pending allocation"],
-    ["Islamic Republic of Pakistan", "Pending allocation"],
-    ["Republic of South Africa", "Pending allocation"],
-    ["People's Republic of Bangladesh", "Pending allocation"],
-    ["Republic of the Union of Myanmar", "Pending allocation"],
-    ["Republic of Türkiye", "Pending allocation"],
-    ["Republic of Ecuador", "Pending allocation"],
-    ["Republic of Finland", "Pending allocation"],
-    ["Canada", "Pending allocation"],
-    ["Hellenic Republic (Greece)", "Pending allocation"],
-    ["Kingdom of Spain", "Pending allocation"],
-    ["Japan", "Pending allocation"],
-    ["Republic of Poland", "Pending allocation"],
-    ["Commonwealth of Australia", "Pending allocation"],
-    ["Republic of Kenya", "Pending allocation"],
-    ["Kingdom of Morocco", "Pending allocation"],
-    ["Republic of El Salvador", "Pending allocation"],
-    ["Federative Republic of Brazil", "Pending allocation"],
-    ["Kingdom of Thailand", "Pending allocation"],
-    ["Swiss Confederation", "Pending allocation"],
-    ["Socialist Republic of Vietnam", "Pending allocation"],
-    ["Kingdom of Saudi Arabia", "Pending allocation"],
-    ["Republic of Seychelles", "Pending allocation"]
+  "headers": [
+    "Country",
+    "Allocation"
   ],
-  "updated": "2026-01-21"
+  "rows": [
+    [
+      "United Mexican States",
+      "Pending allocation"
+    ],
+    [
+      "Republic of Colombia",
+      "Pending allocation"
+    ],
+    [
+      "United States of America",
+      "Pending allocation"
+    ],
+    [
+      "People's Republic of China",
+      "Pending allocation"
+    ],
+    [
+      "Russian Federation",
+      "Pending allocation"
+    ],
+    [
+      "United Kingdom",
+      "Pending allocation"
+    ],
+    [
+      "French Republic",
+      "Pending allocation"
+    ],
+    [
+      "Federal Republic of Germany",
+      "Pending allocation"
+    ],
+    [
+      "Republic of India",
+      "Pending allocation"
+    ],
+    [
+      "Federative Republic of Brazil",
+      "Pending allocation"
+    ],
+    [
+      "United Mexican States",
+      "Pending allocation"
+    ],
+    [
+      "Republic of Colombia",
+      "Pending allocation"
+    ],
+    [
+      "United Arab Emirates",
+      "Pending allocation"
+    ],
+    [
+      "Republic of T\u00fcrkiye",
+      "Pending allocation"
+    ],
+    [
+      "Islamic Republic of Iran",
+      "Pending allocation"
+    ]
+  ],
+  "updated": "2026-03-30"
 }

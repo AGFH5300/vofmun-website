@@ -6,13 +6,13 @@ import ga1Matrix from "@/lib/country-matrix/ga1.json"
 import icrccMatrix from "@/lib/country-matrix/icrcc.json"
 import unscMatrix from "@/lib/country-matrix/unsc.json"
 import unodcMatrix from "@/lib/country-matrix/unodc.json"
-import whoMatrix from "@/lib/country-matrix/who.json"
+import unhrcMatrix from "@/lib/country-matrix/unhrc.json"
 
 const committeeMatrixOptions = {
   ga1: ga1Matrix,
   unodc: unodcMatrix,
   ecosoc: ecosocMatrix,
-  who: whoMatrix,
+  unhrc: unhrcMatrix,
   unsc: unscMatrix,
   icrcc: icrccMatrix,
 } as const

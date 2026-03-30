@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { Users, ExternalLink, Globe, Heart, Shield, ChevronRight } from "lucide-react"
+import { Users, ExternalLink, Globe, Shield, ChevronRight } from "lucide-react"
 import Image from "next/image"
 
 const committees = [
@@ -27,35 +27,6 @@ const committees = [
     difficulty: "Beginner",
     delegates: "30-40",
     href: "/committees/ga1",
-  },
-  {
-    name: "World Health Organization",
-    fullName: "World Health Organisation",
-    acronym: "WHO",
-    icon: Heart,
-    logo:"/svgs/WHO.svg",
-    topics: [
-      "Addressing Algorithmic Bias in Healthcare Diagnostic Tech",
-      "Strengthening Global Vaccine Equity",
-    ],
-    difficulty: "Beginner",
-    delegates: "30-35",
-    href: "/committees/who",
-  },
-  // Junior Level
-  {
-    name: "United Nations Environment Programme",
-    fullName: "United Nations Environment Programme",
-    acronym: "UNEP",
-    icon: Globe,
-    logo:"/svgs/UNEP.svg",
-    topics: [
-      "Regulating the Environmental Impact of Artificial Intelligence Systems on Global Energy Consumption",
-      "Tackling Microplastic Contamination in Food Chains and Water Systems",
-    ],
-    difficulty: "Junior",
-    delegates: "20-25",
-    href: "/committees/unep",
   },
   // Intermediate Level
   {
