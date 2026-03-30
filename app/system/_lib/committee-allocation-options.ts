@@ -17,6 +17,8 @@ const committeeMatrixOptions = {
   icrcc: icrccMatrix,
 } as const
 
+export const allocationCommitteeCodes = Object.keys(committeeMatrixOptions) as Array<keyof typeof committeeMatrixOptions>
+
 export const normalizeCommitteeCode = (committeeCode: string | null | undefined) =>
   (committeeCode ?? "").trim().toLowerCase()
 
