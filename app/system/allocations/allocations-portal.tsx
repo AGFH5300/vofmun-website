@@ -27,7 +27,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/client"
 import { type AllocationUserRow } from "../_lib/allocation-types"
-import { getAllocationOptionsForCommittee, normalizeCommitteeCode } from "../_lib/committee-allocation-options"
+import {
+  allocationCommitteeCodes,
+  getAllocationOptionsForCommittee,
+  normalizeCommitteeCode,
+} from "../_lib/committee-allocation-options"
 import { formatAllocatorDisplay, getAllocatorLabelFromEmail } from "../_lib/allocator-label"
 
 type AllocationsPortalProps = {
@@ -263,12 +267,20 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
   }, [rows])
 
   const committeeOptions = useMemo(() => {
+    const allowedCommittees = new Set<string>(allocationCommitteeCodes)
     const values = new Set<string>()
+
     eligibleRows.forEach((row) => {
       ;[row.delegate_data?.committee1, row.delegate_data?.committee2, row.delegate_data?.committee3, row.allocated_committee_code]
         .filter(Boolean)
-        .forEach((committee) => values.add(String(committee).trim()))
+        .forEach((committee) => {
+          const normalized = normalizeCommitteeCode(String(committee))
+          if (allowedCommittees.has(normalized)) {
+            values.add(normalized)
+          }
+        })
     })
+
     return Array.from(values).filter(Boolean).sort((a, b) => a.localeCompare(b))
   }, [eligibleRows])
 
