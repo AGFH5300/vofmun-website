@@ -118,11 +118,6 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/committees/who" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                  WHO
-                </Link>
-              </li>
-              <li>
                 <Link href="/committees/unodc" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
                   UNODC
                 </Link>
@@ -135,11 +130,6 @@ export function Footer() {
               <li>
                 <Link href="/committees/unhrc" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
                   UNHRC
-                </Link>
-              </li>
-              <li>
-                <Link href="/committees/unep" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                  UNEP
                 </Link>
               </li>
               <li>

@@ -31,7 +31,7 @@ export function AchievementShowcase() {
         title: "Diplomatic Excellence",
         recipient: "Priya Patel",
         country: "India",
-        committee: "WHO",
+        committee: "UNHRC",
         description: "Masterful coalition building on global health initiatives",
         icon: Handshake,
       },
