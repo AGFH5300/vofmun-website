@@ -350,7 +350,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
     )
 
     if (!selectedStillExists) {
-      setSelectedAllocationCommittee(allocatedDelegatesByCommittee[0]?.committee ?? null)
+      setSelectedAllocationCommittee(null)
     }
   }, [allocatedDelegatesByCommittee, selectedAllocationCommittee])
 
@@ -681,12 +681,21 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
           ) : (
             <>
               <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  variant={selectedAllocationCommittee === null ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedAllocationCommittee(null)}
+                >
+                  Unselect all
+                </Button>
                 {allocatedDelegatesByCommittee.map((entry) => (
                   <Button
                     key={entry.committee}
                     variant={selectedAllocationCommittee === entry.committee ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSelectedAllocationCommittee(entry.committee)}
+                    onClick={() =>
+                      setSelectedAllocationCommittee((current) => (current === entry.committee ? null : entry.committee))
+                    }
                   >
                     {entry.committee.toUpperCase()} ({entry.delegates.length})
                   </Button>
