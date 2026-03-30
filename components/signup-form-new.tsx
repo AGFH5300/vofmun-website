@@ -1653,26 +1653,6 @@ export function SignupFormNew() {
                             General Assembly (GA1) - Beginner
                           </SelectItem>
                           <SelectItem
-                            value="who"
-                            disabled={
-                              [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
-                                "who",
-                              ) && delegateData[key] !== "who"
-                            }
-                          >
-                            WHO - Beginner
-                          </SelectItem>
-                          <SelectItem
-                            value="unep"
-                            disabled={
-                              [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
-                                "unep",
-                              ) && delegateData[key] !== "unep"
-                            }
-                          >
-                            UNEP - Junior
-                          </SelectItem>
-                          <SelectItem
                             value="unhrc"
                             disabled={
                               [delegateData.committee1, delegateData.committee2, delegateData.committee3].includes(
@@ -1871,24 +1851,6 @@ export function SignupFormNew() {
                             }
                           >
                             General Assembly (GA1) - Beginner
-                          </SelectItem>
-                          <SelectItem
-                            value="who"
-                            disabled={
-                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("who") &&
-                              chairData[`committee${num}` as keyof typeof chairData] !== "who"
-                            }
-                          >
-                            WHO - Beginner
-                          </SelectItem>
-                          <SelectItem
-                            value="unep"
-                            disabled={
-                              [chairData.committee1, chairData.committee2, chairData.committee3].includes("unep") &&
-                              chairData[`committee${num}` as keyof typeof chairData] !== "unep"
-                            }
-                          >
-                            UNEP - Junior
                           </SelectItem>
                           <SelectItem
                             value="unhrc"
