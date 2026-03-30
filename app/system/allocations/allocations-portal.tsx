@@ -163,6 +163,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
   const [rows, setRows] = useState<AllocationUserRow[]>([])
   const [search, setSearch] = useState("")
   const [committeeFilter, setCommitteeFilter] = useState<string>("all")
+  const [selectedAllocationCommittee, setSelectedAllocationCommittee] = useState<string | null>(null)
   const [nameSort, setNameSort] = useState<"name_asc" | "name_desc">("name_asc")
   const [allocationSort, setAllocationSort] = useState<"default" | "unallocated_first">("default")
   const [visibleColumns, setVisibleColumns] = useState<ColumnKey[]>(DEFAULT_COLUMNS)
@@ -303,6 +304,55 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
 
     return map
   }, [drafts, eligibleRows])
+
+  const allocatedDelegatesByCommittee = useMemo(() => {
+    const map = new Map<string, AllocationUserRow[]>()
+
+    eligibleRows.forEach((row) => {
+      const draft = drafts[row.id]
+      const committeeCode = normalizeCommitteeCode(draft?.allocated_committee_code ?? row.allocated_committee_code)
+      const allocatedOption = (draft?.allocated_country_code ?? row.allocated_country ?? row.allocated_country_code)?.trim()
+
+      if (!committeeCode || !allocatedOption) return
+
+      if (!map.has(committeeCode)) {
+        map.set(committeeCode, [])
+      }
+
+      map.get(committeeCode)?.push({
+        ...row,
+        allocated_committee_code: committeeCode,
+        allocated_country: allocatedOption,
+        allocated_country_code: allocatedOption,
+      })
+    })
+
+    return Array.from(map.entries())
+      .sort(([committeeA], [committeeB]) => committeeA.localeCompare(committeeB))
+      .map(([committee, delegates]) => ({
+        committee,
+        delegates: delegates.sort((a, b) => {
+          const firstNameCompare = a.first_name.localeCompare(b.first_name)
+          if (firstNameCompare !== 0) return firstNameCompare
+          return a.last_name.localeCompare(b.last_name)
+        }),
+      }))
+  }, [drafts, eligibleRows])
+
+  useEffect(() => {
+    if (allocatedDelegatesByCommittee.length === 0) {
+      setSelectedAllocationCommittee(null)
+      return
+    }
+
+    const selectedStillExists = allocatedDelegatesByCommittee.some(
+      (entry) => entry.committee === selectedAllocationCommittee,
+    )
+
+    if (!selectedStillExists) {
+      setSelectedAllocationCommittee(allocatedDelegatesByCommittee[0]?.committee ?? null)
+    }
+  }, [allocatedDelegatesByCommittee, selectedAllocationCommittee])
 
   const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -620,6 +670,63 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
       </CardHeader>
 
       <CardContent>
+        <div className="mb-6 rounded-lg border border-orange-200 bg-orange-50/40 p-4">
+          <h3 className="text-lg font-semibold text-slate-900">Allocated delegates by committee</h3>
+          <p className="mt-1 text-sm text-slate-600">
+            Click a committee to view everyone assigned to it, including their allocation details.
+          </p>
+
+          {allocatedDelegatesByCommittee.length === 0 ? (
+            <p className="mt-3 text-sm text-slate-500">No committee allocations yet.</p>
+          ) : (
+            <>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {allocatedDelegatesByCommittee.map((entry) => (
+                  <Button
+                    key={entry.committee}
+                    variant={selectedAllocationCommittee === entry.committee ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedAllocationCommittee(entry.committee)}
+                  >
+                    {entry.committee.toUpperCase()} ({entry.delegates.length})
+                  </Button>
+                ))}
+              </div>
+
+              {selectedAllocationCommittee && (
+                <div className="mt-4 rounded-md border bg-white">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>School</TableHead>
+                        <TableHead>Grade</TableHead>
+                        <TableHead>Allocated country / position</TableHead>
+                        <TableHead>Allocated by</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {allocatedDelegatesByCommittee
+                        .find((entry) => entry.committee === selectedAllocationCommittee)
+                        ?.delegates.map((delegate) => (
+                          <TableRow key={`allocation-overview-${delegate.id}`}>
+                            <TableCell>{`${delegate.first_name} ${delegate.last_name}`}</TableCell>
+                            <TableCell>{delegate.email}</TableCell>
+                            <TableCell>{delegate.school ?? "—"}</TableCell>
+                            <TableCell>{delegate.grade ?? "—"}</TableCell>
+                            <TableCell>{delegate.allocated_country ?? delegate.allocated_country_code ?? "—"}</TableCell>
+                            <TableCell>{formatAllocatorDisplay(delegate.allocated_by_email) ?? "—"}</TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
         <div className="overflow-x-auto rounded-md border">
           <Table>
             <TableHeader>
