@@ -36,6 +36,9 @@ export default function ResourcesPage() {
                 <Link className="transition-colors hover:text-[#B22222]" href="#committees">
                   Committees
                 </Link>
+                <Link className="transition-colors hover:text-[#B22222]" href="#allocation-search">
+                  Allocation Search
+                </Link>
                 <Link className="transition-colors hover:text-[#B22222]" href="#rules">
                   Rules
                 </Link>
