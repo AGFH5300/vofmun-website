@@ -321,7 +321,7 @@ export function CommitteesSection() {
             })}
           </div>
 
-          <div className="mt-12">
+          <div id="allocation-search" className="mt-12 scroll-mt-28">
             <Card className="border-0 diplomatic-shadow">
               <CardHeader>
                 <CardTitle className="text-2xl font-serif text-primary">Committee Allocations Lookup</CardTitle>
@@ -376,7 +376,17 @@ export function CommitteesSection() {
                         ) : (
                           <TableRow>
                             <TableCell colSpan={3} className="text-muted-foreground">
-                              No allocations match that name yet.
+                              <p>No allocations match that name yet.</p>
+                              <p className="mt-1">
+                                For any queries, please contact us at{" "}
+                                <a
+                                  className="font-semibold text-[#B22222] hover:underline"
+                                  href="mailto:conference@vofmun.org"
+                                >
+                                  conference@vofmun.org
+                                </a>
+                                .
+                              </p>
                             </TableCell>
                           </TableRow>
                         )}
