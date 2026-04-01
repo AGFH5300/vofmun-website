@@ -16,19 +16,28 @@ const buildDelegateName = (firstName: string | null, lastName: string | null) =>
 export async function GET(request: NextRequest) {
   try {
     const committeeCode = normalizeCommitteeCode(request.nextUrl.searchParams.get("committee"))
-
-    if (!committeeCode) {
-      return NextResponse.json({ error: "Missing committee query parameter." }, { status: 400 })
+    const committeeNameMap: Record<string, string> = {
+      ga1: "GA1 - DISEC",
+      unhrc: "UNHRC",
+      unodc: "UNODC",
+      ecosoc: "ECOSOC",
+      unsc: "UNSC",
+      icrcc: "ICRCC",
     }
 
     const supabase = await createClient()
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("users")
-      .select("first_name,last_name,allocated_country_code,allocated_country")
+      .select("first_name,last_name,allocated_country_code,allocated_country,allocated_committee_code")
       .eq("allocation_status", "allocated")
-      .eq("allocated_committee_code", committeeCode)
       .or("allocated_country.not.is.null,allocated_country_code.not.is.null")
+
+    if (committeeCode) {
+      query = query.eq("allocated_committee_code", committeeCode)
+    }
+
+    const { data, error } = await query
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -43,9 +52,21 @@ export async function GET(request: NextRequest) {
           return null
         }
 
-        return { optionCode, assignedName }
+        const normalizedCommitteeCode = normalizeCommitteeCode(row.allocated_committee_code)
+
+        return {
+          optionCode,
+          assignedName,
+          committeeCode: normalizedCommitteeCode,
+          committeeName: committeeNameMap[normalizedCommitteeCode] ?? normalizedCommitteeCode.toUpperCase(),
+        }
       })
-      .filter((entry): entry is { optionCode: string; assignedName: string } => entry !== null)
+      .filter(
+        (
+          entry,
+        ): entry is { optionCode: string; assignedName: string; committeeCode: string; committeeName: string } =>
+          entry !== null,
+      )
 
     return NextResponse.json({ assignments })
   } catch (error) {
