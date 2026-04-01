@@ -7,8 +7,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Users, ExternalLink, Globe, Shield, ChevronRight } from "lucide-react"
 import Image from "next/image"
 
@@ -102,6 +105,13 @@ const committees = [
   },
 ]
 
+type AllocationEntry = {
+  optionCode: string
+  assignedName: string
+  committeeCode: string
+  committeeName: string
+}
+
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
     case "Beginner":
@@ -125,6 +135,10 @@ const getDifficultyColor = (difficulty: string) => {
 
 export function CommitteesSection() {
   const [icrccCountdown, setIcrccCountdown] = useState("T-00:00:00:00")
+  const [allocationRows, setAllocationRows] = useState<AllocationEntry[]>([])
+  const [allocationSearch, setAllocationSearch] = useState("")
+  const [allocationCommitteeFilter, setAllocationCommitteeFilter] = useState("all")
+  const [allocationLoading, setAllocationLoading] = useState(true)
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -152,6 +166,81 @@ export function CommitteesSection() {
 
     return () => clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadAllocations = async () => {
+      setAllocationLoading(true)
+
+      try {
+        const response = await fetch("/api/country-matrix/assignments")
+
+        if (!response.ok) {
+          if (isMounted) {
+            setAllocationRows([])
+          }
+          return
+        }
+
+        const payload = await response.json()
+        if (!isMounted) {
+          return
+        }
+
+        setAllocationRows(Array.isArray(payload.assignments) ? payload.assignments : [])
+      } catch {
+        if (isMounted) {
+          setAllocationRows([])
+        }
+      } finally {
+        if (isMounted) {
+          setAllocationLoading(false)
+        }
+      }
+    }
+
+    void loadAllocations()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const committeeFilterOptions = useMemo(
+    () =>
+      committees.map((committee) => ({
+        value: committee.href.split("/").pop() ?? committee.acronym.toLowerCase(),
+        label: committee.acronym,
+      })),
+    [],
+  )
+
+  const groupedAllocations = useMemo(() => {
+    const filteredByCommittee =
+      allocationCommitteeFilter === "all"
+        ? allocationRows
+        : allocationRows.filter((row) => row.committeeCode === allocationCommitteeFilter)
+
+    return committeeFilterOptions
+      .map((option) => ({
+        committeeCode: option.value,
+        committeeName: option.label,
+        rows: filteredByCommittee
+          .filter((row) => row.committeeCode === option.value)
+          .sort((a, b) => a.optionCode.localeCompare(b.optionCode)),
+      }))
+      .filter((group) => group.rows.length > 0)
+  }, [allocationCommitteeFilter, allocationRows, committeeFilterOptions])
+
+  const searchResults = useMemo(() => {
+    const normalizedSearch = allocationSearch.trim().toLowerCase()
+    if (!normalizedSearch) return []
+
+    return allocationRows
+      .filter((row) => row.assignedName.toLowerCase().includes(normalizedSearch))
+      .sort((a, b) => a.assignedName.localeCompare(b.assignedName))
+  }, [allocationRows, allocationSearch])
 
   return (
     <section id="committees" className="py-12" style={{ backgroundColor: "#f5f5f0" }}>
@@ -230,6 +319,103 @@ export function CommitteesSection() {
                 </Card>
               )
             })}
+          </div>
+
+          <div className="mt-12">
+            <Card className="border-0 diplomatic-shadow">
+              <CardHeader>
+                <CardTitle className="text-2xl font-serif text-primary">Committee Allocations Lookup</CardTitle>
+                <p className="text-sm text-foreground/75">
+                  Filter allocations by committee below, or search your name across all committees to find your
+                  assigned committee and country.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Input
+                    value={allocationSearch}
+                    onChange={(event) => setAllocationSearch(event.target.value)}
+                    placeholder="Search your name across all committees..."
+                  />
+                  <Select value={allocationCommitteeFilter} onValueChange={setAllocationCommitteeFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filter by committee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All committees</SelectItem>
+                      {committeeFilterOptions.map((committee) => (
+                        <SelectItem key={committee.value} value={committee.value}>
+                          {committee.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {allocationLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading allocations...</p>
+                ) : allocationSearch.trim() ? (
+                  <div className="rounded-md border border-gray-200 overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Delegate</TableHead>
+                          <TableHead>Committee</TableHead>
+                          <TableHead>Country</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {searchResults.length > 0 ? (
+                          searchResults.map((row, index) => (
+                            <TableRow key={`${row.assignedName}-${row.optionCode}-${index}`}>
+                              <TableCell>{row.assignedName}</TableCell>
+                              <TableCell>{row.committeeName}</TableCell>
+                              <TableCell>{row.optionCode}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={3} className="text-muted-foreground">
+                              No allocations match that name yet.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : groupedAllocations.length > 0 ? (
+                  <div className="space-y-4">
+                    {groupedAllocations.map((group) => (
+                      <div key={group.committeeCode} className="rounded-md border border-gray-200 overflow-hidden">
+                        <div className="bg-primary/5 px-4 py-2 text-sm font-semibold text-primary">
+                          {group.committeeName} Allocations
+                        </div>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Country</TableHead>
+                              <TableHead>Delegate</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {group.rows.map((row, index) => (
+                              <TableRow key={`${group.committeeCode}-${row.optionCode}-${index}`}>
+                                <TableCell>{row.optionCode}</TableCell>
+                                <TableCell>{row.assignedName}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Allocations are not published yet. Please check back later.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
