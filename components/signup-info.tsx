@@ -50,7 +50,7 @@ export function SignupInfo() {
             <div className="text-gray-800 font-medium">Registration Deadlines:</div>
             <div className="grid grid-cols-1 gap-2 ml-4">
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Delegates: March 28th 2026</span>
+                <span className="text-gray-700">Delegates: TBD</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-700">
@@ -72,13 +72,13 @@ export function SignupInfo() {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-gray-800"><strong>Conference Dates:</strong></span>
-            <span className="text-gray-600">April 3-5, 2026</span>
+            <span className="text-gray-600">TBD</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <span className="text-gray-800"><strong>Venue:</strong></span>
             <div className="text-right space-y-1">
               <span className="text-gray-600 block">
-                Arcadia Global School, Dubai
+                TBD
               </span>
               <a
                 href="https://maps.app.goo.gl/qf6igZTFr56Djqh79"
@@ -86,7 +86,7 @@ export function SignupInfo() {
                 rel="noopener noreferrer"
                 className="text-sm font-medium text-[#B22222] hover:underline"
               >
-                View in Google Maps
+                Venue details coming soon
               </a>
             </div>
           </div>

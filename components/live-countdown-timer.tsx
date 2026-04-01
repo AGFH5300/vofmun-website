@@ -14,11 +14,11 @@ export function LiveCountdownTimer() {
   })
 
   useEffect(() => {
-    const targetDate = new Date("2026-04-03T00:00:00").getTime()
+    const targetDate = null
 
     const updateCountdown = () => {
       const now = new Date().getTime()
-      const difference = targetDate - now
+      const difference = targetDate ? targetDate - now : 0
 
       if (difference > 0) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24))
