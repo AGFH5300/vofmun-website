@@ -17,11 +17,11 @@ export function CountdownSection() {
 
   useEffect(() => {
     // Set conference date (you can adjust this date)
-    const conferenceDate = new Date("2026-04-03T09:00:00")
+    const conferenceDate = null
 
     const timer = setInterval(() => {
       const now = new Date().getTime()
-      const distance = conferenceDate.getTime() - now
+      const distance = conferenceDate ? conferenceDate.getTime() - now : 0
 
       if (distance > 0) {
         setTimeLeft({
@@ -83,7 +83,7 @@ export function CountdownSection() {
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-serif font-semibold text-primary">Date</h3>
-                  <p className="text-sm sm:text-base text-foreground/70">April 3-5, 2026</p>
+                  <p className="text-sm sm:text-base text-foreground/70">TBD</p>
                 </div>
               </CardContent>
             </Card>
@@ -107,15 +107,15 @@ export function CountdownSection() {
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-base sm:text-lg font-serif font-semibold text-primary">Venue</h3>
-                    <p className="text-sm sm:text-base text-foreground/70">Arcadia Global School</p>
-                    <p className="text-xs sm:text-sm text-foreground/60">Dubai</p>
+                    <p className="text-sm sm:text-base text-foreground/70">TBD</p>
+                    <p className="text-xs sm:text-sm text-foreground/60">Venue TBD</p>
                     <a
                       href="https://maps.app.goo.gl/qf6igZTFr56Djqh79"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs font-medium text-primary hover:underline"
                     >
-                      Open in Google Maps
+                      Venue details coming soon
                     </a>
                   </div>
                 </CardContent>
