@@ -50,6 +50,7 @@ export function ProofOfPaymentForm() {
       if (paymentProofPreview) {
         URL.revokeObjectURL(paymentProofPreview)
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- when hasPaid becomes "no", this effect intentionally resets dependent form/upload state to preserve current UX.
       setPaymentProofFile(null)
       setPaymentProofPreview(null)
       setIsDragActive(false)
@@ -144,6 +145,7 @@ export function ProofOfPaymentForm() {
   useEffect(() => {
     if (hasPaid !== "yes") {
       dragDepthRef.current = 0
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- this branch runs when global drag listeners are disabled and must clear overlay drag UI state.
       setIsDragActive(false)
       return
     }
