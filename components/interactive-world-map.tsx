@@ -57,6 +57,7 @@ function CountryFlag({ countryCode, countryName }: { countryCode: string; countr
       alt={`${countryName} flag`}
       width={32}
       height={24}
+      loading="eager"
       className="w-8 h-6 object-cover rounded-sm border border-gray-200"
       onError={() => {
         setImageSrc(createFlagFallbackDataUri(countryCode))

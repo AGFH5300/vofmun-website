@@ -1,7 +1,6 @@
 // © 2026 Ansh Gupta. All rights reserved.
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
-import type { Metadata } from "next"
 import { EnhancedNavigation } from "@/components/enhanced-navigation"
 import { Footer } from "@/components/footer"
 import { ResourcesHero } from "@/components/resources-hero"
@@ -9,15 +8,7 @@ import { ScheduleSection } from "@/components/schedule-section"
 import { CommitteesSection } from "@/components/committees-section"
 import { RulesSection } from "@/components/rules-section"
 import { ScrollRestoration } from "@/components/scroll-restoration"
-import { createPageMetadata } from "@/app/seo-metadata"
 import Link from "next/link"
-
-export const metadata: Metadata = createPageMetadata({
-  title: "Resources | VOFMUN",
-  description:
-    "Explore VOFMUN conference resources, including schedules, committees, rules, and delegate preparation materials.",
-  path: "/resources",
-})
 
 export default function ResourcesPage() {
   return (
