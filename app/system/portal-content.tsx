@@ -1419,7 +1419,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       return
     }
 
-    setRecords((data as SignupRecord[]) ?? [])
+    setRecords(((data as unknown) as SignupRecord[]) ?? [])
     setError(null)
     setUpdateError(null)
     setLastUpdated(new Date())
@@ -1465,7 +1465,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       return
     }
 
-    setSchoolDelegations((data as SchoolDelegationRecord[]) ?? [])
+    setSchoolDelegations(((data as unknown) as SchoolDelegationRecord[]) ?? [])
     setSchoolError(null)
     setSchoolLastUpdated(new Date())
     setSchoolLoading(false)

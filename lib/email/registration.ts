@@ -120,7 +120,7 @@ async function sendEmailAndLog(args: SendEmailArgs, context: EmailLogContext) {
     const response = await sendEmailWithRateLimitHandling(args);
 
     if (response.error) {
-      throw new Error(response.error.message || "Unknown email provider error");
+      throw new Error("Unknown email provider error");
     }
 
     console.info("[email] Sent", {
@@ -716,7 +716,7 @@ export async function sendShortPaymentReminderEmail(
   if (payload.role === "chair" || payload.role === "admin") {
     const content = buildChairAdminEmailContent(payload, "unpaid");
 
-    const response = await sendEmailAndLog(
+    await sendEmailAndLog(
       {
         from: FROM_EMAIL,
         to: payload.email,
@@ -727,10 +727,6 @@ export async function sendShortPaymentReminderEmail(
       { category: "payment-reminder-short", recipient: payload.email },
     );
 
-    if (response.error)
-      throw new Error(
-        `Failed to send reminder email: ${response.error.message}`,
-      );
     return;
   }
 
@@ -799,7 +795,7 @@ If you have already paid, you can ignore this message.
 
 VOFMUN Secretariat`;
 
-  const response = await sendEmailAndLog(
+  await sendEmailAndLog(
     {
       from: FROM_EMAIL,
       to: payload.email,
@@ -810,8 +806,6 @@ VOFMUN Secretariat`;
     { category: "payment-reminder-short", recipient: payload.email },
   );
 
-  if (response.error)
-    throw new Error(`Failed to send reminder email: ${response.error.message}`);
 }
 
 export async function sendPaymentReminderAuditEmail(
@@ -864,7 +858,7 @@ Recipients attempted: ${payload.recipientsAttempted}
 Reminders sent: ${payload.remindersSent}
 Reminders failed: ${payload.remindersFailed}`;
 
-  const response = await sendEmailAndLog(
+  await sendEmailAndLog(
     {
       from: FROM_EMAIL,
       to: "dxb.avg@gmail.com",
@@ -875,8 +869,4 @@ Reminders failed: ${payload.remindersFailed}`;
     { category: "payment-reminder-audit", recipient: "dxb.avg@gmail.com" },
   );
 
-  if (response.error)
-    throw new Error(
-      `Failed to send payment reminder audit email: ${response.error.message}`,
-    );
 }

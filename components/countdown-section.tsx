@@ -16,12 +16,8 @@ export function CountdownSection() {
   })
 
   useEffect(() => {
-    // Set conference date (you can adjust this date)
-    const conferenceDate = null
-
     const timer = setInterval(() => {
-      const now = new Date().getTime()
-      const distance = conferenceDate ? conferenceDate.getTime() - now : 0
+      const distance = 0
 
       if (distance > 0) {
         setTimeLeft({
