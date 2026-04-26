@@ -3,11 +3,25 @@
 
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { DM_Sans, DM_Serif_Display } from "next/font/google"
+import { DM_Sans, DM_Serif_Display, Lato, Poppins } from "next/font/google"
 import "./globals.css"
 
 import { ScrollRestoration } from "@/components/scroll-restoration"
 import { Toaster } from "@/components/ui/sonner"
+
+const lato = Lato({
+  subsets: ["latin"],
+  variable: "--font-lato",
+  display: "swap",
+  weight: ["300", "400", "700", "900"],
+})
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  variable: "--font-poppins",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800"],
+})
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
