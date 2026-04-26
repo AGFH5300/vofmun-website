@@ -98,7 +98,7 @@ export function FounderDetailModal({ isOpen, onClose, founder }: FounderDetailMo
 
               {/* Quote */}
               <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-[#B22222]">
-                <p className="text-gray-700 italic">"{founder.quote}"</p>
+                <p className="text-gray-700 italic">&quot;{founder.quote}&quot;</p>
               </div>
 
               {/* Achievements */}

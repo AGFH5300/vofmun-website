@@ -100,7 +100,7 @@ export function SearchDialog() {
               ) : (
                 <div className="text-center py-6 text-muted-foreground">
                   <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No results found for "{query}"</p>
+                  <p>No results found for &quot;{query}&quot;</p>
                 </div>
               )}
             </div>

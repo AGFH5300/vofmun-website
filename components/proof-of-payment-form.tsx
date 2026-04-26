@@ -365,7 +365,7 @@ export function ProofOfPaymentForm() {
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="yes" id="proof-has-paid-yes" />
                 <Label htmlFor="proof-has-paid-yes" className="text-sm text-gray-700">
-                  Yes, I've already paid
+                  Yes, I&apos;ve already paid
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
