@@ -15,12 +15,42 @@ import { ClientScripts } from "@/components/client-scripts";
 import { FeaturesSlideshow } from "@/components/features-slideshow";
 import { LiveCountdownTimer } from "@/components/live-countdown-timer";
 import { FoundersInfiniteCarousel } from "@/components/founders-infinite-carousel";
-import { NationalitiesSection } from "@/components/nationalities-section";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
+
+const LazyNationalitiesSection = dynamic(
+  () => import("@/components/nationalities-section").then((module) => module.NationalitiesSection),
+  { ssr: false }
+);
 
 export default function HomePage() {
   const [isFoundersModalOpen, setIsFoundersModalOpen] = useState(false);
+  const [shouldRenderNationalities, setShouldRenderNationalities] = useState(false);
+  const nationalitiesContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (shouldRenderNationalities) return;
+    const target = nationalitiesContainerRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setShouldRenderNationalities(true);
+      },
+      {
+        rootMargin: "320px 0px",
+      }
+    );
+
+    observer.observe(target);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [shouldRenderNationalities]);
+
   return (
     <div className="min-h-screen bg-[#ffecdd]">
       <EnhancedNavigation />
@@ -220,8 +250,19 @@ export default function HomePage() {
               Our conference brings together a diverse community of delegates, each bringing unique perspectives shaped by their cultures and backgrounds.
               VOFMUN is a celebration of global thinking, where debate and diplomacy connect people to make a true difference.
             </p>
-            <div className="mt-10 max-w-6xl mx-auto">
-              <NationalitiesSection />
+            <div ref={nationalitiesContainerRef} className="mt-10 max-w-6xl mx-auto">
+              {shouldRenderNationalities ? (
+                <LazyNationalitiesSection />
+              ) : (
+                <div className="rounded-2xl border border-[#B22222]/15 bg-white p-3 shadow-md sm:p-5 lg:p-6">
+                  <div className="h-8 w-72 max-w-full rounded bg-gray-100" />
+                  <div className="mt-2 h-5 w-full max-w-2xl rounded bg-gray-100" />
+                  <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(300px,0.88fr)_minmax(360px,1fr)] lg:items-start lg:gap-4">
+                    <div className="h-[400px] rounded-xl border border-gray-100 bg-gray-50 sm:h-[440px] lg:h-[520px]" />
+                    <div className="h-[400px] rounded-xl border border-black/5 bg-[#020617] sm:h-[440px] lg:h-[520px]" />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>

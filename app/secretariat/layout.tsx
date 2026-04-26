@@ -1,17 +1,21 @@
 // © 2026 Ansh Gupta. All rights reserved.
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
+import type React from "react"
 import type { Metadata } from "next"
-import { GA1Page } from "@/components/committee-pages/ga1-page"
 import { createPageMetadata } from "@/app/seo-metadata"
 
 export const metadata: Metadata = createPageMetadata({
-  title: "GA1 Committee | VOFMUN",
+  title: "Secretariat | VOFMUN",
   description:
-    "Explore the VOFMUN GA1 committee page with agenda details, preparation resources, and registration guidance.",
-  path: "/committees/ga1",
+    "Meet the VOFMUN secretariat team leading conference operations, committees, logistics, media, and finance.",
+  path: "/secretariat",
 })
 
-export default function GA1() {
-  return <GA1Page />
+export default function SecretariatLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return children
 }
