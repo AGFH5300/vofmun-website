@@ -367,18 +367,18 @@ export default function VofmunCleanGlobePreview({
 }) {
   const [rotation, setRotation] = useState(-18)
   const [tilt, setTilt] = useState(DEFAULT_TILT)
-  const [hoveredCluster, setHoveredCluster] = useState<PinCluster | null>(null)
-  const [selectedCluster, setSelectedCluster] = useState<PinCluster | null>(null)
+  const [hoveredClusterId, setHoveredClusterId] = useState<string | null>(null)
+  const [selectedClusterId, setSelectedClusterId] = useState<string | null>(null)
   const [pauseUntil, setPauseUntil] = useState(0)
-  const hoveredClusterRef = useRef<PinCluster | null>(null)
+  const hoveredClusterRef = useRef<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef({ active: false, lastX: 0, lastY: 0 })
   const animationFrameRef = useRef<number | null>(null)
   const lastTickRef = useRef<number | null>(null)
 
   useEffect(() => {
-    hoveredClusterRef.current = hoveredCluster
-  }, [hoveredCluster])
+    hoveredClusterRef.current = hoveredClusterId
+  }, [hoveredClusterId])
 
   useEffect(() => {
     const tick = (timestamp: number) => {
@@ -459,24 +459,14 @@ export default function VofmunCleanGlobePreview({
     }
   }, [pinLocations, rotation, tilt])
 
-  useEffect(() => {
-    if (!hoveredCluster) return
-    const stillVisible = globeData.clusters.some((cluster) => cluster.id === hoveredCluster.id)
-    if (!stillVisible) {
-      setHoveredCluster(null)
-    }
-  }, [globeData.clusters, hoveredCluster])
-
-  useEffect(() => {
-    if (!selectedCluster) return
-    const refreshedCluster = globeData.clusters.find((cluster) => cluster.id === selectedCluster.id)
-    if (!refreshedCluster) {
-      setSelectedCluster(null)
-      return
-    }
-    setSelectedCluster(refreshedCluster)
-  }, [globeData.clusters, selectedCluster])
-
+  const hoveredCluster = useMemo(
+    () => globeData.clusters.find((cluster) => cluster.id === hoveredClusterId) ?? null,
+    [globeData.clusters, hoveredClusterId],
+  )
+  const selectedCluster = useMemo(
+    () => globeData.clusters.find((cluster) => cluster.id === selectedClusterId) ?? null,
+    [globeData.clusters, selectedClusterId],
+  )
   const activeCluster = hoveredCluster ?? selectedCluster
   const activeCountryIds = new Set(activeCluster?.pins.map((pin) => pin.countryId) ?? [])
   const tooltipPlacement = activeCluster ? getTooltipPlacement(activeCluster, globeData.clusters) : null
@@ -484,14 +474,14 @@ export default function VofmunCleanGlobePreview({
     activeCluster?.pins.length === 1 ? wrapTextToLines(activeCluster.pins[0].name, 22, 3) : []
 
   const handlePointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
-    setSelectedCluster(null)
+    setSelectedClusterId(null)
     dragRef.current = {
       active: true,
       lastX: event.clientX,
       lastY: event.clientY,
     }
     setIsDragging(true)
-    setHoveredCluster(null)
+    setHoveredClusterId(null)
     setPauseUntil(Date.now() + RESUME_DELAY_MS)
     event.currentTarget.setPointerCapture?.(event.pointerId)
   }
@@ -597,15 +587,15 @@ export default function VofmunCleanGlobePreview({
                 className="cursor-pointer"
                 onMouseEnter={() => {
                   if (dragRef.current.active) return
-                  setHoveredCluster(cluster)
+                  setHoveredClusterId(cluster.id)
                 }}
                 onMouseLeave={() => {
-                  setHoveredCluster((current) => (current?.id === cluster.id ? null : current))
+                  setHoveredClusterId((current) => (current === cluster.id ? null : current))
                   setPauseUntil(Date.now() + RESUME_DELAY_MS)
                 }}
                 onClick={(event) => {
                   event.stopPropagation()
-                  setSelectedCluster((current) => (current?.id === cluster.id ? null : cluster))
+                  setSelectedClusterId((current) => (current === cluster.id ? null : cluster.id))
                   setPauseUntil(Date.now() + RESUME_DELAY_MS)
                 }}
               >
