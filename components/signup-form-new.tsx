@@ -175,15 +175,27 @@ export function SignupFormNew() {
   const [hasPaid, setHasPaid] = useState<"yes" | "no" | "">("")
   const [paymentFullName, setPaymentFullName] = useState("")
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null)
-  const [paymentProofPreview, setPaymentProofPreview] = useState<string | null>(null)
+  const [safePaymentProofPreview, setSafePaymentProofPreview] = useState<string | null>(null)
   const [activeDropTarget, setActiveDropTarget] = useState<"paymentProof" | "chairCv" | null>(null)
   const [hasEditedFullName, setHasEditedFullName] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const dragDepthRef = useRef(0)
   const [lastPaymentStatus, setLastPaymentStatus] = useState<"yes" | "no" | null>(null)
-  const safePaymentProofPreview =
-    paymentProofPreview && paymentProofPreview.startsWith("blob:") ? paymentProofPreview : null
   const paymentProofTemporarilyDisabled = selectedRole === "chair" || selectedRole === "admin"
+
+  useEffect(() => {
+    if (!paymentProofFile || !paymentProofFile.type.startsWith("image/")) {
+      setSafePaymentProofPreview(null)
+      return
+    }
+
+    const objectUrl = URL.createObjectURL(paymentProofFile)
+    setSafePaymentProofPreview(objectUrl)
+
+    return () => {
+      URL.revokeObjectURL(objectUrl)
+    }
+  }, [paymentProofFile])
 
   const [chairCvFile, setChairCvFile] = useState<File | null>(null)
   const [chairCvError, setChairCvError] = useState<string | null>(null)
@@ -328,12 +340,7 @@ export function SignupFormNew() {
       return
     }
 
-    if (paymentProofPreview) {
-      URL.revokeObjectURL(paymentProofPreview)
-    }
-
     setPaymentProofFile(file)
-    setPaymentProofPreview(isImage ? URL.createObjectURL(file) : null)
     clearError("paymentProof")
   }
 
