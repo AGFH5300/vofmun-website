@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useEffect, useState } from "react"
 import VofmunCleanGlobe from "@/components/vofmun-clean-globe"
 import { Badge } from "@/components/ui/badge"
@@ -91,9 +92,12 @@ export function NationalitiesSection() {
                 className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-1.5"
               >
                 <div className="flex items-center space-x-3">
-                  <img
+                  <Image
                     src={`https://flagcdn.com/w40/${row.code.toLowerCase()}.png`}
                     alt={`${row.country} flag`}
+                    width={32}
+                    height={20}
+                    loading="eager"
                     className="h-5 w-8 rounded-sm border border-gray-200 object-cover"
                   />
                   <span className="text-sm font-medium text-gray-800">{row.country}</span>

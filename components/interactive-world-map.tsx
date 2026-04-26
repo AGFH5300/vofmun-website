@@ -3,6 +3,7 @@
 
 "use client"
 
+import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Globe } from "lucide-react"
@@ -45,6 +46,24 @@ function createFlagFallbackDataUri(countryCode: string): string {
   const code = countryCode.slice(0, 2).toUpperCase()
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='24'><rect width='40' height='24' fill='#f3f4f6'/><rect x='0.5' y='0.5' width='39' height='23' rx='2' ry='2' fill='none' stroke='#d1d5db'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial,sans-serif' font-size='10' fill='#6b7280'>${code}</text></svg>`
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+}
+
+function CountryFlag({ countryCode, countryName }: { countryCode: string; countryName: string }) {
+  const [imageSrc, setImageSrc] = useState(`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`)
+
+  return (
+    <Image
+      src={imageSrc}
+      alt={`${countryName} flag`}
+      width={32}
+      height={24}
+      loading="eager"
+      className="w-8 h-6 object-cover rounded-sm border border-gray-200"
+      onError={() => {
+        setImageSrc(createFlagFallbackDataUri(countryCode))
+      }}
+    />
+  )
 }
 
 export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) {
@@ -160,14 +179,7 @@ export function InteractiveWorldMap({ threshold = 70 }: { threshold?: number }) 
                   >
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-8 flex items-center justify-center">
-                        <img
-                          src={`https://flagcdn.com/w40/${country.countryCode.toLowerCase()}.png`}
-                          alt={`${country.country} flag`}
-                          className="w-8 h-6 object-cover rounded-sm border border-gray-200"
-                          onError={(e) => {
-                            e.currentTarget.src = createFlagFallbackDataUri(country.countryCode)
-                          }}
-                        />
+                        <CountryFlag countryCode={country.countryCode} countryName={country.country} />
                       </div>
                       <div>
                         <div className="font-medium text-gray-900">{country.country}</div>
