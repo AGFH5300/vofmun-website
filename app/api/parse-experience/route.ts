@@ -53,6 +53,16 @@ function makeSchema(isChair: boolean) {
 }
 
 function splitIntoExperienceLines(raw: string): string[] {
+  const labelsToIgnore = new Set(["completed muns", "delegate", "chairing"]);
+
+  const isIgnoredLabel = (segment: string) => {
+    let normalized = segment.trim();
+    if (normalized.endsWith(":")) {
+      normalized = normalized.slice(0, -1).trim();
+    }
+    return labelsToIgnore.has(normalized.toLowerCase());
+  };
+
   return raw
     .split(/\r?\n/)
     .flatMap((line) => {
@@ -63,9 +73,7 @@ function splitIntoExperienceLines(raw: string): string[] {
         .map((segment) => segment.trim())
         .filter(Boolean);
     })
-    .filter((segment) => {
-      return !/^(completed muns|delegate|chairing)\s*:?\s*$/i.test(segment);
-    });
+    .filter((segment) => !isIgnoredLabel(segment));
 }
 
 function buildNumberedExperienceBlock(lines: string[]): string {
