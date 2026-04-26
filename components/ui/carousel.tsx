@@ -98,6 +98,9 @@ function Carousel({
 
   React.useEffect(() => {
     if (!api) return
+    // Embla's current scrollability must be synced immediately after init/reInit.
+    // This updates local button disabled state from external carousel state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     onSelect(api)
     api.on('reInit', onSelect)
     api.on('select', onSelect)
