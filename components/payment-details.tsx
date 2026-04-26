@@ -3,7 +3,7 @@
 
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type CSSProperties } from "react"
 import Link from "next/link"
 import { ShieldCheck, UploadCloud, Wallet, Copy, Check } from "lucide-react"
 
@@ -68,6 +68,25 @@ export function PaymentDetails({ id }: PaymentDetailsProps) {
 
   const stripeButtonClasses =
     "inline-flex items-center justify-center gap-2 rounded-lg bg-[#635bff] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-[#4f47d8] active:bg-[#423ac7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635bff]"
+  const applePayButtonStyle = {
+    appearance: "none",
+    WebkitAppearance: "-apple-pay-button",
+    WebkitApplePayButtonStyle: "black",
+    WebkitApplePayButtonType: "buy",
+    height: "28px",
+    width: "42px",
+    display: "inline-block",
+    verticalAlign: "middle",
+    backgroundColor: "#000",
+    borderRadius: "6px",
+    border: "0",
+    padding: "0",
+    color: "#fff",
+    fontSize: "14px",
+    fontWeight: 600,
+    lineHeight: "28px",
+    textAlign: "center",
+  } as CSSProperties
 
   useEffect(() => {
     return () => {
@@ -125,26 +144,7 @@ export function PaymentDetails({ id }: PaymentDetailsProps) {
                       <button
                         aria-label="Apple Pay"
                         type="button"
-                        style={{
-                          appearance: "-apple-pay-button",
-                          WebkitAppearance: "-apple-pay-button",
-                          WebkitApplePayButtonStyle: "black",
-                          WebkitApplePayButtonType: "buy",
-                          height: "28px",
-                          width: "42px",
-                          display: "inline-block",
-                          verticalAlign: "middle",
-
-                          backgroundColor: "#000",
-                          borderRadius: "6px",
-                          border: "0",
-                          padding: "0",
-                          color: "#fff",
-                          fontSize: "14px",
-                          fontWeight: 600,
-                          lineHeight: "28px",
-                          textAlign: "center",
-                        }}
+                        style={applePayButtonStyle}
                       >
                         Pay
                       </button>
