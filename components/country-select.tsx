@@ -30,7 +30,6 @@ function FlagImage({ countryCode, countryName }: { countryCode: string; countryN
         alt={`${countryName} flag`}
         width={24}
         height={16}
-        loading="eager"
         className="w-6 h-4 object-cover rounded-sm border border-gray-200"
         onError={(event) => {
           // Fallback to a placeholder if flag image fails to load
