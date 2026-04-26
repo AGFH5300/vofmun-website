@@ -242,7 +242,7 @@ export function PaymentDetails({ id }: PaymentDetailsProps) {
                     <div>
                       <h3 className="text-lg font-semibold">Payment reference</h3>
                       <p className="text-sm text-white/90 leading-relaxed">
-                        Include your full name with the reference "{PAYMENT_DETAILS.paymentReference}" so we can match your bank transfer quickly.
+                        Include your full name with the reference &quot;{PAYMENT_DETAILS.paymentReference}&quot; so we can match your bank transfer quickly.
                       </p>
                     </div>
                   </div>

@@ -282,19 +282,19 @@ export function SignupFormNew() {
 
   useEffect(() => {
     return () => {
-      if (paymentProofPreview) {
-        URL.revokeObjectURL(paymentProofPreview)
+      if (safePaymentProofPreview) {
+        URL.revokeObjectURL(safePaymentProofPreview)
       }
     }
-  }, [paymentProofPreview])
+  }, [safePaymentProofPreview])
 
   useEffect(() => {
     if (hasPaid === "no") {
-      if (paymentProofPreview) {
-        URL.revokeObjectURL(paymentProofPreview)
+      if (safePaymentProofPreview) {
+        URL.revokeObjectURL(safePaymentProofPreview)
       }
       setPaymentProofFile(null)
-      setPaymentProofPreview(null)
+      setSafePaymentProofPreview(null)
       setActiveDropTarget(null)
       setPaymentFullName("")
       setHasEditedFullName(false)
@@ -303,7 +303,7 @@ export function SignupFormNew() {
         return rest
       })
     }
-  }, [hasPaid, paymentProofPreview])
+  }, [hasPaid, safePaymentProofPreview])
 
   const fileToDataURL = (file: File) =>
     new Promise<string>((resolve, reject) => {
@@ -365,11 +365,11 @@ export function SignupFormNew() {
   }
 
   const resetPaymentProof = () => {
-    if (paymentProofPreview) {
-      URL.revokeObjectURL(paymentProofPreview)
+    if (safePaymentProofPreview) {
+      URL.revokeObjectURL(safePaymentProofPreview)
     }
     setPaymentProofFile(null)
-    setPaymentProofPreview(null)
+    setSafePaymentProofPreview(null)
     setActiveDropTarget(null)
   }
 
@@ -1312,7 +1312,7 @@ export function SignupFormNew() {
             Register for VOFMUN 2026
           </CardTitle>
           <CardDescription className="text-center text-gray-600 text-sm sm:text-base">
-            Join the conversation that shapes tomorrow's world
+            Join the conversation that shapes tomorrow&apos;s world
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 sm:p-6" style={{ paddingTop: "0px" }}>
@@ -1335,7 +1335,7 @@ export function SignupFormNew() {
           </Alert>
           <div className="text-center mb-4 sm:mb-8">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Choose Your Role</h2>
-            <p className="text-gray-600 text-sm sm:text-base">Select the role you'd like to apply for at VOFMUN 2026</p>
+            <p className="text-gray-600 text-sm sm:text-base">Select the role you&apos;d like to apply for at VOFMUN 2026</p>
           </div>
 
           {(chairSignupClosed || adminSignupClosed) && (
@@ -1922,7 +1922,7 @@ export function SignupFormNew() {
                     <span className="text-red-500">*</span>
                   </Label>
                   <p className="text-sm text-gray-600 mb-3">
-                    Main responsibilities include managing the ICRCC Committee's flow along with the Crisis Director,
+                    Main responsibilities include managing the ICRCC Committee&apos;s flow along with the Crisis Director,
                     operating and planning ICRCC updates, and handling directives and updates for the committee. A
                     complete list of responsibilities can be found at the start of the form.
                   </p>
@@ -2439,7 +2439,7 @@ export function SignupFormNew() {
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="yes" id="has-paid-yes" disabled={paymentProofTemporarilyDisabled} />
                   <Label htmlFor="has-paid-yes" className="text-sm text-gray-700">
-                    Yes, I've already paid
+                    Yes, I&apos;ve already paid
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -2594,7 +2594,7 @@ export function SignupFormNew() {
 
             {hasPaid === "no" && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 space-y-2">
-                <p>You indicated you have not paid yet. That's okay but please complete your payment after submitting your application.</p>
+                <p>You indicated you have not paid yet. That&apos;s okay but please complete your payment after submitting your application.</p>
                 <p>
                   Once you have your receipt, visit the{" "}
                   <Link href="/proof-of-payment" className="font-semibold text-[#B22222] underline-offset-4 hover:underline">
