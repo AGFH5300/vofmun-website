@@ -4,6 +4,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Check, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -22,15 +23,20 @@ interface CountrySelectProps {
 }
 
 function FlagImage({ countryCode, countryName }: { countryCode: string; countryName: string }) {
+  const [imageSrc, setImageSrc] = useState(`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`)
+
   return (
     <div className="w-6 h-4 flex items-center justify-center flex-shrink-0">
-      <img
-        src={`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`}
+      <Image
+        src={imageSrc}
         alt={`${countryName} flag`}
+        width={24}
+        height={16}
+        loading="eager"
         className="w-6 h-4 object-cover rounded-sm border border-gray-200"
-        onError={(e) => {
+        onError={() => {
           // Fallback to a placeholder if flag image fails to load
-          e.currentTarget.src = `https://via.placeholder.com/24x16/cccccc/666666?text=${countryCode}`
+          setImageSrc(`https://via.placeholder.com/24x16/cccccc/666666?text=${countryCode}`)
         }}
       />
     </div>
