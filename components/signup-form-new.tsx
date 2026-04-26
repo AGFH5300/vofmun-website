@@ -5,7 +5,7 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react"
+import { useCallback, useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -238,7 +238,7 @@ export function SignupFormNew() {
   const isFileDrag = (event: DragEvent | React.DragEvent<HTMLElement>) =>
     Array.from(event.dataTransfer?.types ?? []).includes("Files")
 
-  const resolveGlobalDropTarget = (): "paymentProof" | "chairCv" | null => {
+  const resolveGlobalDropTarget = useCallback((): "paymentProof" | "chairCv" | null => {
     if (selectedRole === "chair") {
       return "chairCv"
     }
@@ -248,7 +248,7 @@ export function SignupFormNew() {
     }
 
     return null
-  }
+  }, [hasPaid, paymentProofTemporarilyDisabled, selectedRole])
 
   const paymentProofIsPdf =
     !!paymentProofFile &&
@@ -256,6 +256,15 @@ export function SignupFormNew() {
       paymentProofFile.name.toLowerCase().endsWith(".pdf"))
 
   const paymentProofIsImage = !!paymentProofFile && paymentProofFile.type.startsWith("image/")
+
+  const resetPaymentProof = useCallback(() => {
+    if (safePaymentProofPreview) {
+      URL.revokeObjectURL(safePaymentProofPreview)
+    }
+    setPaymentProofFile(null)
+    setSafePaymentProofPreview(null)
+    setActiveDropTarget(null)
+  }, [safePaymentProofPreview])
 
   useEffect(() => {
     if (paymentProofTemporarilyDisabled) {
@@ -267,7 +276,7 @@ export function SignupFormNew() {
         return rest
       })
     }
-  }, [paymentProofTemporarilyDisabled])
+  }, [paymentProofTemporarilyDisabled, resetPaymentProof])
 
   useEffect(() => {
     const combinedName = [formData.firstName, formData.lastName]
@@ -313,15 +322,15 @@ export function SignupFormNew() {
       reader.readAsDataURL(file)
     })
 
-  const clearError = (key: string) => {
+  const clearError = useCallback((key: string) => {
     setErrors((prev) => {
       if (!prev[key]) return prev
       const { [key]: _removed, ...rest } = prev
       return rest
     })
-  }
+  }, [])
 
-  const handlePaymentProofSelect = (file: File) => {
+  const handlePaymentProofSelect = useCallback((file: File) => {
     if (paymentProofTemporarilyDisabled) {
       toast.info(
         "Payment proof uploads for chair and admin applicants are disabled until selections are announced.",
@@ -342,7 +351,7 @@ export function SignupFormNew() {
 
     setPaymentProofFile(file)
     clearError("paymentProof")
-  }
+  }, [clearError, paymentProofTemporarilyDisabled])
 
   const handleChairCvSelect = (file: File) => {
     const allowed =
@@ -362,15 +371,6 @@ export function SignupFormNew() {
       const { chairCv, ...rest } = prev
       return rest
     })
-  }
-
-  const resetPaymentProof = () => {
-    if (safePaymentProofPreview) {
-      URL.revokeObjectURL(safePaymentProofPreview)
-    }
-    setPaymentProofFile(null)
-    setSafePaymentProofPreview(null)
-    setActiveDropTarget(null)
   }
 
   const resetChairCv = () => {
@@ -517,7 +517,7 @@ export function SignupFormNew() {
       window.removeEventListener("dragleave", onDragLeave)
       window.removeEventListener("drop", onDrop)
     }
-  }, [hasPaid, paymentProofTemporarilyDisabled, selectedRole])
+  }, [handlePaymentProofSelect, resolveGlobalDropTarget])
 
   const clearReferralFeedbackForIndex = (index: number) => {
     setReferralFeedback((prev) => {
