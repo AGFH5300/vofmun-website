@@ -170,7 +170,7 @@ async function callModelOnce(opts: {
       contents: [{ role: "user", parts: [{ text: buildPrompt(roleType, text, prompt) }] }],
       generationConfig: {
         responseMimeType: "application/json",
-        responseSchema: makeSchema(isChair),
+        responseSchema: makeSchema(isChair) as any,
       },
     });
 

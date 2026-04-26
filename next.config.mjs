@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
+  experimental: { turbopackUseSystemTlsCerts: true },
   images: { unoptimized: true },
 };
 export default nextConfig;

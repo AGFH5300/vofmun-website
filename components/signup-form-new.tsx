@@ -1396,7 +1396,7 @@ export function SignupFormNew() {
                       </TooltipProvider>
                     </div>
 
-                    <p className="text-sm text-gray-600 mb-4 flex-1">{card.description}</p>
+                    <p className="text-sm text-gray-600 mb-4 flex-1">{card.details}</p>
 
                     <Button
                       className="flex w-full bg-[#B22222] hover:bg-[#B22222] text-white text-xs py-2 sm:py-2.5 mt-auto"
