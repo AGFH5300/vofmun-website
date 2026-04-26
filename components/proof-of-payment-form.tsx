@@ -35,6 +35,7 @@ export function ProofOfPaymentForm() {
     Array.from(event.dataTransfer?.types ?? []).includes("Files")
   const isSafeBlobPreviewUrl = !!paymentProofPreview && paymentProofPreview.startsWith("blob:")
   const isImagePreview = !!paymentProofFile && paymentProofFile.type.startsWith("image/")
+  const safePaymentProofImagePreview = isSafeBlobPreviewUrl && isImagePreview ? paymentProofPreview : null
 
   useEffect(() => {
     return () => {
@@ -516,10 +517,10 @@ export function ProofOfPaymentForm() {
                             </Button>
                           </div>
                         </div>
-                      ) : isSafeBlobPreviewUrl && isImagePreview ? (
+                      ) : safePaymentProofImagePreview ? (
                         <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={paymentProofPreview} alt="Payment proof preview" className="h-48 w-full object-cover" />
+                          <img src={safePaymentProofImagePreview} alt="Payment proof preview" className="h-48 w-full object-cover" />
                           <button
                             type="button"
                             onClick={(event) => {
