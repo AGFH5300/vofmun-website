@@ -1,9 +1,18 @@
 // © 2026 Ansh Gupta. All rights reserved.
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
+import type { Metadata } from "next"
 import { DelegateReferralCodeForm } from '@/components/delegate-referral-code-form'
 import { EnhancedNavigation } from '@/components/enhanced-navigation'
 import { Footer } from '@/components/footer'
+import { createPageMetadata } from "@/app/seo-metadata"
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Delegate Referral Code | VOFMUN",
+  description:
+    "Find your VOFMUN delegate referral code to invite peers and track conference referrals.",
+  path: "/delegate-referral-code",
+})
 
 export default function DelegateReferralCodePage() {
   return (
