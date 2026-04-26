@@ -73,6 +73,7 @@ export function PaymentReminderForm({ eligibleCount, recipients, resendConfigure
   })
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- When the server returns a refreshed recipients prop, this form intentionally resets local editable rows to the latest source data.
     setRecipientList(recipients)
     setSelectedIds(recipients.map((recipient) => recipient.id))
   }, [recipients])
