@@ -256,6 +256,8 @@ export function SignupFormNew() {
       paymentProofFile.name.toLowerCase().endsWith(".pdf"))
 
   const paymentProofIsImage = !!paymentProofFile && paymentProofFile.type.startsWith("image/")
+  const safePaymentProofImagePreview =
+    paymentProofIsImage && safePaymentProofPreview?.startsWith("blob:") ? safePaymentProofPreview : null
 
   const resetPaymentProof = useCallback(() => {
     if (safePaymentProofPreview) {
@@ -2530,12 +2532,12 @@ export function SignupFormNew() {
                     />
 
                     {paymentProofFile ? (
-                      paymentProofIsImage && safePaymentProofPreview ? (
+                      safePaymentProofImagePreview ? (
                         <div className="w-full flex flex-col items-center space-y-3">
                           <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={safePaymentProofPreview}
+                              src={safePaymentProofImagePreview}
                               alt="Payment proof preview"
                               className="h-48 w-full object-cover"
                             />
