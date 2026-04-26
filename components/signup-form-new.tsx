@@ -181,6 +181,8 @@ export function SignupFormNew() {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const dragDepthRef = useRef(0)
   const [lastPaymentStatus, setLastPaymentStatus] = useState<"yes" | "no" | null>(null)
+  const safePaymentProofPreview =
+    paymentProofPreview && paymentProofPreview.startsWith("blob:") ? paymentProofPreview : null
   const paymentProofTemporarilyDisabled = selectedRole === "chair" || selectedRole === "admin"
 
   const [chairCvFile, setChairCvFile] = useState<File | null>(null)
@@ -2521,12 +2523,12 @@ export function SignupFormNew() {
                     />
 
                     {paymentProofFile ? (
-                      paymentProofIsImage && paymentProofPreview ? (
+                      paymentProofIsImage && safePaymentProofPreview ? (
                         <div className="w-full flex flex-col items-center space-y-3">
                           <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={paymentProofPreview}
+                              src={safePaymentProofPreview}
                               alt="Payment proof preview"
                               className="h-48 w-full object-cover"
                             />
