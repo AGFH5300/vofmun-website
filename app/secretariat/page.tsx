@@ -404,10 +404,9 @@ export default function SecretariatPage() {
     return (
       <div
         key={hoverKey}
-        className={`relative group cursor-pointer transition-all duration-700 ${
+        className={`relative group transition-all duration-700 ${
           isHovered ? "transform scale-105 z-10" : ""
         }`}
-        onClick={() => openModal(member)}
         onMouseEnter={() => setHoveredFounder(hoverKey)}
         onMouseLeave={() => setHoveredFounder(null)}
       >
@@ -422,55 +421,58 @@ export default function SecretariatPage() {
             }`}
           ></div>
 
-          <div
-            className={`relative z-10 flex flex-col items-center gap-5 ${
-              variant === "founder" ? "md:gap-6" : ""
-            }`}
-          >
-            <div className="flex justify-center">
-              <div className={`p-3 ${colors.bg} rounded-full shadow-lg`}>
-                <IconComponent className="h-6 w-6 text-white" />
+          <div className="relative z-10 flex flex-col items-center gap-5">
+            <button
+              type="button"
+              onClick={() => openModal(member)}
+              className={`w-full flex flex-col items-center gap-5 text-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B22222] ${
+                variant === "founder" ? "md:gap-6" : ""
+              }`}
+            >
+              <div className="flex justify-center">
+                <div className={`p-3 ${colors.bg} rounded-full shadow-lg`}>
+                  <IconComponent className="h-6 w-6 text-white" />
+                </div>
               </div>
-            </div>
-
-            <div className="flex justify-center">
-              <div
-                className={`relative ${imageSizeClass} rounded-full border-4 ${colors.border} shadow-lg overflow-hidden`}
-              >
-                <Image
-                  src={member.image}
-                  alt={member.name}
-                  fill
-                  className={`object-cover ${member.name === "Vihaan Harrison" ? "object-[center_58%]" : "object-center"}`}
-                />
-              </div>
-            </div>
-
-            <div className="text-center space-y-3">
-              <h3 className={`${nameClass} font-bold text-gray-900 font-serif`}>
-                {member.name}
-              </h3>
-              <p
-                className={`${roleClass} text-gray-600 mb-1`}
-                dangerouslySetInnerHTML={{ __html: member.role }}
-              />
-              <span className={`${badgeClass} ${colors.badgeClass}`}>
-                {member.department}
-              </span>
-            </div>
 
               <div className="flex justify-center">
-                <a
-                  href={linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${socialButtonSize} bg-[#0077B5] rounded-full flex items-center justify-center hover:bg-[#005885] transition-all duration-300 hover:scale-110 shadow-md`}
-                  aria-label={linkedinLabel}
-                  onClick={(e) => e.stopPropagation()}
+                <div
+                  className={`relative ${imageSizeClass} rounded-full border-4 ${colors.border} shadow-lg overflow-hidden`}
                 >
-                  <Linkedin className={`${socialIconSize} text-white`} />
-                </a>
+                  <Image
+                    src={member.image}
+                    alt={member.name}
+                    fill
+                    className={`object-cover ${member.name === "Vihaan Harrison" ? "object-[center_58%]" : "object-center"}`}
+                  />
+                </div>
               </div>
+
+              <div className="space-y-3">
+                <h3 className={`${nameClass} font-bold text-gray-900 font-serif`}>
+                  {member.name}
+                </h3>
+                <p
+                  className={`${roleClass} text-gray-600 mb-1`}
+                  dangerouslySetInnerHTML={{ __html: member.role }}
+                />
+                <span className={`${badgeClass} ${colors.badgeClass}`}>
+                  {member.department}
+                </span>
+              </div>
+            </button>
+
+            <div className="flex justify-center">
+              <a
+                href={linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${socialButtonSize} bg-[#0077B5] rounded-full flex items-center justify-center hover:bg-[#005885] transition-all duration-300 hover:scale-110 shadow-md`}
+                aria-label={linkedinLabel}
+              >
+                <Linkedin className={`${socialIconSize} text-white`} />
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -558,7 +560,12 @@ export default function SecretariatPage() {
             />
 
             {/* Modal Container */}
-            <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row">
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="secretariat-modal-title"
+              className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row"
+            >
               {/* Left - Image & Department */}
               <div
                 className={`md:w-1/3 ${getDepartmentColor(modalFounder.department).bg} flex flex-col items-center justify-center gap-4 md:gap-5 p-6 md:p-8 text-center`}
@@ -572,7 +579,7 @@ export default function SecretariatPage() {
                     sizes="(max-width: 768px) 60vw, 224px"
                   />
                 </div>
-                <h2 className="text-white text-2xl font-bold">
+                <h2 id="secretariat-modal-title" className="text-white text-2xl font-bold">
                   {modalFounder.name}
                 </h2>
                 <p
@@ -613,6 +620,7 @@ export default function SecretariatPage() {
 
               {/* Close Button */}
               <button
+                type="button"
                 onClick={closeModal}
                 className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-gray-600 hover:text-gray-900 rounded-full p-2 shadow-lg transition hover:scale-110"
               >
