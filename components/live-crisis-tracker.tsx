@@ -5,35 +5,35 @@
 
 import { useState, useEffect } from "react"
 
+const crises = [
+  {
+    title: "Climate Emergency Response",
+    description: "Delegates must negotiate immediate action on rising sea levels affecting Pacific Island nations.",
+    urgency: "High",
+    affectedCountries: ["Tuvalu", "Maldives", "Marshall Islands"],
+    timeRemaining: "2 hours",
+    status: "Active",
+  },
+  {
+    title: "Global Food Security Crisis",
+    description: "Addressing supply chain disruptions and ensuring food access for vulnerable populations.",
+    urgency: "Critical",
+    affectedCountries: ["Yemen", "Afghanistan", "Somalia"],
+    timeRemaining: "45 minutes",
+    status: "Urgent",
+  },
+  {
+    title: "Cybersecurity Threat Assessment",
+    description: "International cooperation needed to address state-sponsored cyber attacks on infrastructure.",
+    urgency: "Medium",
+    affectedCountries: ["Estonia", "Ukraine", "South Korea"],
+    timeRemaining: "3 hours",
+    status: "Monitoring",
+  },
+]
+
 export function LiveCrisisTracker() {
   const [currentCrisis, setCurrentCrisis] = useState(0)
-
-  const crises = [
-    {
-      title: "Climate Emergency Response",
-      description: "Delegates must negotiate immediate action on rising sea levels affecting Pacific Island nations.",
-      urgency: "High",
-      affectedCountries: ["Tuvalu", "Maldives", "Marshall Islands"],
-      timeRemaining: "2 hours",
-      status: "Active",
-    },
-    {
-      title: "Global Food Security Crisis",
-      description: "Addressing supply chain disruptions and ensuring food access for vulnerable populations.",
-      urgency: "Critical",
-      affectedCountries: ["Yemen", "Afghanistan", "Somalia"],
-      timeRemaining: "45 minutes",
-      status: "Urgent",
-    },
-    {
-      title: "Cybersecurity Threat Assessment",
-      description: "International cooperation needed to address state-sponsored cyber attacks on infrastructure.",
-      urgency: "Medium",
-      affectedCountries: ["Estonia", "Ukraine", "South Korea"],
-      timeRemaining: "3 hours",
-      status: "Monitoring",
-    },
-  ]
 
   useEffect(() => {
     const interval = setInterval(() => {
