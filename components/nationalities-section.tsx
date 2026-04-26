@@ -33,6 +33,10 @@ export function NationalitiesSection() {
     let isMounted = true
 
     async function fetchNationalities() {
+      if (document.visibilityState !== 'visible') {
+        return
+      }
+
       try {
         const response = await fetch('/api/nationalities-globe', { cache: 'no-store' })
 
@@ -65,10 +69,17 @@ export function NationalitiesSection() {
     fetchNationalities()
 
     const intervalId = window.setInterval(fetchNationalities, 30_000)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchNationalities()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       isMounted = false
       window.clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 
@@ -97,7 +108,6 @@ export function NationalitiesSection() {
                     alt={`${row.country} flag`}
                     width={32}
                     height={20}
-                    loading="eager"
                     className="h-5 w-8 rounded-sm border border-gray-200 object-cover"
                   />
                   <span className="text-sm font-medium text-gray-800">{row.country}</span>
