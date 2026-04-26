@@ -139,6 +139,7 @@ export function CommitteesSection() {
   const [allocationSearch, setAllocationSearch] = useState("")
   const [allocationCommitteeFilter, setAllocationCommitteeFilter] = useState("all")
   const [allocationLoading, setAllocationLoading] = useState(true)
+  const [showAllAllocations, setShowAllAllocations] = useState(true)
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -351,6 +352,17 @@ export function CommitteesSection() {
                     </SelectContent>
                   </Select>
                 </div>
+                {!allocationSearch.trim() && groupedAllocations.length > 0 ? (
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowAllAllocations((previous) => !previous)}
+                    >
+                      {showAllAllocations ? "Minimize all allocations" : "Show all allocations"}
+                    </Button>
+                  </div>
+                ) : null}
 
                 {allocationLoading ? (
                   <p className="text-sm text-muted-foreground">Loading allocations...</p>
@@ -394,6 +406,7 @@ export function CommitteesSection() {
                     </Table>
                   </div>
                 ) : groupedAllocations.length > 0 ? (
+                  showAllAllocations ? (
                   <div className="space-y-4">
                     {groupedAllocations.map((group) => (
                       <div key={group.committeeCode} className="rounded-md border border-gray-200 overflow-hidden">
@@ -419,6 +432,11 @@ export function CommitteesSection() {
                       </div>
                     ))}
                   </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Allocations are currently minimized. Use &quot;Show all allocations&quot; to expand them.
+                    </p>
+                  )
                 ) : (
                   <p className="text-sm text-muted-foreground">
                     Allocations are not published yet. Please check back later.
