@@ -1276,6 +1276,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
       const storedSchoolFields = window.localStorage.getItem(SCHOOL_FIELD_STORAGE_KEY)
 
       if (storedUserFields) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate persisted admin column preferences once on mount before enabling persistence.
         setSelectedUserFields(sanitizeUserFieldSelections(JSON.parse(storedUserFields)))
       }
 
@@ -1472,6 +1473,7 @@ export function PortalContent({ onSignOut }: PortalContentProps) {
   }, [supabase])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial portal load must fetch and populate editable admin tables from Supabase.
     void fetchRecords()
     void fetchSchoolDelegations()
 
