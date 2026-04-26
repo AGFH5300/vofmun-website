@@ -208,6 +208,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Initial portal load intentionally hydrates editable table state from API.
     void loadRows()
   }, [loadRows])
 
@@ -223,6 +224,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
 
     const emailKey = userEmail.trim().toLowerCase()
     if (!emailKey) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydration flag must flip after checking user-scoped cookie state.
       setColumnsHydrated(true)
       return
     }
@@ -341,6 +343,7 @@ export function AllocationsPortal({ isAdmin, userEmail, onSignOut }: Allocations
 
   useEffect(() => {
     if (allocatedDelegatesByCommittee.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Selected committee must reset when underlying allocated committees disappear.
       setSelectedAllocationCommittee(null)
       return
     }
