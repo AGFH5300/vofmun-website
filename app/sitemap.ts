@@ -7,11 +7,18 @@ const baseUrl = "https://vofmun.org";
 
 const routes = [
   "",
-  "/committees",
   "/resources",
   "/secretariat",
   "/signup",
+  "/signup/school",
   "/proof-of-payment",
+  "/delegate-referral-code",
+  "/committees/ga1",
+  "/committees/unhrc",
+  "/committees/unodc",
+  "/committees/ecosoc",
+  "/committees/unsc",
+  "/committees/icrcc",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
