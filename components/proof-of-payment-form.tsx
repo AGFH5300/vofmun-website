@@ -33,6 +33,8 @@ export function ProofOfPaymentForm() {
   const dragDepthRef = useRef(0)
   const isFileDrag = (event: DragEvent | React.DragEvent<HTMLElement>) =>
     Array.from(event.dataTransfer?.types ?? []).includes("Files")
+  const isSafeBlobPreviewUrl = !!paymentProofPreview && paymentProofPreview.startsWith("blob:")
+  const isImagePreview = !!paymentProofFile && paymentProofFile.type.startsWith("image/")
 
   useEffect(() => {
     return () => {
@@ -514,7 +516,7 @@ export function ProofOfPaymentForm() {
                             </Button>
                           </div>
                         </div>
-                      ) : (
+                      ) : isSafeBlobPreviewUrl && isImagePreview ? (
                         <div className="relative w-full max-w-xs overflow-hidden rounded-lg border border-green-200 bg-white shadow-sm">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={paymentProofPreview} alt="Payment proof preview" className="h-48 w-full object-cover" />
@@ -525,6 +527,26 @@ export function ProofOfPaymentForm() {
                               resetPaymentProof()
                             }}
                             className="absolute top-2 right-2 inline-flex items-center space-x-1 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white shadow"
+                          >
+                            <X className="h-3 w-3" />
+                            <span>Remove</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="w-full max-w-xs rounded-lg border border-green-200 bg-white p-4 shadow-sm">
+                          <div className="mb-3 flex items-center gap-2 text-green-700">
+                            <FileText className="h-5 w-5" />
+                            <span className="text-sm font-medium">
+                              {paymentProofFile?.name ?? "Uploaded file"}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              resetPaymentProof()
+                            }}
+                            className="inline-flex items-center space-x-1 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white shadow"
                           >
                             <X className="h-3 w-3" />
                             <span>Remove</span>
