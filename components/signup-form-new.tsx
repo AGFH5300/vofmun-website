@@ -185,6 +185,7 @@ export function SignupFormNew() {
 
   useEffect(() => {
     if (!paymentProofFile || !paymentProofFile.type.startsWith("image/")) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing preview state when file type is non-image preserves upload/preview behavior.
       setSafePaymentProofPreview(null)
       return
     }
@@ -270,6 +271,7 @@ export function SignupFormNew() {
 
   useEffect(() => {
     if (paymentProofTemporarilyDisabled) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- role switch intentionally forces payment section back to unpaid and clears dependent fields.
       setHasPaid("no")
       resetPaymentProof()
       setPaymentFullName("")
@@ -287,6 +289,7 @@ export function SignupFormNew() {
       .trim()
 
     if (!hasEditedFullName) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- keeps payment name synced to primary name until user manually overrides it.
       setPaymentFullName(combinedName)
     }
   }, [formData.firstName, formData.lastName, hasEditedFullName])
@@ -304,6 +307,7 @@ export function SignupFormNew() {
       if (safePaymentProofPreview) {
         URL.revokeObjectURL(safePaymentProofPreview)
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting payment proof state is required when user marks unpaid.
       setPaymentProofFile(null)
       setSafePaymentProofPreview(null)
       setActiveDropTarget(null)
@@ -456,6 +460,7 @@ export function SignupFormNew() {
 
     if (!globalDropTarget) {
       dragDepthRef.current = 0
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clears drag highlight when no global file drop target is active.
       setActiveDropTarget(null)
       return
     }
