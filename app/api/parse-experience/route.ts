@@ -54,6 +54,7 @@ function makeSchema(isChair: boolean) {
 
 function splitIntoExperienceLines(raw: string): string[] {
   const labelsToIgnore = new Set(["completed muns", "delegate", "chairing"]);
+  const segmentDelimiters = new Set([";", "•", "·"]);
 
   const isIgnoredLabel = (segment: string) => {
     let normalized = segment.trim();
@@ -63,13 +64,27 @@ function splitIntoExperienceLines(raw: string): string[] {
     return labelsToIgnore.has(normalized.toLowerCase());
   };
 
+  const splitSegments = (line: string) => {
+    const segments: string[] = [];
+    let current = "";
+    for (const char of line) {
+      if (segmentDelimiters.has(char)) {
+        segments.push(current);
+        current = "";
+        continue;
+      }
+      current += char;
+    }
+    segments.push(current);
+    return segments;
+  };
+
   return raw
     .split(/\r?\n/)
     .flatMap((line) => {
       const trimmed = line.trim();
       if (!trimmed) return [];
-      return trimmed
-        .split(/[;•·]/)
+      return splitSegments(trimmed)
         .map((segment) => segment.trim())
         .filter(Boolean);
     })
