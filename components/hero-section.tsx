@@ -30,7 +30,7 @@ export function HeroSection() {
 
           {/* Description */}
           <p className="text-base sm:text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
-            Join a youth-driven platform bringing together tomorrow's leaders to debate, collaborate, and create
+            Join a youth-driven platform bringing together tomorrow&apos;s leaders to debate, collaborate, and create
             solutions for global challenges through diplomatic excellence.
           </p>
 

@@ -19,7 +19,7 @@ export function ResourcesHero() {
         <div className="max-w-4xl mx-auto text-center space-y-4 sm:space-y-6">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#B22222] leading-tight">Conference Resources</h1>
           <p className="text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto">
-            Everything you need to prepare for VOFMUN. From committee guides to schedules, we've got you covered.
+            Everything you need to prepare for VOFMUN. From committee guides to schedules, we&apos;ve got you covered.
           </p>
 
           {/* Quick Navigation */}

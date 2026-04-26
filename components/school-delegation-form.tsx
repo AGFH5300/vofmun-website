@@ -331,7 +331,7 @@ export function SchoolDelegationForm() {
           School Delegation Signup
         </CardTitle>
         <CardDescription className="text-gray-600 text-sm sm:text-base">
-          Provide your school's details and upload the delegate spreadsheet.
+          Provide your school&apos;s details and upload the delegate spreadsheet.
         </CardDescription>
         <Alert className="bg-red-50 border-red-200 text-red-900">
           <Building2 className="h-5 w-5" />
@@ -363,7 +363,7 @@ export function SchoolDelegationForm() {
                   id="schoolName"
                   value={formData.schoolName}
                   onChange={(event) => handleInputChange("schoolName", event.target.value)}
-                  placeholder="Enter your school's full name"
+                  placeholder="Enter your school&apos;s full name"
                   className={errors.schoolName ? "border-red-500" : ""}
                 />
                 {errors.schoolName && <p className="text-sm text-red-500">{errors.schoolName}</p>}
@@ -502,7 +502,7 @@ export function SchoolDelegationForm() {
           <div className="space-y-3 sm:space-y-4">
             <h3 className="text-lg sm:text-xl font-serif font-semibold text-primary">Logistics support</h3>
             <p className="text-sm text-gray-600">
-              Let us know if you'd like the VOFMUN team to organise any of the following for your delegation.
+              Let us know if you&apos;d like the VOFMUN team to organise any of the following for your delegation.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="flex items-start gap-3 rounded-lg border border-gray-200 p-3 hover:border-[#B22222]">
@@ -634,7 +634,7 @@ export function SchoolDelegationForm() {
               <div className="flex items-start gap-2">
                 <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0" />
                 <div className="space-y-2 text-sm text-blue-800">
-                  <p className="font-medium">What's next?</p>
+                  <p className="font-medium">What&apos;s next?</p>
                   <p>
                     VOFMUN will get in contact with you soon regarding payment details and procedures - please check your inbox.
                     It is possible our emails may go to your spam/junk folder, so please ensure you check those folders as well.

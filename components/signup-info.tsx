@@ -93,12 +93,12 @@ export function SignupInfo() {
         </CardContent>
       </Card>
 
-      {/* What's Included */}
+      {/* What&apos;s Included */}
       <Card className="diplomatic-shadow border-0 bg-white/90">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2 text-gray-900">
             <CheckCircle className="h-5 w-5 text-green-600" />
-            <span>What's Included</span>
+            <span>What&apos;s Included</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -133,7 +133,7 @@ export function SignupInfo() {
         <CardContent className="space-y-3">
           <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-gray-800">
-              <strong>Committee Assignment:</strong> We'll do our best to accommodate your committee preferences, but
+              <strong>Committee Assignment:</strong> We&apos;ll do our best to accommodate your committee preferences, but
               assignments are not guaranteed and depend on availability.
             </p>
           </div>
@@ -171,7 +171,7 @@ export function SignupInfo() {
           <CardTitle className="text-white">Need Help?</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-blue-100">Have questions about registration or the conference? We're here to help!</p>
+          <p className="text-blue-100">Have questions about registration or the conference? We&apos;re here to help!</p>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <span className="text-sm text-blue-100">Email:</span>

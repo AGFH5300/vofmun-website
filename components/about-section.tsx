@@ -15,7 +15,7 @@ export function AboutSection() {
           <div className="text-center space-y-6 mb-16">
             <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary">About VOFMUN</h2>
             <p className="text-lg md:text-xl text-foreground/80 leading-relaxed max-w-3xl mx-auto">
-              VOFMUN is a youth-driven platform bringing together tomorrow's leaders to debate, collaborate, and create
+              VOFMUN is a youth-driven platform bringing together tomorrow&apos;s leaders to debate, collaborate, and create
               solutions for global challenges. Our mission is to foster diplomacy, critical thinking, and global
               awareness among young minds.
             </p>
