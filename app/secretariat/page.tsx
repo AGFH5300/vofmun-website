@@ -421,11 +421,16 @@ export default function SecretariatPage() {
             }`}
           ></div>
 
-          <div className="relative z-10 flex flex-col items-center gap-5">
-            <button
-              type="button"
-              onClick={() => openModal(member)}
-              className={`w-full flex flex-col items-center gap-5 text-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B22222] ${
+          <button
+            type="button"
+            onClick={() => openModal(member)}
+            aria-label={`Open ${member.name} profile`}
+            className="absolute inset-0 z-10 rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B22222]"
+          />
+
+          <div className="relative z-20 flex flex-col items-center gap-5 pointer-events-none">
+            <div
+              className={`w-full flex flex-col items-center gap-5 text-center ${
                 variant === "founder" ? "md:gap-6" : ""
               }`}
             >
@@ -460,9 +465,9 @@ export default function SecretariatPage() {
                   {member.department}
                 </span>
               </div>
-            </button>
+            </div>
 
-            <div className="flex justify-center">
+            <div className="flex justify-center pointer-events-auto relative z-30">
               <a
                 href={linkedinUrl}
                 target="_blank"
