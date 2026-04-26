@@ -33,6 +33,10 @@ export function NationalitiesSection() {
     let isMounted = true
 
     async function fetchNationalities() {
+      if (document.visibilityState !== 'visible') {
+        return
+      }
+
       try {
         const response = await fetch('/api/nationalities-globe', { cache: 'no-store' })
 
@@ -65,10 +69,17 @@ export function NationalitiesSection() {
     fetchNationalities()
 
     const intervalId = window.setInterval(fetchNationalities, 30_000)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchNationalities()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       isMounted = false
       window.clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 
