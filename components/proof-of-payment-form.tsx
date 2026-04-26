@@ -3,7 +3,7 @@
 
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { toast } from "sonner"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -62,15 +62,15 @@ export function ProofOfPaymentForm() {
     }
   }, [hasPaid, paymentProofPreview])
 
-  const clearError = (key: string) => {
+  const clearError = useCallback((key: string) => {
     setErrors((prev) => {
       if (!prev[key]) return prev
       const { [key]: _removed, ...rest } = prev
       return rest
     })
-  }
+  }, [])
 
-  const handlePaymentProofSelect = (file: File) => {
+  const handlePaymentProofSelect = useCallback((file: File) => {
     const isImage = file.type.startsWith("image/")
     const isPdf = file.type === "application/pdf"
 
@@ -90,7 +90,7 @@ export function ProofOfPaymentForm() {
     setPaymentProofFile(file)
     setPaymentProofPreview(objectUrl)
     clearError("paymentProof")
-  }
+  }, [clearError, paymentProofPreview])
 
   const resetPaymentProof = () => {
     if (paymentProofPreview) {
@@ -199,7 +199,7 @@ export function ProofOfPaymentForm() {
       window.removeEventListener("dragleave", onDragLeave)
       window.removeEventListener("drop", onDrop)
     }
-  }, [hasPaid])
+  }, [handlePaymentProofSelect, hasPaid])
 
   const fileToDataURL = (file: File) =>
     new Promise<string>((resolve, reject) => {
