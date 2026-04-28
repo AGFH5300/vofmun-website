@@ -620,16 +620,44 @@ export default function SecretariatPage() {
                 <span className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-sm text-white">
                   {modalFounder.department}
                 </span>
-                <a
-                  href={modalFounder.linkedin?.trim() || DEFAULT_LINKEDIN}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={modalFounder.linkedin?.trim() ? `${modalFounder.name} LinkedIn` : "VOFMUN LinkedIn"}
-                  className="inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-[#0077B5] shadow-md transition-all hover:bg-white hover:scale-105"
-                >
-                  <Linkedin className="h-4 w-4" />
-                  <span>LinkedIn</span>
-                </a>
+                {modalFounder.linkedin?.trim() ? (
+                  <a
+                    href={modalFounder.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${modalFounder.name} LinkedIn`}
+                    className="inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-[#0077B5] shadow-md transition-all hover:bg-white hover:scale-105"
+                  >
+                    <Linkedin className="h-4 w-4" />
+                    <span>LinkedIn</span>
+                  </a>
+                ) : (
+                  <div className="relative w-12 h-12 rounded-full pointer-events-auto group">
+                    <a
+                      href={DEFAULT_LINKEDIN}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="VOFMUN LinkedIn"
+                      title="Visit VOFMUN on LinkedIn"
+                      className="relative z-[2] flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#B22222,#8B0000,#C8960C)] shadow-[0_4px_10px_rgba(0,0,0,0.25)] transition-all duration-200 ease-out hover:scale-[1.08] hover:bg-[linear-gradient(135deg,#8B0000,#700000,#a87a0a)] hover:shadow-[0_0_18px_rgba(212,175,55,0.45)]"
+                    >
+                      <Linkedin className="h-5 w-5 text-[#D4AF37] drop-shadow-[0_0_6px_rgba(212,175,55,0.85)]" />
+                    </a>
+                    <svg
+                      className="absolute inset-[-7px] z-[3] h-[62px] w-[62px] pointer-events-none overflow-visible -rotate-90"
+                      viewBox="0 0 62 62"
+                      aria-hidden="true"
+                    >
+                      <circle
+                        cx="31"
+                        cy="31"
+                        r="28"
+                        pathLength="100"
+                        className="modal-vofmun-gold-circle"
+                      />
+                    </svg>
+                  </div>
+                )}
               </div>
 
               {/* Right - Content */}
@@ -712,6 +740,23 @@ export default function SecretariatPage() {
           -webkit-line-clamp: 3;
           -webkit-box-orient: vertical;
           overflow: hidden;
+        }
+        .group .modal-vofmun-gold-circle {
+          fill: none;
+          stroke: #d4af37;
+          stroke-width: 4;
+          stroke-linecap: round;
+          opacity: 0;
+          stroke-dasharray: 100;
+          stroke-dashoffset: 100;
+          filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.8));
+          transition:
+            opacity 100ms ease-out,
+            stroke-dashoffset 1500ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .group:hover .modal-vofmun-gold-circle {
+          opacity: 1;
+          stroke-dashoffset: 0;
         }
       `}</style>
     </div>
