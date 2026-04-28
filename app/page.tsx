@@ -30,6 +30,17 @@ export default function HomePage() {
   const nationalitiesContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    const preloadNationalitiesSection = () => {
+      void import("@/components/nationalities-section");
+    };
+
+    const timeoutId = window.setTimeout(preloadNationalitiesSection, 250);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
+  useEffect(() => {
     if (shouldRenderNationalities) return;
     const target = nationalitiesContainerRef.current;
     if (!target) return;
@@ -40,7 +51,7 @@ export default function HomePage() {
         setShouldRenderNationalities(true);
       },
       {
-        rootMargin: "320px 0px",
+        rootMargin: "1000px 0px",
       }
     );
 
