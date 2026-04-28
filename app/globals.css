@@ -556,6 +556,10 @@ label {
   pointer-events: auto;
 }
 
+.vofmun-linkedin-wrap--pill {
+  border-radius: 9999px;
+}
+
 .vofmun-linkedin-btn {
   position: relative;
   z-index: 2;
@@ -566,6 +570,11 @@ label {
   background: linear-gradient(135deg, #B22222, #8B0000, #C8960C);
   box-shadow: 0 4px 10px rgba(0,0,0,0.25);
   transition: transform 220ms ease-out, background 220ms ease-out, box-shadow 220ms ease-out;
+}
+
+.vofmun-linkedin-btn--pill {
+  gap: 0.45rem;
+  white-space: nowrap;
 }
 
 .vofmun-linkedin-btn:hover {
@@ -580,6 +589,13 @@ label {
   pointer-events: none;
   overflow: visible;
   transform: rotate(-90deg);
+}
+
+.vofmun-gold-svg--pill {
+  inset: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+  transform: none;
 }
 
 .vofmun-gold-circle {
