@@ -397,9 +397,10 @@ export default function SecretariatPage() {
     const socialButtonSize = variant === "deputy" ? "w-9 h-9" : "w-12 h-12";
     const socialIconSize = variant === "deputy" ? "w-4 h-4" : "w-5 h-5";
     const linkedinUrl = member.linkedin?.trim() || DEFAULT_LINKEDIN;
-    const linkedinLabel = member.linkedin?.trim()
-      ? `${member.name} LinkedIn`
-      : "VOFMUN LinkedIn";
+    const isVofmunLinkedin = !member.linkedin?.trim();
+    const linkedinLabel = isVofmunLinkedin
+      ? "VOFMUN LinkedIn"
+      : `${member.name} LinkedIn`;
 
     return (
       <div
@@ -468,15 +469,40 @@ export default function SecretariatPage() {
             </div>
 
             <div className="flex justify-center pointer-events-auto relative z-30">
-              <a
-                href={linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${socialButtonSize} bg-[#0077B5] rounded-full flex items-center justify-center hover:bg-[#005885] transition-all duration-300 hover:scale-110 shadow-md`}
-                aria-label={linkedinLabel}
-              >
-                <Linkedin className={`${socialIconSize} text-white`} />
-              </a>
+              {isVofmunLinkedin ? (
+                <div className={`vofmun-linkedin-wrap ${socialButtonSize}`}>
+                  <a
+                    href={linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`vofmun-linkedin-btn ${socialButtonSize}`}
+                    aria-label={linkedinLabel}
+                    title="Visit VOFMUN on LinkedIn"
+                  >
+                    <Linkedin className={`${socialIconSize} text-[#FFD56A] drop-shadow-[0_0_6px_rgba(255,213,106,0.85)]`} />
+                  </a>
+                  {variant === "deputy" ? (
+                    <svg className="vofmun-gold-svg" style={{ inset: "-7px", width: "50px", height: "50px" }} viewBox="0 0 50 50" aria-hidden="true">
+                      <circle className="vofmun-gold-circle" cx="25" cy="25" r="22" pathLength="100" />
+                    </svg>
+                  ) : (
+                    <svg className="vofmun-gold-svg" style={{ inset: "-7px", width: "62px", height: "62px" }} viewBox="0 0 62 62" aria-hidden="true">
+                      <circle className="vofmun-gold-circle" cx="31" cy="31" r="28" pathLength="100" />
+                    </svg>
+                  )}
+                </div>
+              ) : (
+                <a
+                  href={linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${socialButtonSize} rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-md bg-[#0077B5] hover:bg-[#005885]`}
+                  aria-label={linkedinLabel}
+                  title={`${member.name} on LinkedIn`}
+                >
+                  <Linkedin className={`${socialIconSize} text-white`} />
+                </a>
+              )}
             </div>
           </div>
         </div>
