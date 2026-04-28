@@ -396,8 +396,6 @@ export default function SecretariatPage() {
         : "inline-block px-4 py-2 rounded-full text-sm font-medium";
     const socialButtonSize = variant === "deputy" ? "w-9 h-9" : "w-12 h-12";
     const socialIconSize = variant === "deputy" ? "w-4 h-4" : "w-5 h-5";
-    const vofmunPillSize = variant === "deputy" ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm";
-    const vofmunPillIconSize = variant === "deputy" ? "h-3.5 w-3.5" : "h-4 w-4";
     const linkedinUrl = member.linkedin?.trim() || DEFAULT_LINKEDIN;
     const isVofmunLinkedin = !member.linkedin?.trim();
     const linkedinLabel = isVofmunLinkedin
@@ -472,21 +470,26 @@ export default function SecretariatPage() {
 
             <div className="flex justify-center pointer-events-auto relative z-30">
               {isVofmunLinkedin ? (
-                <div className={`vofmun-linkedin-wrap vofmun-linkedin-wrap--pill ${vofmunPillSize}`}>
+                <div className={`vofmun-linkedin-wrap ${socialButtonSize}`}>
                   <a
                     href={linkedinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`vofmun-linkedin-btn vofmun-linkedin-btn--pill ${vofmunPillSize}`}
+                    className={`vofmun-linkedin-btn ${socialButtonSize}`}
                     aria-label={linkedinLabel}
                     title="Visit VOFMUN on LinkedIn"
                   >
-                    <Linkedin className={`${vofmunPillIconSize} text-[#FFD56A] drop-shadow-[0_0_6px_rgba(255,213,106,0.85)]`} />
-                    <span className="font-semibold tracking-wide text-[#FFD56A]">LinkedIn</span>
+                    <Linkedin className={`${socialIconSize} text-[#FFD56A] drop-shadow-[0_0_6px_rgba(255,213,106,0.85)]`} />
                   </a>
-                  <svg className="vofmun-gold-svg vofmun-gold-svg--pill" viewBox="0 0 140 46" aria-hidden="true">
-                    <rect className="vofmun-gold-circle" x="2" y="2" width="136" height="42" rx="21" pathLength="100" />
-                  </svg>
+                  {variant === "deputy" ? (
+                    <svg className="vofmun-gold-svg" style={{ inset: "-7px", width: "50px", height: "50px" }} viewBox="0 0 50 50" aria-hidden="true">
+                      <circle className="vofmun-gold-circle" cx="25" cy="25" r="22" pathLength="100" />
+                    </svg>
+                  ) : (
+                    <svg className="vofmun-gold-svg" style={{ inset: "-7px", width: "62px", height: "62px" }} viewBox="0 0 62 62" aria-hidden="true">
+                      <circle className="vofmun-gold-circle" cx="31" cy="31" r="28" pathLength="100" />
+                    </svg>
+                  )}
                 </div>
               ) : (
                 <a
@@ -740,7 +743,7 @@ export default function SecretariatPage() {
           stroke-linecap: round;
           opacity: 0;
           stroke-dasharray: 100;
-          stroke-dashoffset: 100;
+          stroke-dashoffset: -100;
           filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.8));
           transition:
             opacity 100ms ease-out,
