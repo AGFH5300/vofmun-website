@@ -547,3 +547,54 @@ label {
 }
 
 /* Target text nodes containing asterisks - this will be handled in the component */
+
+
+/* ── VOFMUN LinkedIn gold-circle draw animation ── */
+.vofmun-linkedin-wrap {
+  position: relative;
+  border-radius: 9999px;
+  pointer-events: auto;
+}
+
+.vofmun-linkedin-btn {
+  position: relative;
+  z-index: 2;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #B22222, #8B0000, #C8960C);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  transition: transform 220ms ease-out, background 220ms ease-out, box-shadow 220ms ease-out;
+}
+
+.vofmun-linkedin-btn:hover {
+  transform: scale(1.08);
+  background: linear-gradient(135deg, #8B0000, #700000, #a87a0a);
+  box-shadow: 0 0 18px rgba(212,175,55,0.45);
+}
+
+.vofmun-gold-svg {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+
+.vofmun-gold-circle {
+  fill: none;
+  stroke: #D4AF37;
+  stroke-width: 4;
+  stroke-linecap: round;
+  opacity: 0;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 8px rgba(212,175,55,0.8));
+  transition: opacity 100ms ease-out, stroke-dashoffset 1200ms cubic-bezier(0.22,1,0.36,1);
+}
+
+.vofmun-linkedin-wrap:hover .vofmun-gold-circle {
+  opacity: 1;
+  stroke-dashoffset: 0;
+}
