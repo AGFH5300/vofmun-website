@@ -470,6 +470,17 @@ export default function SecretariatPage() {
 
             <div className="flex justify-center pointer-events-auto relative z-30">
               {isVofmunLinkedin ? (
+                <a
+                  href={linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${socialButtonSize} rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-md bg-[#0077B5] hover:bg-[#005885]`}
+                  aria-label={linkedinLabel}
+                  title="Visit VOFMUN on LinkedIn"
+                >
+                  <Linkedin className={`${socialIconSize} text-white`} />
+                </a>
+              ) : (
                 <div className={`vofmun-linkedin-wrap ${socialButtonSize}`}>
                   <a
                     href={linkedinUrl}
@@ -477,9 +488,9 @@ export default function SecretariatPage() {
                     rel="noopener noreferrer"
                     className={`vofmun-linkedin-btn ${socialButtonSize}`}
                     aria-label={linkedinLabel}
-                    title="Visit VOFMUN on LinkedIn"
+                    title={`${member.name} on LinkedIn`}
                   >
-                    <Linkedin className={`${socialIconSize} text-[#FFD56A] drop-shadow-[0_0_6px_rgba(255,213,106,0.85)]`} />
+                    <Linkedin className={`${socialIconSize} text-white`} />
                   </a>
                   {variant === "deputy" ? (
                     <svg className="vofmun-gold-svg" style={{ inset: "-7px", width: "50px", height: "50px" }} viewBox="0 0 50 50" aria-hidden="true">
@@ -491,17 +502,6 @@ export default function SecretariatPage() {
                     </svg>
                   )}
                 </div>
-              ) : (
-                <a
-                  href={linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${socialButtonSize} rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-md bg-[#0077B5] hover:bg-[#005885]`}
-                  aria-label={linkedinLabel}
-                  title={`${member.name} on LinkedIn`}
-                >
-                  <Linkedin className={`${socialIconSize} text-white`} />
-                </a>
               )}
             </div>
           </div>
@@ -621,28 +621,17 @@ export default function SecretariatPage() {
                   {modalFounder.department}
                 </span>
                 {modalFounder.linkedin?.trim() ? (
-                  <a
-                    href={modalFounder.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${modalFounder.name} LinkedIn`}
-                    className="inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-[#0077B5] shadow-md transition-all hover:bg-white hover:scale-105"
-                  >
-                    <Linkedin className="h-4 w-4" />
-                    <span>LinkedIn</span>
-                  </a>
-                ) : (
                   <div className="vofmun-linkedin-wrap vofmun-linkedin-wrap--pill px-4 py-2 text-sm pointer-events-auto group">
                     <a
-                      href={DEFAULT_LINKEDIN}
+                      href={modalFounder.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label="VOFMUN LinkedIn"
-                      title="Visit VOFMUN on LinkedIn"
+                      aria-label={`${modalFounder.name} LinkedIn`}
+                      title={`${modalFounder.name} on LinkedIn`}
                       className="vofmun-linkedin-btn vofmun-linkedin-btn--pill px-4 py-2 text-sm"
                     >
-                      <Linkedin className="h-4 w-4 text-[#D4AF37] drop-shadow-[0_0_6px_rgba(212,175,55,0.85)]" />
-                      <span className="font-semibold tracking-wide text-[#D4AF37]">LinkedIn</span>
+                      <Linkedin className="h-4 w-4 text-white" />
+                      <span className="font-semibold tracking-wide text-white">LinkedIn</span>
                     </a>
                     <svg
                       className="vofmun-gold-svg vofmun-gold-svg--pill"
@@ -652,6 +641,17 @@ export default function SecretariatPage() {
                       <rect x="2" y="2" width="136" height="42" rx="21" pathLength="100" className="modal-vofmun-gold-circle" />
                     </svg>
                   </div>
+                ) : (
+                  <a
+                    href={DEFAULT_LINKEDIN}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="VOFMUN LinkedIn"
+                    className="inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-[#0077B5] shadow-md transition-all hover:bg-white hover:scale-105"
+                  >
+                    <Linkedin className="h-4 w-4" />
+                    <span>LinkedIn</span>
+                  </a>
                 )}
               </div>
 
@@ -738,13 +738,13 @@ export default function SecretariatPage() {
         }
         .group .modal-vofmun-gold-circle {
           fill: none;
-          stroke: #d4af37;
+          stroke: #ff8a8a;
           stroke-width: 4;
           stroke-linecap: round;
           opacity: 0;
           stroke-dasharray: 100;
           stroke-dashoffset: -100;
-          filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.8));
+          filter: drop-shadow(0 0 8px rgba(255, 138, 138, 0.8));
           transition:
             opacity 100ms ease-out,
             stroke-dashoffset 1500ms cubic-bezier(0.22, 1, 0.36, 1);
