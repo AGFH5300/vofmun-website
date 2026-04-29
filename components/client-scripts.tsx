@@ -41,14 +41,18 @@ export function ClientScripts() {
 
     const delegateCounter = document.getElementById("delegate-counter")
     if (delegateCounter) {
-      let count = 0
       const target = 250
-      const increment = target / 100
+      const durationMs = 900
+      let startTime: number | null = null
 
-      const updateCounter = () => {
-        count += increment
+      const updateCounter = (timestamp: number) => {
+        if (startTime === null) startTime = timestamp
+        const elapsed = timestamp - startTime
+        const progress = Math.min(elapsed / durationMs, 1)
+        const count = Math.floor(target * progress)
+
         if (count < target) {
-          delegateCounter.textContent = Math.floor(count).toString()
+          delegateCounter.textContent = count.toString()
           requestAnimationFrame(updateCounter)
         } else {
           delegateCounter.textContent = "250+"
@@ -59,7 +63,7 @@ export function ClientScripts() {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            updateCounter()
+            requestAnimationFrame(updateCounter)
             observer.unobserve(entry.target)
           }
         })
