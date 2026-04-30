@@ -42,7 +42,7 @@ export function ClientScripts() {
     const delegateCounter = document.getElementById("delegate-counter")
     if (delegateCounter) {
       const target = 250
-      const durationMs = 900
+      const durationMs = 1500
       let startTime: number | null = null
 
       const updateCounter = (timestamp: number) => {
