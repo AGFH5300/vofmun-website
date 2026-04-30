@@ -178,6 +178,7 @@ As Deputy Head of Committees, I support the Co-Heads in managing committee quali
     department: "Logistics",
     image: "/founders/VihaanHarrison_Logistics.webp",
     bio: "Supporting logistics operations to deliver a structured, high-impact delegate experience.",
+    linkedin: "https://www.linkedin.com/in/vihaan-harrison-1a3128252/",
     writeup: `Hi, I’m Vihaan Harrison, a debater, public speaker, and Secretariat member at VOFMUN 2026. Since beginning my MUN journey in January 2024, I’ve participated in 20+ conferences across the UAE, earning multiple Best Delegate awards along with distinctions such as Best Researcher, Runner-Up Best Delegate, and Honourable Mention.
 
 Beyond delegating, leadership is where I’ve grown the most. I currently serve in senior Secretariat roles including Head of Outreach, Head of Crisis, and USG of Committees across various conferences. These experiences have strengthened my ability to manage teams, oversee academic standards, and handle high-pressure committee environments with structure and clarity. I’ve also chaired committees such as UNHRC and UNODC, focusing on maintaining competitive yet respectful debate.
