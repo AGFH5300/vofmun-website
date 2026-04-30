@@ -133,6 +133,7 @@ I hope to see all of you at VOFMUN 2026 because it is an incredible experience f
     department: "Logistics",
     image: "/founders/AryanShah_Logistics.webp",
     bio: "Supporting logistical planning, coordination, and on-site readiness for VOFMUN.",
+    linkedin: "https://www.linkedin.com/in/aryan-shah-275829338/",
     writeup: `Hi I'm Aryan Shah, Co-Head of Logistics for VOFMUN 2026! I have previously participated in 2 MUN conferences, and have received an honorable mention in one of them. I am currently a Year 11 student at Dubai International Academy. I am also Vice-President of my school's Cubing and AI club. Outside of school I have organised and hosted multiple internationally recognized and licensed Rubik's Cube Competitions that have attracted the attention of some of the best cubers in the MENA region. At VOFMUN my goal is to ensure that all the delegates have an amazing experience at VOFMUN by handling all committee-related matters that range from finalising topics to country allocation and communication with all delegates.`,
   },
   {
