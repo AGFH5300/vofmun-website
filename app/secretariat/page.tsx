@@ -597,8 +597,8 @@ export default function SecretariatPage() {
                       title={`${modalFounder.name} on LinkedIn`}
                       className="vofmun-linkedin-btn vofmun-linkedin-btn--pill px-4 py-2 text-sm"
                     >
-                      <Linkedin className="h-4 w-4 text-[#D4AF37] drop-shadow-[0_0_6px_rgba(212,175,55,0.85)]" />
-                      <span className="font-semibold tracking-wide text-[#D4AF37]">LinkedIn</span>
+                      <Linkedin className="h-4 w-4 text-[#FFD56A] drop-shadow-[0_0_6px_rgba(255,213,106,0.85)]" />
+                      <span className="font-semibold tracking-wide text-[#FFD56A]">LinkedIn</span>
                     </a>
                     <svg
                       className="vofmun-gold-svg vofmun-gold-svg--pill"
