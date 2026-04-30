@@ -105,6 +105,7 @@ const TINY_POLYGON_AREA = 0.000005
 const CLUSTER_DISTANCE = 42
 const DEFAULT_TILT = -14
 const RESUME_DELAY_MS = 700
+const AUTO_ROTATE_FRAME_MS = 120
 
 const worldFeatureCollection = feature(world as any, (world as any).objects.countries) as any
 const worldDisplayFeatures = (worldFeatureCollection.features ?? [])
@@ -375,6 +376,7 @@ export default function VofmunCleanGlobePreview({
   const dragRef = useRef({ active: false, lastX: 0, lastY: 0 })
   const animationFrameRef = useRef<number | null>(null)
   const lastTickRef = useRef<number | null>(null)
+  const lastRenderRef = useRef<number | null>(null)
 
   useEffect(() => {
     hoveredClusterRef.current = hoveredClusterId
@@ -389,12 +391,21 @@ export default function VofmunCleanGlobePreview({
       const deltaMs = Math.min(timestamp - lastTickRef.current, 64)
       lastTickRef.current = timestamp
 
-      if (!dragRef.current.active && !hoveredClusterRef.current && Date.now() >= pauseUntil) {
-        setRotation((prev) => (prev - deltaMs * 0.007) % 360)
+      const elapsedSinceRender =
+        lastRenderRef.current === null ? AUTO_ROTATE_FRAME_MS : timestamp - lastRenderRef.current
+
+      if (
+        elapsedSinceRender >= AUTO_ROTATE_FRAME_MS &&
+        !dragRef.current.active &&
+        !hoveredClusterRef.current &&
+        Date.now() >= pauseUntil
+      ) {
+        lastRenderRef.current = timestamp
+        setRotation((prev) => (prev - elapsedSinceRender * 0.007) % 360)
         setTilt((prev) => {
           const delta = DEFAULT_TILT - prev
           if (Math.abs(delta) < 0.04) return DEFAULT_TILT
-          return prev + delta * Math.min(deltaMs / 560, 0.12)
+          return prev + delta * Math.min(elapsedSinceRender / 560, 0.12)
         })
       }
 
@@ -409,6 +420,7 @@ export default function VofmunCleanGlobePreview({
       }
       animationFrameRef.current = null
       lastTickRef.current = null
+      lastRenderRef.current = null
     }
   }, [pauseUntil])
 
