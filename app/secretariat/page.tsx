@@ -595,7 +595,7 @@ export default function SecretariatPage() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="secretariat-modal-title"
-              className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row"
+              className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto flex flex-col md:flex-row"
             >
               {/* Left - Image & Department */}
               <div
@@ -656,7 +656,7 @@ export default function SecretariatPage() {
               </div>
 
               {/* Right - Content */}
-              <div className="md:w-2/3 p-6 overflow-y-auto">
+              <div className="md:w-2/3 p-6">
                 <p className="text-gray-700 leading-relaxed">
                   {modalFounder.writeup}
                   {modalFounder.websiteLink && (
