@@ -16,7 +16,6 @@ import {
   X,
   Workflow,
   Briefcase,
-  Cpu,
 } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -223,11 +222,7 @@ const getDepartmentIcon = (department: string) => {
       return Briefcase;
     case "Committees":
       return Users;
-    case "Technology":
-      return Cpu;
     case "Core ":
-      return Workflow;
-    case "Delegate Affairs":
       return Workflow;
     case "Logistics":
       return Truck;
@@ -256,26 +251,12 @@ const getDepartmentColor = (department: string) => {
         border: "border-blue-500",
         badgeClass: "bg-blue-600 text-white border-0",
       };
-    case "Technology":
-      return {
-        bg: "bg-gradient-to-br from-green-500 to-green-700",
-        text: "text-white",
-        border: "border-green-500",
-        badgeClass: "bg-green-600 text-white border-0",
-      };
     case "Core ":
       return {
         bg: "bg-gradient-to-br from-teal-500 to-teal-700",
         text: "text-white",
         border: "border-teal-500",
         badgeClass: "bg-teal-600 text-white border-0",
-      };
-    case "Delegate Affairs":
-      return {
-        bg: "bg-gradient-to-br from-purple-500 to-purple-700",
-        text: "text-white",
-        border: "border-purple-500",
-        badgeClass: "bg-purple-600 text-white border-0",
       };
     case "Logistics":
       return {
