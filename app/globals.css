@@ -592,12 +592,10 @@ label {
 }
 
 .vofmun-gold-svg--pill {
-  inset: 0px;
-  width: calc(100% + 0px);
-  height: calc(100% + 0px);
+  inset: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
   transform: none;
-  margin-top: 0.25rem;
-  padding-bottom: 10px;
 }
 
 .vofmun-gold-circle {
