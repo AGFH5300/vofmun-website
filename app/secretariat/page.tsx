@@ -457,7 +457,7 @@ export default function SecretariatPage() {
                     aria-label={linkedinLabel}
                     title={`${member.name} on LinkedIn`}
                   >
-                    <Linkedin className={`${socialIconSize} text-white`} />
+                    <Linkedin className={`${socialIconSize} text-[#FFD56A] drop-shadow-[0_0_6px_rgba(255,213,106,0.85)]`} />
                   </a>
                   {variant === "deputy" ? (
                     <svg className="vofmun-gold-svg" style={{ inset: "-7px", width: "50px", height: "50px" }} viewBox="0 0 50 50" aria-hidden="true">
@@ -597,8 +597,8 @@ export default function SecretariatPage() {
                       title={`${modalFounder.name} on LinkedIn`}
                       className="vofmun-linkedin-btn vofmun-linkedin-btn--pill px-4 py-2 text-sm"
                     >
-                      <Linkedin className="h-4 w-4 text-white" />
-                      <span className="font-semibold tracking-wide text-white">LinkedIn</span>
+                      <Linkedin className="h-4 w-4 text-[#D4AF37] drop-shadow-[0_0_6px_rgba(212,175,55,0.85)]" />
+                      <span className="font-semibold tracking-wide text-[#D4AF37]">LinkedIn</span>
                     </a>
                     <svg
                       className="vofmun-gold-svg vofmun-gold-svg--pill"
@@ -705,13 +705,13 @@ export default function SecretariatPage() {
         }
         .group .modal-vofmun-gold-circle {
           fill: none;
-          stroke: #ff8a8a;
+          stroke: #d4af37;
           stroke-width: 4;
           stroke-linecap: round;
           opacity: 0;
           stroke-dasharray: 100;
           stroke-dashoffset: -100;
-          filter: drop-shadow(0 0 8px rgba(255, 138, 138, 0.8));
+          filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.8));
           transition:
             opacity 100ms ease-out,
             stroke-dashoffset 1500ms cubic-bezier(0.22, 1, 0.36, 1);
