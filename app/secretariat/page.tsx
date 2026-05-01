@@ -588,7 +588,7 @@ export default function SecretariatPage() {
                   {modalFounder.department}
                 </span>
                 {modalFounder.linkedin?.trim() ? (
-                  <div className="vofmun-linkedin-wrap vofmun-linkedin-wrap--pill px-4 py-2 text-sm pointer-events-auto group">
+                  <div className="vofmun-linkedin-wrap vofmun-linkedin-wrap--pill px-4 py-2 text-sm pointer-events-auto">
                     <a
                       href={modalFounder.linkedin}
                       target="_blank"
@@ -703,7 +703,7 @@ export default function SecretariatPage() {
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
-        .group .modal-vofmun-gold-circle {
+        .vofmun-gold-svg .modal-vofmun-gold-circle {
           fill: none;
           stroke: #d4af37;
           stroke-width: 4;
@@ -716,7 +716,7 @@ export default function SecretariatPage() {
             opacity 100ms ease-out,
             stroke-dashoffset 1500ms cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .group:hover .modal-vofmun-gold-circle {
+        .vofmun-linkedin-btn:hover + .vofmun-gold-svg .modal-vofmun-gold-circle {
           opacity: 1;
           stroke-dashoffset: 0;
         }
