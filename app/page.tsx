@@ -45,7 +45,7 @@ export default function HomePage() {
             </p>
 
             {/* Conference Countdown */}
-            <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 inline-block border border-white/30 animate-fade-in-delay-2 mb-8 min-h-[220px] md:min-h-[230px]">
+            <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 inline-block border border-white/30 animate-fade-in-delay-2 mb-8">
               <h2 className="text-2xl font-bold mb-4 font-serif text-white drop-shadow-lg">
                 Conference begins in
               </h2>
@@ -59,13 +59,13 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/resources">
-                <Button className="bg-gray-900 border-2 border-white text-white hover:bg-gray-100 hover:text-gray-900 px-8 py-4 rounded-lg font-bold text-lg transition-transform hover:scale-105 shadow-xl min-h-11">
+                <Button className="bg-gray-900 border-2 border-white text-white hover:bg-gray-100 hover:text-gray-900 px-8 py-4 rounded-lg font-bold text-lg transition-transform hover:scale-105 shadow-xl">
                   Explore Resources
                 </Button>
               </Link>
             </div>
 
-            <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 inline-block border border-white/30 animate-fade-in-delay-2 mb-10 sm:mb-12 min-h-[200px] sm:min-h-[140px]">
+            <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 inline-block border border-white/30 animate-fade-in-delay-2 mb-10 sm:mb-12">
               <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-8">
                 <div className="text-center">
                   <div
