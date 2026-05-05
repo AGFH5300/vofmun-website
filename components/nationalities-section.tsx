@@ -1,9 +1,11 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useState } from "react"
-import VofmunCleanGlobe from "@/components/vofmun-clean-globe"
+import dynamic from "next/dynamic"
+import { useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
+
+const VofmunCleanGlobe = dynamic(() => import("@/components/vofmun-clean-globe"), { ssr: false })
 import { getCountryByCode } from "@/lib/countries"
 
 type NationalityRow = {
@@ -20,6 +22,8 @@ export function NationalitiesSection() {
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
+  const sectionRef = useRef<HTMLDivElement | null>(null)
 
   const rows = Object.entries(counts)
     .map(([code, participants]): NationalityRow => ({
@@ -28,6 +32,23 @@ export function NationalitiesSection() {
       participants,
     }))
     .sort((a, b) => b.participants - a.participants)
+
+  useEffect(() => {
+    const element = sectionRef.current
+    if (!element) return
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      })
+    }, { rootMargin: "300px 0px" })
+
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [isVisible])
 
   useEffect(() => {
     let isMounted = true
@@ -66,6 +87,12 @@ export function NationalitiesSection() {
       }
     }
 
+    if (!isVisible) {
+      return () => {
+        isMounted = false
+      }
+    }
+
     fetchNationalities()
 
     const intervalId = window.setInterval(fetchNationalities, 30_000)
@@ -81,10 +108,10 @@ export function NationalitiesSection() {
       window.clearInterval(intervalId)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [])
+  }, [isVisible])
 
   return (
-    <div className="rounded-2xl border border-[#B22222]/15 bg-white p-3 shadow-md sm:p-5 lg:p-6">
+    <div ref={sectionRef} className="rounded-2xl border border-[#B22222]/15 bg-white p-3 shadow-md sm:p-5 lg:p-6">
       <h3 className="text-2xl font-bold text-[#B22222] font-serif">Where Our Participants Come From</h3>
       <p className="mt-2 text-sm text-gray-600 sm:text-base">
         A live snapshot of the countries shaping this year&apos;s debates, ideas, and diplomacy.
@@ -108,6 +135,8 @@ export function NationalitiesSection() {
                     alt={`${row.country} flag`}
                     width={32}
                     height={20}
+                    loading="lazy"
+                    sizes="32px"
                     className="h-5 w-8 rounded-sm border border-gray-200 object-cover"
                   />
                   <span className="text-sm font-medium text-gray-800">{row.country}</span>
@@ -124,7 +153,7 @@ export function NationalitiesSection() {
           <Badge className="pointer-events-none absolute left-3 top-3 z-10 bg-[#B22222] text-white hover:bg-[#B22222]">
             Beta
           </Badge>
-          <VofmunCleanGlobe counts={counts} />
+          {isVisible ? <VofmunCleanGlobe counts={counts} /> : <div className="h-full w-full" aria-hidden="true" />}
         </div>
       </div>
     </div>

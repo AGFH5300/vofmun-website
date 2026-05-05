@@ -127,7 +127,7 @@ export function FoundersInfiniteCarousel() {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-40 bg-[#B22222] hover:bg-[#8B0000] text-white p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110"
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-40 bg-[#B22222] hover:bg-[#8B0000] text-white p-3 rounded-full shadow-xl transition-transform duration-300 hover:scale-110"
         aria-label="Previous founder"
       >
         <ChevronLeft className="w-6 h-6" />
@@ -135,7 +135,7 @@ export function FoundersInfiniteCarousel() {
 
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-40 bg-[#B22222] hover:bg-[#8B0000] text-white p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110"
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-40 bg-[#B22222] hover:bg-[#8B0000] text-white p-3 rounded-full shadow-xl transition-transform duration-300 hover:scale-110"
         aria-label="Next founder"
       >
         <ChevronRight className="w-6 h-6" />
@@ -170,7 +170,7 @@ export function FoundersInfiniteCarousel() {
           return (
             <div
               key={`${founder.name}-${index}`}
-              className="absolute transition-all duration-700 ease-in-out cursor-pointer"
+              className="absolute transition-transform duration-700 ease-in-out cursor-pointer"
               style={{
                 transform: `${transform} scale(${scale})`,
                 zIndex,
@@ -186,7 +186,7 @@ export function FoundersInfiniteCarousel() {
                 href="/secretariat"
                 className="block group"
               >
-                <div className={`relative bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 w-64 h-80 ${
+                <div className={`relative bg-white rounded-2xl overflow-hidden shadow-lg transition-shadow duration-300 w-64 h-80 ${
                   isCenter 
                     ? 'shadow-2xl' 
                     : 'shadow-md hover:shadow-xl'
@@ -201,6 +201,8 @@ export function FoundersInfiniteCarousel() {
                       src={founder.image}
                       alt={founder.name}
                       fill
+                      loading="lazy"
+                      sizes="(max-width: 768px) 256px, 320px"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
