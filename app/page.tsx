@@ -1,27 +1,25 @@
+"use client";
+
 // © 2026 Ansh Gupta. All rights reserved.
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
-
-"use client";
 
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { FoundersModal } from "@/components/founders-modal";
-import { LiveCrisisTracker } from "@/components/live-crisis-tracker";
-import { EnhancedNavigation } from "@/components/enhanced-navigation";
-import { ScrollProgress } from "@/components/scroll-progress";
-import { BackToTop } from "@/components/back-to-top";
-import { ClientScripts } from "@/components/client-scripts";
-import { FeaturesSlideshow } from "@/components/features-slideshow";
-import { LiveCountdownTimer } from "@/components/live-countdown-timer";
-import { FoundersInfiniteCarousel } from "@/components/founders-infinite-carousel";
-import { NationalitiesSection } from "@/components/nationalities-section";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+
+const EnhancedNavigation = dynamic(() => import("@/components/enhanced-navigation").then((m) => m.EnhancedNavigation))
+const ScrollProgress = dynamic(() => import("@/components/scroll-progress").then((m) => m.ScrollProgress), { ssr: false })
+const BackToTop = dynamic(() => import("@/components/back-to-top").then((m) => m.BackToTop), { ssr: false })
+const ClientScripts = dynamic(() => import("@/components/client-scripts").then((m) => m.ClientScripts), { ssr: false })
+const FeaturesSlideshow = dynamic(() => import("@/components/features-slideshow").then((m) => m.FeaturesSlideshow), { ssr: false })
+const LiveCountdownTimer = dynamic(() => import("@/components/live-countdown-timer").then((m) => m.LiveCountdownTimer), { ssr: false })
+const FoundersInfiniteCarousel = dynamic(() => import("@/components/founders-infinite-carousel").then((m) => m.FoundersInfiniteCarousel), { ssr: false, loading: () => <div className="h-96 w-full max-w-6xl mx-auto" aria-hidden="true" /> })
+const NationalitiesSection = dynamic(() => import("@/components/nationalities-section").then((m) => m.NationalitiesSection), { ssr: false, loading: () => <div className="h-[540px] w-full rounded-2xl border border-[#B22222]/15 bg-white" aria-hidden="true" /> })
+
+import dynamic from "next/dynamic";
 
 export default function HomePage() {
-  const [isFoundersModalOpen, setIsFoundersModalOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-[#ffecdd]">
       <EnhancedNavigation />
@@ -56,12 +54,12 @@ export default function HomePage() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in-delay-2">
               <Link href="/signup">
-                <Button className="bg-white text-[#B22222] hover:bg-gray-100 px-10 py-5 rounded-lg font-bold text-xl transition-all hover:scale-105 shadow-xl">
+                <Button className="bg-white text-[#B22222] hover:bg-gray-100 px-10 py-5 rounded-lg font-bold text-xl transition-transform hover:scale-105 shadow-xl">
                   Register Now
                 </Button>
               </Link>
               <Link href="/resources">
-                <Button className="bg-gray-900 border-2 border-white text-white hover:bg-gray-100 hover:text-gray-900 px-8 py-4 rounded-lg font-bold text-lg transition-all hover:scale-105 shadow-xl">
+                <Button className="bg-gray-900 border-2 border-white text-white hover:bg-gray-100 hover:text-gray-900 px-8 py-4 rounded-lg font-bold text-lg transition-transform hover:scale-105 shadow-xl">
                   Explore Resources
                 </Button>
               </Link>
@@ -133,7 +131,7 @@ export default function HomePage() {
             <div className="text-center mt-8">
               <Link
                 href="/secretariat"
-                className="inline-flex items-center space-x-2 bg-gray-700 hover:bg-gray-800 text-white px-8 py-4 rounded-lg font-medium transition-all duration-300 hover:scale-105 shadow-lg"
+                className="inline-flex items-center space-x-2 bg-gray-700 hover:bg-gray-800 text-white px-8 py-4 rounded-lg font-medium transition-transform duration-300 hover:scale-105 shadow-lg"
               >
                 <span>Explore the Secretariat</span>
                 <svg
@@ -152,10 +150,6 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <FoundersModal
-              isOpen={isFoundersModalOpen}
-              onClose={() => setIsFoundersModalOpen(false)}
-            />
           </div>
         </section>
 
@@ -173,7 +167,7 @@ export default function HomePage() {
                 href="https://www.linkedin.com/company/vofmun"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-4 bg-[#B22222] hover:bg-[#8B0000] text-white px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl group min-w-[200px]"
+                className="flex items-center space-x-4 bg-[#B22222] hover:bg-[#8B0000] text-white px-8 py-4 rounded-xl transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-xl group min-w-[200px]"
               >
                 <svg
                   className="w-8 h-8 group-hover:scale-110 transition-transform"
@@ -192,7 +186,7 @@ export default function HomePage() {
                 href="https://www.instagram.com/vofmun"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-4 bg-gradient-to-r from-[#B22222] via-[#8B0000] to-[#B22222] hover:from-[#8B0000] hover:via-[#B22222] hover:to-[#8B0000] text-white px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl group min-w-[200px]"
+                className="flex items-center space-x-4 bg-gradient-to-r from-[#B22222] via-[#8B0000] to-[#B22222] hover:from-[#8B0000] hover:via-[#B22222] hover:to-[#8B0000] text-white px-8 py-4 rounded-xl transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-xl group min-w-[200px]"
               >
                 <svg
                   className="w-8 h-8 group-hover:scale-110 transition-transform"

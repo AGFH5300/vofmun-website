@@ -151,6 +151,7 @@ export function EnhancedNavigation() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             className={`md:hidden p-2 rounded-lg transition-colors ${
               isScrolled ? "text-gray-900 hover:bg-gray-200" : "text-gray-900 hover:bg-gray-100"
             }`}
