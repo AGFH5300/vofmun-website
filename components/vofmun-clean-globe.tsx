@@ -105,7 +105,6 @@ const TINY_POLYGON_AREA = 0.000005
 const CLUSTER_DISTANCE = 42
 const DEFAULT_TILT = -14
 const RESUME_DELAY_MS = 700
-const AUTO_ROTATE_FRAME_MS = 120
 
 const worldFeatureCollection = feature(world as any, (world as any).objects.countries) as any
 const worldDisplayFeatures = (worldFeatureCollection.features ?? [])
@@ -363,24 +362,34 @@ function getTooltipPlacement(cluster: PinCluster, clusters: PinCluster[]) {
 
 export default function VofmunCleanGlobePreview({
   counts,
+  isActive = true,
 }: {
   counts?: Record<string, number>
+  isActive?: boolean
 }) {
   const [rotation, setRotation] = useState(-18)
   const [tilt, setTilt] = useState(DEFAULT_TILT)
   const [hoveredClusterId, setHoveredClusterId] = useState<string | null>(null)
   const [selectedClusterId, setSelectedClusterId] = useState<string | null>(null)
   const [pauseUntil, setPauseUntil] = useState(0)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const hoveredClusterRef = useRef<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef({ active: false, lastX: 0, lastY: 0 })
   const animationFrameRef = useRef<number | null>(null)
   const lastTickRef = useRef<number | null>(null)
-  const lastRenderRef = useRef<number | null>(null)
 
   useEffect(() => {
     hoveredClusterRef.current = hoveredClusterId
   }, [hoveredClusterId])
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const sync = () => setPrefersReducedMotion(mediaQuery.matches)
+    sync()
+    mediaQuery.addEventListener("change", sync)
+    return () => mediaQuery.removeEventListener("change", sync)
+  }, [])
 
   useEffect(() => {
     const tick = (timestamp: number) => {
@@ -388,19 +397,18 @@ export default function VofmunCleanGlobePreview({
         lastTickRef.current = timestamp
       }
 
-      const deltaMs = Math.min(timestamp - lastTickRef.current, 64)
+      const elapsedSinceRender = timestamp - lastTickRef.current
       lastTickRef.current = timestamp
 
-      const elapsedSinceRender =
-        lastRenderRef.current === null ? AUTO_ROTATE_FRAME_MS : timestamp - lastRenderRef.current
-
-      if (
-        elapsedSinceRender >= AUTO_ROTATE_FRAME_MS &&
+      const canAnimate =
+        isActive &&
+        document.visibilityState === "visible" &&
+        !prefersReducedMotion &&
         !dragRef.current.active &&
         !hoveredClusterRef.current &&
         Date.now() >= pauseUntil
-      ) {
-        lastRenderRef.current = timestamp
+
+      if (canAnimate) {
         setRotation((prev) => (prev - elapsedSinceRender * 0.007) % 360)
         setTilt((prev) => {
           const delta = DEFAULT_TILT - prev
@@ -420,9 +428,8 @@ export default function VofmunCleanGlobePreview({
       }
       animationFrameRef.current = null
       lastTickRef.current = null
-      lastRenderRef.current = null
     }
-  }, [pauseUntil])
+  }, [isActive, pauseUntil, prefersReducedMotion])
 
   const pinLocations = useMemo(
     () => (counts ? buildPinLocations(counts) : FALLBACK_PIN_LOCATIONS),
@@ -521,7 +528,7 @@ export default function VofmunCleanGlobePreview({
   }
 
   return (
-    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.04),transparent_22%),linear-gradient(180deg,#020617,#030712_44%,#020617)] p-0 text-white">
+    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.04),transparent_22%),linear-gradient(180deg,#020617,#030712_44%,#020617)] p-0 text-white [backface-visibility:hidden] [transform:translateZ(0)] [will-change:transform]">
       <div className="flex h-full w-full items-center justify-center">
         <svg
           viewBox="0 0 1600 1600"
