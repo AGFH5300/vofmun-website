@@ -249,7 +249,7 @@ export function FeaturesSlideshow() {
       {/* Navigation Arrows */}
       <button
         onClick={goToPrevious}
-        className="absolute left-0 sm:left-1 md:left-2 top-1/2 -translate-y-1/2 bg-[#B22222] text-white p-1.5 sm:p-2 rounded-full shadow-lg hover:bg-[#D32F2F] transition-all hover:scale-110 z-10"
+        className="absolute left-0 sm:left-1 md:left-2 top-1/2 -translate-y-1/2 bg-[#B22222] text-white p-1.5 sm:p-2 rounded-full shadow-lg hover:bg-[#D32F2F] transition-transform transition-colors duration-200 hover:scale-110 z-10"
         aria-label="Previous feature"
       >
         <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -257,7 +257,7 @@ export function FeaturesSlideshow() {
 
       <button
         onClick={goToNext}
-        className="absolute right-0 sm:right-1 md:right-2 top-1/2 -translate-y-1/2 bg-[#B22222] text-white p-1.5 sm:p-2 rounded-full shadow-lg hover:bg-[#D32F2F] transition-all hover:scale-110 z-10"
+        className="absolute right-0 sm:right-1 md:right-2 top-1/2 -translate-y-1/2 bg-[#B22222] text-white p-1.5 sm:p-2 rounded-full shadow-lg hover:bg-[#D32F2F] transition-transform transition-colors duration-200 hover:scale-110 z-10"
         aria-label="Next feature"
       >
         <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -265,7 +265,7 @@ export function FeaturesSlideshow() {
 
       <div className="relative min-h-96 px-8 sm:px-10">
         <div
-          className="absolute inset-0 transition-all duration-500 ease-in-out transform"
+          className="absolute inset-0 transition-opacity duration-500 ease-in-out"
           style={{
             opacity: 1,
             transform: "translateX(0)",
@@ -276,16 +276,16 @@ export function FeaturesSlideshow() {
             {/* Feature Description */}
             <div className="flex flex-col justify-center px-4">
               <div
-                className={`inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full ${currentFeature.color} mb-4 sm:mb-5 md:mb-6 transition-all duration-300`}
+                className={`inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full ${currentFeature.color} mb-4 sm:mb-5 md:mb-6 transition-colors duration-300`}
               >
                 <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
               </div>
 
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#B22222] mb-3 sm:mb-4 font-serif transition-all duration-300">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#B22222] mb-3 sm:mb-4 font-serif transition-colors duration-300">
                 {currentFeature.title}
               </h3>
 
-              <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed transition-all duration-300">
+              <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed transition-colors duration-300">
                 {currentFeature.description}
               </p>
             </div>
@@ -310,11 +310,15 @@ export function FeaturesSlideshow() {
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
-              index === currentIndex ? "bg-[#B22222] scale-110" : "bg-gray-300 hover:bg-gray-400"
+            className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-full transition-colors duration-300 ${
+              index === currentIndex ? "bg-[#B22222]/10" : "bg-transparent hover:bg-gray-100"
             }`}
             aria-label={`Go to slide ${index + 1}`}
-          />
+          >
+            <span className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-transform transition-colors duration-300 ${
+              index === currentIndex ? "bg-[#B22222] scale-110" : "bg-gray-300 hover:bg-gray-400"
+            }`} aria-hidden="true" />
+          </button>
         ))}
       </div>
 
@@ -327,7 +331,7 @@ export function FeaturesSlideshow() {
               key={index}
               type="button"
               onClick={() => goToSlide(index)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors duration-300 ${
                 isActive ? "bg-[#B22222] text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
