@@ -167,6 +167,13 @@
   animation: fadeIn 0.8s ease-out 0.6s both;
 }
 
+@media (max-width: 640px) {
+  .animate-fade-in-delay,
+  .animate-fade-in-delay-2 {
+    animation-delay: 0s;
+  }
+}
+
 /* Floating animation for decorative elements */
 @keyframes float {
   0%,
