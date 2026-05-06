@@ -1,7 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  images: { unoptimized: false },
+  images: {
+    unoptimized: false,
+    remotePatterns: [
+      { protocol: 'https', hostname: 'flagcdn.com' },
+    ],
+  },
   async headers() {
     return [
       {
