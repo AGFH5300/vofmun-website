@@ -202,7 +202,8 @@ export function FoundersInfiniteCarousel() {
                       alt={founder.name}
                       fill
                       loading="lazy"
-                      quality={founder.image === "/founders/AnshGupta_Tech.webp" ? 95 : 90}
+                      quality={90}
+                      unoptimized={founder.image === "/founders/AnshGupta_Tech.webp"}
                       sizes="(max-width: 768px) 256px, 320px"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
