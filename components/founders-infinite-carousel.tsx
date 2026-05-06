@@ -202,6 +202,7 @@ export function FoundersInfiniteCarousel() {
                       alt={founder.name}
                       fill
                       loading="lazy"
+                      quality={90}
                       sizes="(max-width: 768px) 256px, 320px"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
