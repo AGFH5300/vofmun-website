@@ -201,7 +201,7 @@ export function FoundersInfiniteCarousel() {
                       src={founder.image}
                       alt={founder.name}
                       fill
-                      loading="lazy"
+                      loading={Math.abs(position) <= 1 ? "eager" : "lazy"}
                       quality={90}
                       unoptimized={founder.image === "/founders/AnshGupta_Tech.webp"}
                       sizes="(max-width: 768px) 256px, 320px"
