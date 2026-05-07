@@ -5,6 +5,7 @@
 
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
+import { LiveCountdownTimer } from "@/components/live-countdown-timer";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -18,7 +19,6 @@ const ScrollProgress = dynamic(() => import("@/components/scroll-progress").then
 const BackToTop = dynamic(() => import("@/components/back-to-top").then((m) => m.BackToTop), { ssr: false })
 const ClientScripts = dynamic(() => import("@/components/client-scripts").then((m) => m.ClientScripts), { ssr: false })
 const FeaturesSlideshow = dynamic(() => import("@/components/features-slideshow").then((m) => m.FeaturesSlideshow), { ssr: false })
-const LiveCountdownTimer = dynamic(() => import("@/components/live-countdown-timer").then((m) => m.LiveCountdownTimer), { ssr: false })
 const FoundersInfiniteCarousel = dynamic(() => import("@/components/founders-infinite-carousel").then((m) => m.FoundersInfiniteCarousel), { ssr: false, loading: () => <div className="h-96 w-full max-w-6xl mx-auto" aria-hidden="true" /> })
 const NationalitiesSection = dynamic(() => import("@/components/nationalities-section").then((m) => m.NationalitiesSection), { ssr: false, loading: () => <div className="h-[540px] w-full rounded-2xl border border-[#B22222]/15 bg-white" aria-hidden="true" /> })
 
@@ -84,6 +84,34 @@ function LazyHydrate({
 }
 
 export default function HomePage() {
+  const [isNationalitiesReady, setIsNationalitiesReady] = useState(false)
+
+  useEffect(() => {
+    let idleTimer: ReturnType<typeof setTimeout> | null = null
+    let idleId: RequestIdleCallbackHandle | null = null
+    const windowWithIdle = window as Window & {
+      requestIdleCallback?: RequestIdleCallbackFn
+      cancelIdleCallback?: (handle: RequestIdleCallbackHandle) => void
+    }
+
+    if (windowWithIdle.requestIdleCallback) {
+      idleId = windowWithIdle.requestIdleCallback(() => {
+        setIsNationalitiesReady(true)
+      }, { timeout: 900 })
+    } else {
+      idleTimer = setTimeout(() => {
+        setIsNationalitiesReady(true)
+      }, 900)
+    }
+
+    return () => {
+      if (idleTimer) clearTimeout(idleTimer)
+      if (idleId !== null && windowWithIdle.cancelIdleCallback) {
+        windowWithIdle.cancelIdleCallback(idleId)
+      }
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-[#ffecdd]">
       <EnhancedNavigation />
@@ -280,7 +308,7 @@ export default function HomePage() {
               VOFMUN is a celebration of global thinking, where debate and diplomacy connect people to make a true difference.
             </p>
             <div className="mt-10 max-w-6xl mx-auto">
-              <LazyHydrate desktopRootMargin="700px 0px" mobileRootMargin="1400px 0px" idleDelayMs={1200} fallback={<div className="h-[540px] w-full rounded-2xl border border-[#B22222]/15 bg-white" aria-hidden="true" />}><NationalitiesSection /></LazyHydrate>
+              {isNationalitiesReady ? <NationalitiesSection /> : <div className="h-[540px] w-full rounded-2xl border border-[#B22222]/15 bg-white" aria-hidden="true" />}
             </div>
           </div>
         </section>
