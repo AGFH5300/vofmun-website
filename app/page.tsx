@@ -10,6 +10,9 @@ import { ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
+type RequestIdleCallbackHandle = number
+type RequestIdleCallbackFn = (callback: IdleRequestCallback, opts?: IdleRequestOptions) => RequestIdleCallbackHandle
+
 const EnhancedNavigation = dynamic(() => import("@/components/enhanced-navigation").then((m) => m.EnhancedNavigation))
 const ScrollProgress = dynamic(() => import("@/components/scroll-progress").then((m) => m.ScrollProgress), { ssr: false })
 const BackToTop = dynamic(() => import("@/components/back-to-top").then((m) => m.BackToTop), { ssr: false })
@@ -25,11 +28,13 @@ function LazyHydrate({
   fallback,
   desktopRootMargin,
   mobileRootMargin,
+  idleDelayMs,
 }: {
   children: ReactNode
   fallback: ReactNode
   desktopRootMargin: string
   mobileRootMargin: string
+  idleDelayMs: number
 }) {
   const [isReady, setIsReady] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -46,9 +51,34 @@ function LazyHydrate({
       }
     }, { rootMargin })
 
+    let idleTimer: ReturnType<typeof setTimeout> | null = null
+    let idleId: RequestIdleCallbackHandle | null = null
+    const windowWithIdle = window as Window & {
+      requestIdleCallback?: RequestIdleCallbackFn
+      cancelIdleCallback?: (handle: RequestIdleCallbackHandle) => void
+    }
+
+    if (windowWithIdle.requestIdleCallback) {
+      idleId = windowWithIdle.requestIdleCallback(() => {
+        setIsReady(true)
+        observer.disconnect()
+      }, { timeout: idleDelayMs })
+    } else {
+      idleTimer = setTimeout(() => {
+        setIsReady(true)
+        observer.disconnect()
+      }, idleDelayMs)
+    }
+
     observer.observe(element)
-    return () => observer.disconnect()
-  }, [desktopRootMargin, isReady, mobileRootMargin])
+    return () => {
+      observer.disconnect()
+      if (idleTimer) clearTimeout(idleTimer)
+      if (idleId !== null && windowWithIdle.cancelIdleCallback) {
+        windowWithIdle.cancelIdleCallback(idleId)
+      }
+    }
+  }, [desktopRootMargin, idleDelayMs, isReady, mobileRootMargin])
 
   return <div ref={containerRef}>{isReady ? children : fallback}</div>
 }
@@ -147,7 +177,7 @@ export default function HomePage() {
               Our conference webapp has been developed in-house to provide all our delegates, chairs, and admin staff with a seamless and intuitive experience. 
               VOFMUN One - our custom-built platform - integrates all essential tools and resources needed for effective participation throughout the conference!
             </p>
-            <LazyHydrate desktopRootMargin="180px 0px" mobileRootMargin="600px 0px" fallback={<div className="min-h-[560px] w-full" aria-hidden="true" />}><FeaturesSlideshow /></LazyHydrate>
+            <LazyHydrate desktopRootMargin="520px 0px" mobileRootMargin="1200px 0px" idleDelayMs={500} fallback={<div className="min-h-[560px] w-full" aria-hidden="true" />}><FeaturesSlideshow /></LazyHydrate>
           </div>
         </section>
 
@@ -160,7 +190,7 @@ export default function HomePage() {
               Get to know the founders, heads, and deputies who power VOFMUN.
             </p>
 
-            <LazyHydrate desktopRootMargin="120px 0px" mobileRootMargin="500px 0px" fallback={<div className="h-96 w-full max-w-6xl mx-auto" aria-hidden="true" />}><FoundersInfiniteCarousel /></LazyHydrate>
+            <LazyHydrate desktopRootMargin="500px 0px" mobileRootMargin="1100px 0px" idleDelayMs={900} fallback={<div className="h-96 w-full max-w-6xl mx-auto" aria-hidden="true" />}><FoundersInfiniteCarousel /></LazyHydrate>
 
             <div className="text-center mt-8">
               <Link
@@ -250,7 +280,7 @@ export default function HomePage() {
               VOFMUN is a celebration of global thinking, where debate and diplomacy connect people to make a true difference.
             </p>
             <div className="mt-10 max-w-6xl mx-auto">
-              <LazyHydrate desktopRootMargin="220px 0px" mobileRootMargin="900px 0px" fallback={<div className="h-[540px] w-full rounded-2xl border border-[#B22222]/15 bg-white" aria-hidden="true" />}><NationalitiesSection /></LazyHydrate>
+              <LazyHydrate desktopRootMargin="700px 0px" mobileRootMargin="1400px 0px" idleDelayMs={1200} fallback={<div className="h-[540px] w-full rounded-2xl border border-[#B22222]/15 bg-white" aria-hidden="true" />}><NationalitiesSection /></LazyHydrate>
             </div>
           </div>
         </section>
