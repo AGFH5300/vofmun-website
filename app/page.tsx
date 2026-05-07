@@ -7,6 +7,8 @@ import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
+import dynamic from "next/dynamic";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 const EnhancedNavigation = dynamic(() => import("@/components/enhanced-navigation").then((m) => m.EnhancedNavigation))
 const ScrollProgress = dynamic(() => import("@/components/scroll-progress").then((m) => m.ScrollProgress), { ssr: false })
@@ -17,7 +19,39 @@ const LiveCountdownTimer = dynamic(() => import("@/components/live-countdown-tim
 const FoundersInfiniteCarousel = dynamic(() => import("@/components/founders-infinite-carousel").then((m) => m.FoundersInfiniteCarousel), { ssr: false, loading: () => <div className="h-96 w-full max-w-6xl mx-auto" aria-hidden="true" /> })
 const NationalitiesSection = dynamic(() => import("@/components/nationalities-section").then((m) => m.NationalitiesSection), { ssr: false, loading: () => <div className="h-[540px] w-full rounded-2xl border border-[#B22222]/15 bg-white" aria-hidden="true" /> })
 
-import dynamic from "next/dynamic";
+
+function LazyHydrate({
+  children,
+  fallback,
+  desktopRootMargin,
+  mobileRootMargin,
+}: {
+  children: ReactNode
+  fallback: ReactNode
+  desktopRootMargin: string
+  mobileRootMargin: string
+}) {
+  const [isReady, setIsReady] = useState(false)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const element = containerRef.current
+    if (!element || isReady) return
+
+    const rootMargin = window.matchMedia("(max-width: 768px)").matches ? mobileRootMargin : desktopRootMargin
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        setIsReady(true)
+        observer.disconnect()
+      }
+    }, { rootMargin })
+
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [desktopRootMargin, isReady, mobileRootMargin])
+
+  return <div ref={containerRef}>{isReady ? children : fallback}</div>
+}
 
 export default function HomePage() {
   return (
@@ -113,7 +147,7 @@ export default function HomePage() {
               Our conference webapp has been developed in-house to provide all our delegates, chairs, and admin staff with a seamless and intuitive experience. 
               VOFMUN One - our custom-built platform - integrates all essential tools and resources needed for effective participation throughout the conference!
             </p>
-            <FeaturesSlideshow />
+            <LazyHydrate desktopRootMargin="180px 0px" mobileRootMargin="600px 0px" fallback={<div className="min-h-[560px] w-full" aria-hidden="true" />}><FeaturesSlideshow /></LazyHydrate>
           </div>
         </section>
 
@@ -126,7 +160,7 @@ export default function HomePage() {
               Get to know the founders, heads, and deputies who power VOFMUN.
             </p>
 
-            <FoundersInfiniteCarousel />
+            <LazyHydrate desktopRootMargin="120px 0px" mobileRootMargin="500px 0px" fallback={<div className="h-96 w-full max-w-6xl mx-auto" aria-hidden="true" />}><FoundersInfiniteCarousel /></LazyHydrate>
 
             <div className="text-center mt-8">
               <Link
@@ -216,7 +250,7 @@ export default function HomePage() {
               VOFMUN is a celebration of global thinking, where debate and diplomacy connect people to make a true difference.
             </p>
             <div className="mt-10 max-w-6xl mx-auto">
-              <NationalitiesSection />
+              <LazyHydrate desktopRootMargin="220px 0px" mobileRootMargin="900px 0px" fallback={<div className="h-[540px] w-full rounded-2xl border border-[#B22222]/15 bg-white" aria-hidden="true" />}><NationalitiesSection /></LazyHydrate>
             </div>
           </div>
         </section>
