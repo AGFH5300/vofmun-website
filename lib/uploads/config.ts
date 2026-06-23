@@ -65,6 +65,11 @@ export const uploadPurposeConfigs: Record<UploadPurpose, UploadPurposeConfig> = 
 
 export const getUploadConfig = (purpose: UploadPurpose) => uploadPurposeConfigs[purpose]
 
+export const getUploadMaxSizeLabel = (purpose: UploadPurpose) => {
+  const maxMegabytes = uploadPurposeConfigs[purpose].maxBytes / mb(1)
+  return `${Number.isInteger(maxMegabytes) ? maxMegabytes : maxMegabytes.toFixed(1)} MB`
+}
+
 export const getFileExtension = (fileName: string) => {
   const trimmed = fileName.trim().toLowerCase()
   const dotIndex = trimmed.lastIndexOf('.')
