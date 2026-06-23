@@ -1,0 +1,47 @@
+name: One-time npm security fix
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Show npm environment
+        run: |
+          node --version
+          npm --version
+      - name: Regenerate package-lock with npm overrides
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Apply npm audit fixes to package-lock
+        run: npm audit fix --package-lock-only --ignore-scripts || true
+      - name: Install from fixed lockfile
+        run: npm ci --ignore-scripts
+      - name: Run production audit
+        run: npm audit --omit=dev
+      - name: Run full audit
+        run: npm audit
+      - name: Commit fixed npm lockfile and remove one-time workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/one-time-npm-security-fix.yml
+          git add package.json package-lock.json .github/workflows/one-time-npm-security-fix.yml
+          if ! git diff --cached --quiet; then
+            git commit -m "fix(deps): resolve npm security alerts"
+            git push origin HEAD:main
+          fi
