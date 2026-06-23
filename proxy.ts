@@ -1,10 +1,21 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 
+const AUTH_REQUIRED_PREFIXES = ["/system", "/dashboard", "/admin"]
+const AUTH_FLOW_PREFIXES = ["/auth"]
+
+const shouldRefreshSession = (pathname: string) =>
+  AUTH_REQUIRED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)) ||
+  AUTH_FLOW_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
+
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: { headers: request.headers },
   })
+
+  if (!shouldRefreshSession(request.nextUrl.pathname)) {
+    return response
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
