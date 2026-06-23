@@ -50,11 +50,6 @@ const founders = [
     image: "/founders/AryanShah_Logistics.webp",
   },
   {
-    name: "Vihaan Harrison",
-    role: "Deputy of Logistics",
-    image: "/founders/VihaanHarrison_Logistics.webp",
-  },
-  {
     name: "Armaghan Siddiqui",
     role: "Head of Finance",
     image: "/founders/MuhammadArmaghanSiddiqui_Finance.webp",
@@ -65,19 +60,9 @@ const founders = [
     image: "/founders/PranavVerma_Finance.webp",
   },
   {
-    name: "Noaf Qassem",
-    role: "Deputy of Finance",
-    image: "/founders/NoafQassem_Finance.webp",
-  },
-  {
     name: "Saira Shirvaikar",
     role: "Head of Media & Marketing",
     image: "/founders/SairaShirvaikar_Media.webp",
-  },
-  {
-    name: "Tamara Moshawrab",
-    role: "Deputy of Media & Marketing",
-    image: "/founders/TamaraMoshawrab_Media.webp",
   },
   {
     name: "Prakhar Sinha",
