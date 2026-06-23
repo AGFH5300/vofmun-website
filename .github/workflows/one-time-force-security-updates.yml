@@ -1,0 +1,71 @@
+name: One-time force security updates
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Resolve latest safe versions and update package.json overrides
+        run: |
+          node --version
+          npm --version
+          WS_VERSION=$(npm view ws@8 version --json | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const v=JSON.parse(s); console.log(Array.isArray(v)?v[v.length-1]:v)})")
+          TMP_VERSION=$(npm view tmp version)
+          BRACE_VERSION=$(npm view brace-expansion version)
+          SHELL_QUOTE_VERSION=$(npm view shell-quote version)
+          node - <<'NODE'
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.overrides = {
+            ...(pkg.overrides || {}),
+            postcss: '8.5.10',
+            'shell-quote': process.env.SHELL_QUOTE_VERSION,
+            ws: process.env.WS_VERSION,
+            tmp: process.env.TMP_VERSION,
+            'brace-expansion': process.env.BRACE_VERSION
+          };
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          NODE
+        env:
+          WS_VERSION: ${{ env.WS_VERSION }}
+          TMP_VERSION: ${{ env.TMP_VERSION }}
+          BRACE_VERSION: ${{ env.BRACE_VERSION }}
+          SHELL_QUOTE_VERSION: ${{ env.SHELL_QUOTE_VERSION }}
+      - name: Upgrade direct Next.js dependencies and regenerate npm lockfile
+        run: |
+          npm install next@latest eslint-config-next@latest --package-lock-only --ignore-scripts
+          npm install --package-lock-only --ignore-scripts
+      - name: Install from updated lockfile
+        run: npm ci --ignore-scripts
+      - name: Run production audit
+        run: npm audit --omit=dev
+      - name: Run full audit
+        run: npm audit
+      - name: Check build
+        run: npm run build
+      - name: Commit fixed dependencies and remove one-time workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/one-time-force-security-updates.yml
+          git add package.json package-lock.json .github/workflows/one-time-force-security-updates.yml
+          if ! git diff --cached --quiet; then
+            git commit -m "fix(deps): update npm security dependencies"
+            git push origin HEAD:main
+          fi
