@@ -2,13 +2,9 @@
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
 import { NextRequest, NextResponse } from 'next/server'
-import { randomUUID } from 'crypto'
 
 import { createClient } from '@/utils/supabase/server'
 import {
-  ensurePaymentProofBucketExists,
-  ensureChairCvBucketExists,
-  getManualBucketSetupChecklist,
   getPaymentProofBucketName,
   getChairCvBucketName,
   PaymentProofBucketError,
@@ -24,22 +20,20 @@ import {
 import { normalizeToAlpha2CountryCode } from '@/lib/countries'
 import { isAdminSignupClosed, isChairSignupClosed } from '@/lib/registration-deadlines'
 import { z } from 'zod'
+import { verifyUploadReference } from '@/lib/uploads/intent'
+import { rejectLargeJsonRequest } from '@/lib/http/request-size'
 
 export const runtime = 'nodejs'
 
 const paymentConfirmationSchema = z.object({
-  fullName: z.string().min(1, 'Payment confirmation requires the payer\'s name'),
+  fullName: z.string().min(1, "Payment confirmation requires the payer's name"),
   role: z.enum(['delegate', 'chair', 'admin']),
-  fileName: z.string().min(1),
-  mimeType: z.string().min(1),
-  dataUrl: z.string().regex(/^data:.*;base64,.+/, 'Invalid payment proof format'),
-})
+  uploadReference: z.unknown(),
+}).strict()
 
 const chairCvSchema = z.object({
-  fileName: z.string().min(1),
-  mimeType: z.string().min(1),
-  dataUrl: z.string().regex(/^data:.*;base64,.+/, 'Invalid CV file format'),
-})
+  uploadReference: z.unknown(),
+}).strict()
 
 async function partitionReferralCodesByValidity(supabase: Awaited<ReturnType<typeof createClient>>, codes: string[]) {
   if (codes.length === 0) {
@@ -84,6 +78,10 @@ async function partitionReferralCodesByValidity(supabase: Awaited<ReturnType<typ
 }
 
 export async function POST(request: NextRequest) {
+  const tooLarge = rejectLargeJsonRequest(request, 192 * 1024)
+  if (tooLarge) return tooLarge
+
+  const uploadedPaths: Array<{ bucket: string; path: string }> = []
   try {
     const body = await request.json()
     const supabase = await createClient()
@@ -122,6 +120,14 @@ export async function POST(request: NextRequest) {
     let chairCvFileName: string | null = null
     let chairCvUploadedAt: string | null = null
 
+    const cleanupUploadedPaths = async () => {
+      for (const upload of uploadedPaths) {
+        await supabase.storage.from(upload.bucket).remove([upload.path]).catch((removeError) => {
+          console.error('Failed to remove unrecorded signup upload:', removeError instanceof Error ? removeError.message : 'Unknown error')
+        })
+      }
+    }
+
     if (body.selectedRole === 'chair' && !body.chairCv) {
       return NextResponse.json(
         {
@@ -134,51 +140,26 @@ export async function POST(request: NextRequest) {
 
     if (rawPaymentStatus === 'yes') {
       const paymentConfirmation = paymentConfirmationSchema.parse(body.paymentConfirmation)
-
-      const [, base64Data] = paymentConfirmation.dataUrl.split(',')
-      if (!base64Data) {
-        throw new Error('Invalid payment proof payload received')
-      }
-
-      const fileBuffer = Buffer.from(base64Data, 'base64')
-
-      const rawFileName = paymentConfirmation.fileName.trim() || 'payment-proof'
-      const sanitizedFileName = rawFileName.replace(/[^a-zA-Z0-9._-]/g, '_')
-      const hasExtension = sanitizedFileName.includes('.')
-      const mimeExtension = paymentConfirmation.mimeType.split('/')[1] || 'png'
-      const fileNameWithExtension = hasExtension ? sanitizedFileName : `${sanitizedFileName}.${mimeExtension}`
-
-      const storagePath = `proof-of-payment/${new Date().toISOString().split('T')[0]}/${randomUUID()}-${fileNameWithExtension}`
-
       const paymentProofBucket = getPaymentProofBucketName()
-
-      await ensurePaymentProofBucketExists(paymentProofBucket)
-
-      const { error: uploadError } = await supabase.storage
-        .from(paymentProofBucket)
-        .upload(storagePath, fileBuffer, {
-          contentType: paymentConfirmation.mimeType,
-          upsert: false,
-        })
-
-      if (uploadError) {
-        const normalizedMessage = uploadError.message?.toLowerCase() ?? ''
-        if (normalizedMessage.includes('bucket not found')) {
-          const manualSetupMessage = getManualBucketSetupChecklist(paymentProofBucket)
-          throw new PaymentProofBucketError(
-            `Failed to upload payment proof: Supabase storage bucket "${paymentProofBucket}" was not found.\n\n${manualSetupMessage}`,
-            'Payment proof uploads are temporarily unavailable while we finish setting up storage. Please try again later or contact support.'
-          )
-        }
-
-        throw new Error('Failed to upload payment proof: ' + uploadError.message)
+      const uploadReference = verifyUploadReference(paymentConfirmation.uploadReference, 'payment-proof', paymentProofBucket)
+      if (uploadReference.bucket !== paymentProofBucket) {
+        throw new Error('Payment proof upload bucket is not configured for this deployment.')
       }
-
-      const { data: publicUrlData } = supabase.storage.from(paymentProofBucket).getPublicUrl(storagePath)
+      const pathParts = uploadReference.path.split('/')
+      const fileName = pathParts.pop()
+      const { data: objects, error: objectLookupError } = await supabase.storage
+        .from(paymentProofBucket)
+        .list(pathParts.join('/'), { search: fileName, limit: 1 })
+      if (objectLookupError) throw new Error('Failed to verify payment proof upload: ' + objectLookupError.message)
+      if (!fileName || !objects?.some((object) => object.name === fileName)) {
+        throw new Error('Payment proof upload was not found. Please upload the file again.')
+      }
+      const { data: publicUrlData } = supabase.storage.from(paymentProofBucket).getPublicUrl(uploadReference.path)
+      uploadedPaths.push({ bucket: paymentProofBucket, path: uploadReference.path })
 
       paymentProofUrl = publicUrlData?.publicUrl ?? null
-      paymentProofStoragePath = storagePath
-      paymentProofFileName = fileNameWithExtension
+      paymentProofStoragePath = uploadReference.path
+      paymentProofFileName = uploadReference.fileName
       paymentProofPayerName = paymentConfirmation.fullName.trim()
       paymentProofRole = paymentConfirmation.role
       paymentProofUploadedAt = new Date().toISOString()
@@ -186,39 +167,26 @@ export async function POST(request: NextRequest) {
 
     if (body.selectedRole === 'chair' && body.chairCv) {
       const chairCv = chairCvSchema.parse(body.chairCv)
-
-      const [, base64Data] = chairCv.dataUrl.split(',')
-      if (!base64Data) {
-        throw new Error('Invalid CV payload received')
-      }
-
-      const fileBuffer = Buffer.from(base64Data, 'base64')
-      const rawFileName = chairCv.fileName.trim() || 'chair-cv'
-      const sanitizedFileName = rawFileName.replace(/[^a-zA-Z0-9._-]/g, '_')
-      const hasExtension = sanitizedFileName.includes('.')
-      const mimeExtension = chairCv.mimeType.split('/')[1] || 'pdf'
-      const fileNameWithExtension = hasExtension ? sanitizedFileName : `${sanitizedFileName}.${mimeExtension}`
-      const storagePath = `chair-cvs/${new Date().toISOString().split('T')[0]}/${randomUUID()}-${fileNameWithExtension}`
       const chairCvBucket = getChairCvBucketName()
-
-      await ensureChairCvBucketExists(chairCvBucket)
-
-      const { error: uploadError } = await supabase.storage
-        .from(chairCvBucket)
-        .upload(storagePath, fileBuffer, {
-          contentType: chairCv.mimeType,
-          upsert: false,
-        })
-
-      if (uploadError) {
-        throw new Error('Failed to upload chair CV: ' + uploadError.message)
+      const uploadReference = verifyUploadReference(chairCv.uploadReference, 'chair-cv', chairCvBucket)
+      if (uploadReference.bucket !== chairCvBucket) {
+        throw new Error('Chair CV upload bucket is not configured for this deployment.')
       }
-
-      const { data: publicUrlData } = supabase.storage.from(chairCvBucket).getPublicUrl(storagePath)
+      const pathParts = uploadReference.path.split('/')
+      const fileName = pathParts.pop()
+      const { data: objects, error: objectLookupError } = await supabase.storage
+        .from(chairCvBucket)
+        .list(pathParts.join('/'), { search: fileName, limit: 1 })
+      if (objectLookupError) throw new Error('Failed to verify chair CV upload: ' + objectLookupError.message)
+      if (!fileName || !objects?.some((object) => object.name === fileName)) {
+        throw new Error('Chair CV upload was not found. Please upload the file again.')
+      }
+      const { data: publicUrlData } = supabase.storage.from(chairCvBucket).getPublicUrl(uploadReference.path)
+      uploadedPaths.push({ bucket: chairCvBucket, path: uploadReference.path })
 
       chairCvUrl = publicUrlData?.publicUrl ?? null
-      chairCvStoragePath = storagePath
-      chairCvFileName = fileNameWithExtension
+      chairCvStoragePath = uploadReference.path
+      chairCvFileName = uploadReference.fileName
       chairCvUploadedAt = new Date().toISOString()
     }
 
@@ -321,6 +289,7 @@ export async function POST(request: NextRequest) {
         })
         .join(' ')
 
+      await cleanupUploadedPaths()
       return NextResponse.json(
         {
           status: 'invalid_referral_codes',
@@ -385,6 +354,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       // Handle specific Supabase errors
       if (error.code === '23505' || error.message.includes('duplicate key')) {
+        await cleanupUploadedPaths()
         return NextResponse.json(
           { 
             message: 'An account with this email already exists',
@@ -394,6 +364,7 @@ export async function POST(request: NextRequest) {
         )
       }
       
+      await cleanupUploadedPaths()
       throw new Error('Failed to create user: ' + error.message)
     }
     
