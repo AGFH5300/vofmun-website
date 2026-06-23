@@ -1,67 +1,25 @@
-name: Resolve npm dependency security updates
+name: Dependency audit
 
 on:
-  push:
-    branches: [fix/dependabot-npm-audit-2026-06]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  resolve-and-audit:
+  audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: fix/dependabot-npm-audit-2026-06
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - name: Install existing lockfile
+      - name: Install locked dependencies
         run: npm ci --ignore-scripts
-      - name: Update Next.js and apply non-breaking audit fixes
-        run: |
-          npm update next --package-lock-only --ignore-scripts
-          set +e
-          npm audit fix --package-lock-only --ignore-scripts
-          audit_fix_exit=$?
-          set -e
-          echo "npm audit fix exit code: ${audit_fix_exit}"
-      - name: Reinstall and capture final audits
-        run: |
-          npm ci --ignore-scripts
-          npm audit --json > audit-full.json || true
-          npm audit --omit=dev --json > audit-production.json || true
-          node - <<'NODE'
-          const fs = require('fs');
-          for (const file of ['audit-full.json', 'audit-production.json']) {
-            const report = JSON.parse(fs.readFileSync(file, 'utf8'));
-            console.log(`\n=== ${file} ===`);
-            console.log(JSON.stringify(report.metadata?.vulnerabilities ?? {}, null, 2));
-            for (const [name, issue] of Object.entries(report.vulnerabilities ?? {})) {
-              console.log(`${name}: ${issue.severity}; fix=${JSON.stringify(issue.fixAvailable)}`);
-            }
-          }
-          NODE
-      - name: Commit refreshed npm lockfile
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json
-          if git diff --cached --quiet; then
-            echo "No dependency changes to commit."
-          else
-            git commit -m "fix(deps): update Next.js and npm audit resolutions"
-            git push origin HEAD:fix/dependabot-npm-audit-2026-06
-          fi
-      - name: Upload final audit reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: npm-audit-reports-final
-          path: |
-            audit-full.json
-            audit-production.json
-          if-no-files-found: error
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+      - name: Audit all dependencies
+        run: npm audit
