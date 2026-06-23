@@ -161,33 +161,12 @@ Beyond my formal roles, I’ve built a rep for being that person who keeps thing
 As Deputy Head of Committees, I support the Co-Heads in managing committee quality, coordinating background guide development, and ensuring each chairing team is aligned and prepared. I help oversee logistics, communication, and the overall delegate experience, making sure committees run smoothly from prep to conference day. My aim is to create a well-structured, fair, and engaging environment where delegates can genuinely grow — in research, diplomacy, and public speaking.`,
   },
   {
-    name: "Vihaan Harrison",
-    role: "<strong>Deputy of Logistics</strong>",
-    department: "Logistics",
-    image: "/founders/VihaanHarrison_Logistics.webp",
-    linkedin: "https://www.linkedin.com/in/vihaan-harrison-1a3128252/",
-    writeup: `Hi, I’m Vihaan Harrison, a debater, public speaker, and Secretariat member at VOFMUN 2026. Since beginning my MUN journey in January 2024, I’ve participated in 20+ conferences across the UAE, earning multiple Best Delegate awards along with distinctions such as Best Researcher, Runner-Up Best Delegate, and Honourable Mention.
-
-Beyond delegating, leadership is where I’ve grown the most. I currently serve in senior Secretariat roles including Head of Outreach, Head of Crisis, and USG of Committees across various conferences. These experiences have strengthened my ability to manage teams, oversee academic standards, and handle high-pressure committee environments with structure and clarity. I’ve also chaired committees such as UNHRC and UNODC, focusing on maintaining competitive yet respectful debate.
-
-I’m a Grade 10 student at Delhi Private School, Sharjah, and I approach MUN with strategic thinking, strong research, and composed diplomacy. At VOFMUN 2026, my goal is to help design a conference that challenges delegates, sharpens their skills, and creates an environment where serious debate and meaningful growth go hand in hand. Get to know me more at vihaanharrison.lovable.app.`,
-  },
-  {
     name: "Prakhar Sinha",
     role: "<strong>Deputy of Media & Marketing</strong>",
     department: "Media",
     image: "/founders/PrakharSinha_Media.webp",
     linkedin: "https://www.linkedin.com/in/prakhar-sinha-5b00b23a7/",
     writeup: `I’m Prakhar Sinha, a Grade 11 student at Bright Riders School, Abu Dhabi, and a member of the Media Team for VOFMUN. I’ve gained extensive prior experience in marketing through internships, managing my school’s Student Council social media page, and working with multiple non-profit organizations. Through these experiences, I’ve grown a genuine interest in communication, design, and using media to create impact. These experiences have also helped strengthen my teamwork, organization, and leadership abilities. I’m excited to be part of the VOFMUN Media Team and contribute by capturing the moments and atmosphere that make the conference memorable.`,
-  },
-  {
-    name: "Tamara Moshawrab",
-    role: "<strong>Deputy of Media & Marketing</strong>",
-    department: "Media",
-    image: "/founders/TamaraMoshawrab_Media.webp",
-    writeup: `Hello! My name is Tamara Moshawrab, and I’m a Year 11 student at SABIS International School of Choueifat Dubai. I’m thrilled to serve as Deputy of Media for Voices of the Future MUN 2026, where I help manage communications and create engaging content to connect with delegates and showcase the conference experience.
-
-Academically, I study IGCSE Business and AP Economics, which have strengthened my analytical and organisational skills - skills I bring into planning and managing media for VOFMUN. Outside of school, I’m passionate about debate, MUN, and tennis, all of which help me develop focus, creativity, and teamwork. I’m excited to contribute to making VOFMUN 2026 a memorable and inspiring conference for all!`,
   },
   {
     name: "Pranav Verma",
@@ -202,17 +181,6 @@ Over the years, I’ve been deeply involved in student leadership and event mana
 Beyond event management, I’m passionate about sustainability and innovation. My Personal Project focused on creating eco-friendly fast food packaging, and my Community Project involved building a mini hydroponic farm at school. These initiatives reflect my interest in using creativity and problem-solving to drive real impact.
 
 At VOFMUN, I aim to bring that same precision and initiative - ensuring every financial decision contributes to a conference that’s not only professional and impactful, but also forward-thinking and inclusive.`,
-  },
-  {
-    name: "Noaf Qassem",
-    role: "<strong>Deputy of Finance</strong>",
-    department: "Finance",
-    image: "/founders/NoafQassem_Finance.webp",
-    writeup: `I'm Noaf Qassem, a Year 11 student at SABIS International School of Choueifat Dubai, and I'm incredibly proud to be serving as the Deputy of Finance of Voices of the Future 2026! Being part of the VOFMUN leadership has given me the opportunity to contribute to something meaningful while building valuable skills in organization, teamwork, and strategic planning. I've chosen to take IGCSE Business, AP Economics, and AP Statistics - subjects that reflect my deep interest in global systems, economic theory, and data-driven decision-making.
-
-My future aspirations lie in either diplomacy or economics, and I believe that understanding the mechanics of both global policy and financial systems will prepare me to make a real impact in those fields. MUN has always been a space where I've been able to grow - not just as a speaker and thinker, but as a global citizen. I love the way it challenges me to think critically, communicate clearly, and collaborate with others to solve complex issues. Outside of academics, I am an ongoing track and field athlete, which helps shape my perspective on core life skills such as discipline, leadership, and respect.
-
-Being part of the VOFMUN team and this great journey has been incredibly exciting, and I'm committed to ensuring the financial planning behind the scenes helps make this conference as smooth, impactful, and unforgettable as possible. Can't wait to see what we accomplish together; hope to see you at VOFMUN 2026!`,
   },
 ];
 
