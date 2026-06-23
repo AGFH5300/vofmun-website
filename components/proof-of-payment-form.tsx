@@ -16,7 +16,9 @@ import { UploadCloud, X, Loader2, FileText } from "lucide-react"
 import { HAS_STRIPE_PAYMENT_LINK, STRIPE_PAYMENT_URL } from "@/lib/payment-details"
 import { getRequestErrorMessage } from "@/lib/http/client-errors"
 import { uploadFileDirectly } from "@/lib/uploads/client"
-import { validateUploadMetadata } from "@/lib/uploads/config"
+import { getUploadMaxSizeLabel, validateUploadMetadata } from "@/lib/uploads/config"
+
+const PAYMENT_PROOF_MAX_SIZE_LABEL = getUploadMaxSizeLabel("payment-proof")
 
 const stripeButtonClasses =
   "inline-flex items-center justify-center gap-2 rounded-lg bg-[#635bff] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-[#4f47d8] active:bg-[#423ac7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635bff]"
@@ -553,7 +555,7 @@ export function ProofOfPaymentForm() {
                       <p className="text-sm text-gray-700">
                         Drag & drop your payment proof file here, or <span className="font-semibold text-[#B22222]">browse</span>
                       </p>
-                      <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC, PDF • Max size 10MB</p>
+                      <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC, PDF • Max size {PAYMENT_PROOF_MAX_SIZE_LABEL}</p>
                     </div>
                   )}
                 </div>

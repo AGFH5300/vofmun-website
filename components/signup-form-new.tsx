@@ -52,9 +52,11 @@ import {
 } from "@/lib/referral-codes"
 import { HAS_STRIPE_PAYMENT_LINK, STRIPE_PAYMENT_URL } from "@/lib/payment-details"
 import { uploadFileDirectly } from "@/lib/uploads/client"
-import { validateUploadMetadata } from "@/lib/uploads/config"
+import { getUploadMaxSizeLabel, validateUploadMetadata } from "@/lib/uploads/config"
 import { getRequestErrorMessage, getTooManyRequestsMessage } from "@/lib/http/client-errors"
 import { cn } from "@/lib/utils"
+
+const PAYMENT_PROOF_MAX_SIZE_LABEL = getUploadMaxSizeLabel("payment-proof")
 
 type Role = "delegate" | "chair" | "admin" | null
 
@@ -2571,7 +2573,7 @@ export function SignupFormNew() {
                         <p className="text-sm text-gray-700">
                           Drag & drop your payment proof file here, or <span className="font-semibold text-[#B22222]">browse</span>
                         </p>
-                        <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC, PDF • Max size 10MB</p>
+                        <p className="text-xs text-gray-500">Accepted formats: PNG, JPG, HEIC, PDF • Max size {PAYMENT_PROOF_MAX_SIZE_LABEL}</p>
                       </div>
                     )}
                   </div>
