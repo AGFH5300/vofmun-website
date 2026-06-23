@@ -111,7 +111,7 @@ export function NationalitiesSection() {
       }
     }
 
-    const intervalId = window.setInterval(fetchNationalities, 30_000)
+    const intervalId = window.setInterval(fetchNationalities, 120_000)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         fetchNationalities()

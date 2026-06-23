@@ -51,6 +51,8 @@ import {
   normalizeReferralCode,
 } from "@/lib/referral-codes"
 import { HAS_STRIPE_PAYMENT_LINK, STRIPE_PAYMENT_URL } from "@/lib/payment-details"
+import { uploadFileDirectly } from "@/lib/uploads/client"
+import { validateUploadMetadata } from "@/lib/uploads/config"
 import { getRequestErrorMessage, getTooManyRequestsMessage } from "@/lib/http/client-errors"
 import { cn } from "@/lib/utils"
 
@@ -320,14 +322,6 @@ export function SignupFormNew() {
     }
   }, [hasPaid, safePaymentProofPreview])
 
-  const fileToDataURL = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = () => reject(new Error("Unable to read file"))
-      reader.readAsDataURL(file)
-    })
-
   const clearError = useCallback((key: string) => {
     setErrors((prev) => {
       if (!prev[key]) return prev
@@ -343,14 +337,12 @@ export function SignupFormNew() {
       )
       return
     }
-    const isImage = file.type.startsWith("image/")
-    const isPdf =
-      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+    const validationError = validateUploadMetadata({ purpose: "payment-proof", fileName: file.name, mimeType: file.type, size: file.size })
 
-    if (!isImage && !isPdf) {
+    if (validationError) {
       setErrors((prev) => ({
         ...prev,
-        paymentProof: "Please upload a PNG, JPG, HEIC, or PDF file.",
+        paymentProof: validationError,
       }))
       return
     }
@@ -360,14 +352,10 @@ export function SignupFormNew() {
   }, [clearError, paymentProofTemporarilyDisabled])
 
   const handleChairCvSelect = (file: File) => {
-    const allowed =
-      file.type === "application/pdf" ||
-      file.name.toLowerCase().endsWith(".pdf") ||
-      file.name.toLowerCase().endsWith(".doc") ||
-      file.name.toLowerCase().endsWith(".docx")
+    const validationError = validateUploadMetadata({ purpose: "chair-cv", fileName: file.name, mimeType: file.type, size: file.size })
 
-    if (!allowed) {
-      setChairCvError("Please upload a PDF or Word document for your CV.")
+    if (validationError) {
+      setChairCvError(validationError)
       return
     }
 
@@ -952,15 +940,13 @@ export function SignupFormNew() {
 
       setIsSubmitting(true)
 
-      let paymentProofDataUrl: string | null = null
-      if (!paymentProofTemporarilyDisabled && paymentProofFile) {
-        paymentProofDataUrl = await fileToDataURL(paymentProofFile)
-      }
+      const paymentUploadReference = !paymentProofTemporarilyDisabled && paymentProofFile
+        ? await uploadFileDirectly("payment-proof", paymentProofFile)
+        : null
 
-      let chairCvDataUrl: string | null = null
-      if (selectedRole === "chair" && chairCvFile) {
-        chairCvDataUrl = await fileToDataURL(chairCvFile)
-      }
+      const chairCvUploadReference = selectedRole === "chair" && chairCvFile
+        ? await uploadFileDirectly("chair-cv", chairCvFile)
+        : null
 
       const sanitizedDelegateData = selectedRole === "delegate" ? { ...delegateData } : null
 
@@ -977,21 +963,17 @@ export function SignupFormNew() {
         referralCodes: sanitizedReferralCodes,
         paymentStatus: paymentProofTemporarilyDisabled ? "no" : hasPaid,
         paymentConfirmation:
-          !paymentProofTemporarilyDisabled && hasPaid === "yes" && paymentProofDataUrl && selectedRole
+          !paymentProofTemporarilyDisabled && hasPaid === "yes" && paymentUploadReference && selectedRole
             ? {
                 fullName: paymentFullName.trim(),
                 role: selectedRole,
-                fileName: paymentProofFile?.name ?? "payment-proof",
-                mimeType: paymentProofFile?.type ?? "application/octet-stream",
-                dataUrl: paymentProofDataUrl,
+                uploadReference: paymentUploadReference,
               }
             : null,
         chairCv:
-          selectedRole === "chair" && chairCvFile && chairCvDataUrl
+          selectedRole === "chair" && chairCvFile && chairCvUploadReference
             ? {
-                fileName: chairCvFile.name,
-                mimeType: chairCvFile.type || "application/pdf",
-                dataUrl: chairCvDataUrl,
+                uploadReference: chairCvUploadReference,
               }
             : null,
       }
