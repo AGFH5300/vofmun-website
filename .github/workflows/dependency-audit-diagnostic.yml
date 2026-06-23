@@ -1,0 +1,50 @@
+name: Dependency audit diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Capture full audit
+        run: npm audit --json > audit-full.json || true
+      - name: Capture production audit
+        run: npm audit --omit=dev --json > audit-production.json || true
+      - name: Print affected dependency paths
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          for (const file of ['audit-full.json', 'audit-production.json']) {
+            const report = JSON.parse(fs.readFileSync(file, 'utf8'));
+            console.log(`\n=== ${file} ===`);
+            console.log(JSON.stringify(report.metadata?.vulnerabilities ?? {}, null, 2));
+            for (const [name, issue] of Object.entries(report.vulnerabilities ?? {})) {
+              console.log(`\n${name} (${issue.severity})`);
+              console.log(`direct: ${issue.isDirect}; range: ${issue.range}`);
+              console.log(`via: ${JSON.stringify(issue.via)}`);
+              console.log(`effects: ${JSON.stringify(issue.effects)}`);
+              console.log(`fix: ${JSON.stringify(issue.fixAvailable)}`);
+            }
+          }
+          NODE
+      - name: Upload audit reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-reports
+          path: |
+            audit-full.json
+            audit-production.json
+          if-no-files-found: error
