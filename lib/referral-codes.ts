@@ -18,12 +18,9 @@ export const REFERRAL_CODES: ReferralCodeEntry[] = [
   { code: 'AS812', owner: 'Aryan Shah' },
   
   { code: 'AS696', owner: 'Arsh Saxena' },
-  { code: 'VH123', owner: 'Vihaan Harrison'},
   { code: 'SRS14', owner: 'Saira Shirvaikar' },
   { code: 'PS123', owner: 'Prakhar Sinha' },
-  { code: 'TM123', owner: 'Tamara Moshawrab' },
   { code: 'PV556', owner: 'Pranav Verma' },
-  { code: 'NQ123', owner: 'Noaf Qassem' },
 ]
 
 export const CHAIR_REFERRAL_CODES: ReferralCodeEntry[] = [
