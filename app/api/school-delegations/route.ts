@@ -2,30 +2,25 @@
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
 import { NextRequest, NextResponse } from 'next/server'
-import { randomUUID } from 'crypto'
 
 import { createClient } from '@/utils/supabase/server'
 import { db } from '@/lib/db'
 import { sql } from 'drizzle-orm'
 import {
   DelegationSpreadsheetBucketError,
-  ensureDelegationSpreadsheetBucketExists,
-  getDelegationManualBucketSetupChecklist,
   getDelegationSpreadsheetBucketName,
 } from '@/utils/supabase/storage'
 import { insertSchoolDelegationSchema } from '@/lib/db/schema'
 import { normalizeToAlpha2CountryCode } from '@/lib/countries'
 import { z } from 'zod'
+import { verifyUploadReference } from '@/lib/uploads/intent'
+import { rejectLargeJsonRequest } from '@/lib/http/request-size'
 
 export const runtime = 'nodejs'
 
 const spreadsheetSchema = z.object({
-  fileName: z.string().min(1, 'Spreadsheet file name is required'),
-  mimeType: z.string().min(1, 'Spreadsheet MIME type is required'),
-  dataUrl: z
-    .string()
-    .regex(/^data:.*;base64,.+/, 'Invalid spreadsheet payload received'),
-})
+  uploadReference: z.unknown(),
+}).strict()
 
 const requestSchema = z.object({
   schoolName: z.string().min(1, 'School name is required'),
@@ -50,39 +45,6 @@ const requestSchema = z.object({
   termsAccepted: z.boolean().refine((value) => value === true, 'Terms and conditions must be accepted'),
   spreadsheet: spreadsheetSchema,
 })
-
-const sanitizeFileName = (fileName: string) => {
-  const trimmed = fileName.trim()
-  const safeName = trimmed.length > 0 ? trimmed.replace(/[^a-zA-Z0-9._-]/g, '_') : 'delegation'
-  const hasExtension = safeName.includes('.')
-  return { safeName, hasExtension }
-}
-
-const inferSpreadsheetExtension = (mimeType: string) => {
-  const normalized = mimeType.toLowerCase().split(';')[0]?.trim() ?? ''
-
-  const knownExtensions: Record<string, string> = {
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
-    'application/vnd.ms-excel': 'xls',
-    'application/vnd.ms-excel.sheet.macroenabled.12': 'xlsm',
-    'application/vnd.oasis.opendocument.spreadsheet': 'ods',
-    'text/csv': 'csv',
-    'application/csv': 'csv',
-    'text/tab-separated-values': 'tsv',
-    'application/json': 'json',
-  }
-
-  if (normalized in knownExtensions) {
-    return knownExtensions[normalized]
-  }
-
-  const slashIndex = normalized.lastIndexOf('/')
-  if (slashIndex !== -1 && slashIndex < normalized.length - 1) {
-    return normalized.slice(slashIndex + 1)
-  }
-
-  return 'xlsx'
-}
 
 let warnedAboutMissingPublicBase = false
 
@@ -131,6 +93,10 @@ const getStoragePublicBaseUrl = () => {
 // Column spreadsheet_url exists in the database schema, no need to check
 
 export async function POST(request: NextRequest) {
+  const tooLarge = rejectLargeJsonRequest(request, 128 * 1024)
+  if (tooLarge) return tooLarge
+
+  let uploadedStoragePath: string | null = null
   try {
     const json = await request.json()
     const parsed = requestSchema.parse(json)
@@ -139,46 +105,30 @@ export async function POST(request: NextRequest) {
 
     const { spreadsheet, requests, heardAbout, ...rest } = parsed
 
-    const [, base64Data] = spreadsheet.dataUrl.split(',')
-    if (!base64Data) {
-      throw new Error('Invalid spreadsheet payload received')
-    }
-
-    const fileBuffer = Buffer.from(base64Data, 'base64')
-    const { safeName, hasExtension } = sanitizeFileName(spreadsheet.fileName)
-    const mimeExtension = inferSpreadsheetExtension(spreadsheet.mimeType)
-    const fileNameWithExtension = hasExtension ? safeName : `${safeName}.${mimeExtension}`
-    const storagePath = `school-delegations/${new Date().toISOString().split('T')[0]}/${randomUUID()}-${fileNameWithExtension}`
-
     const bucketName = getDelegationSpreadsheetBucketName()
-    await ensureDelegationSpreadsheetBucketExists(bucketName)
-
-    const { error: uploadError } = await supabase.storage.from(bucketName).upload(storagePath, fileBuffer, {
-      contentType: spreadsheet.mimeType,
-      upsert: false,
-    })
-
-    if (uploadError) {
-      const normalizedMessage = uploadError.message?.toLowerCase() ?? ''
-      if (normalizedMessage.includes('not found')) {
-        const manualSetupMessage = getDelegationManualBucketSetupChecklist(bucketName)
-        throw new DelegationSpreadsheetBucketError(
-          `Failed to upload delegation spreadsheet: Supabase storage bucket "${bucketName}" was not found.\n\n${manualSetupMessage}`,
-          'Delegation spreadsheet uploads are temporarily unavailable while we finish configuring storage. Please try again later or contact support.'
-        )
-      }
-
-      throw new Error('Failed to upload delegation spreadsheet: ' + uploadError.message)
+    const uploadReference = verifyUploadReference(spreadsheet.uploadReference, 'school-delegation-spreadsheet', bucketName)
+    if (uploadReference.bucket !== bucketName) {
+      throw new Error('Delegation spreadsheet upload bucket is not configured for this deployment.')
+    }
+    const pathParts = uploadReference.path.split('/')
+    const fileName = pathParts.pop()
+    const { data: objects, error: objectLookupError } = await supabase.storage
+      .from(bucketName)
+      .list(pathParts.join('/'), { search: fileName, limit: 1 })
+    if (objectLookupError) throw new Error('Failed to verify delegation spreadsheet upload: ' + objectLookupError.message)
+    if (!fileName || !objects?.some((object) => object.name === fileName)) {
+      throw new Error('Delegation spreadsheet upload was not found. Please upload the file again.')
     }
 
-    const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(storagePath)
+    const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(uploadReference.path)
+    uploadedStoragePath = uploadReference.path
     let spreadsheetPublicUrl = publicUrlData?.publicUrl ?? null
 
     // Always ensure we have a properly formatted URL
     if (!spreadsheetPublicUrl || spreadsheetPublicUrl.trim().length === 0) {
       const baseUrl = getStoragePublicBaseUrl()
       if (baseUrl) {
-        spreadsheetPublicUrl = joinUrlParts(baseUrl, bucketName, storagePath)
+        spreadsheetPublicUrl = joinUrlParts(baseUrl, bucketName, uploadReference.path)
       } else if (!warnedAboutMissingPublicBase) {
         console.warn(
           'Unable to determine Supabase storage public URL base; delegation records will omit spreadsheet_url until configured.'
@@ -191,7 +141,7 @@ export async function POST(request: NextRequest) {
     if (spreadsheetPublicUrl && !spreadsheetPublicUrl.startsWith('http')) {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
       if (supabaseUrl) {
-        spreadsheetPublicUrl = `${supabaseUrl.trim().replace(/\/+$/, '')}/storage/v1/object/public/${bucketName}/${storagePath}`
+        spreadsheetPublicUrl = `${supabaseUrl.trim().replace(/\/+$/, '')}/storage/v1/object/public/${bucketName}/${uploadReference.path}`
       }
     }
 
@@ -212,10 +162,9 @@ export async function POST(request: NextRequest) {
       additionalRequests: requests?.trim() ? requests.trim() : null,
       heardAbout: heardAbout?.trim() ? heardAbout.trim() : null,
       termsAccepted: rest.termsAccepted,
-      spreadsheetFileName: fileNameWithExtension,
-      spreadsheetStoragePath: storagePath,
-      spreadsheetMimeType:
-        spreadsheet.mimeType || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      spreadsheetFileName: uploadReference.fileName,
+      spreadsheetStoragePath: uploadReference.path,
+      spreadsheetMimeType: uploadReference.mimeType,
       spreadsheetUrl: spreadsheetPublicUrl,
     })
 
@@ -245,6 +194,11 @@ export async function POST(request: NextRequest) {
     const { error } = await supabase.from('school_delegations').insert([insertPayload])
 
     if (error) {
+      if (uploadedStoragePath) {
+        await supabase.storage.from(bucketName).remove([uploadedStoragePath]).catch((removeError) => {
+          console.error('Failed to remove unrecorded delegation spreadsheet:', removeError instanceof Error ? removeError.message : 'Unknown error')
+        })
+      }
       throw new Error(error.message)
     }
 

@@ -2,13 +2,12 @@
 // Proprietary - NOT OPEN SOURCE. No copying/modification/deployment without permission (dxb.avg@gmail.com).
 
 import { NextRequest, NextResponse } from 'next/server'
-import { randomUUID } from 'crypto'
 import { z } from 'zod'
+import { verifyUploadReference } from '@/lib/uploads/intent'
+import { rejectLargeJsonRequest } from '@/lib/http/request-size'
 
 import { createClient } from '@/utils/supabase/server'
 import {
-  ensurePaymentProofBucketExists,
-  getManualBucketSetupChecklist,
   getPaymentProofBucketName,
   PaymentProofBucketError,
 } from '@/utils/supabase/storage'
@@ -19,22 +18,16 @@ const paymentProofSchema = z.object({
   email: z.string().email('Please provide the email you used to register'),
   fullName: z.string().min(1, "Payment confirmation requires the payer's name"),
   role: z.enum(['delegate', 'chair', 'admin']),
-  paymentProof: z
-    .object({
-      fileName: z.string().min(1),
-      mimeType: z.string().min(1),
-      dataUrl: z.string().regex(/^data:.*;base64,.+/, 'Invalid payment proof format'),
-    })
-    .refine(
-      (proof) => proof.mimeType.startsWith('image/') || proof.mimeType === 'application/pdf',
-      {
-        message: 'Payment proof must be an image or PDF file.',
-        path: ['mimeType'],
-      },
-    ),
+  paymentProof: z.object({
+    uploadReference: z.unknown(),
+  }).strict(),
 })
 
 export async function POST(request: NextRequest) {
+  const tooLarge = rejectLargeJsonRequest(request, 64 * 1024)
+  if (tooLarge) return tooLarge
+
+  let uploadedStoragePath: string | null = null
   try {
     const body = await request.json()
     const payload = paymentProofSchema.parse(body)
@@ -80,46 +73,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const [, base64Data] = payload.paymentProof.dataUrl.split(',')
-    if (!base64Data) {
-      throw new Error('Invalid payment proof payload received')
-    }
-
-    const fileBuffer = Buffer.from(base64Data, 'base64')
-
-    const rawFileName = payload.paymentProof.fileName.trim() || 'payment-proof'
-    const sanitizedFileName = rawFileName.replace(/[^a-zA-Z0-9._-]/g, '_')
-    const hasExtension = sanitizedFileName.includes('.')
-    const mimeExtension = payload.paymentProof.mimeType.split('/')[1] || 'png'
-    const fileNameWithExtension = hasExtension ? sanitizedFileName : `${sanitizedFileName}.${mimeExtension}`
-
-    const storagePath = `proof-of-payment/${new Date().toISOString().split('T')[0]}/${randomUUID()}-${fileNameWithExtension}`
-
     const paymentProofBucket = getPaymentProofBucketName()
+    const uploadReference = verifyUploadReference(payload.paymentProof.uploadReference, 'payment-proof', paymentProofBucket)
 
-    await ensurePaymentProofBucketExists(paymentProofBucket)
-
-    const { error: uploadError } = await supabase.storage
-      .from(paymentProofBucket)
-      .upload(storagePath, fileBuffer, {
-        contentType: payload.paymentProof.mimeType,
-        upsert: false,
-      })
-
-    if (uploadError) {
-      const normalizedMessage = uploadError.message?.toLowerCase() ?? ''
-      if (normalizedMessage.includes('bucket not found')) {
-        const manualSetupMessage = getManualBucketSetupChecklist(paymentProofBucket)
-        throw new PaymentProofBucketError(
-          `Failed to upload payment proof: Supabase storage bucket "${paymentProofBucket}" was not found.\n\n${manualSetupMessage}`,
-          'Payment proof uploads are temporarily unavailable while we finish setting up storage. Please try again later or contact support.'
-        )
-      }
-
-      throw new Error('Failed to upload payment proof: ' + uploadError.message)
+    if (uploadReference.bucket !== paymentProofBucket) {
+      throw new Error('Payment proof upload bucket is not configured for this deployment.')
     }
 
-    const { data: publicUrlData } = supabase.storage.from(paymentProofBucket).getPublicUrl(storagePath)
+    const pathParts = uploadReference.path.split('/')
+    const fileName = pathParts.pop()
+    const folder = pathParts.join('/')
+    const { data: objects, error: objectLookupError } = await supabase.storage
+      .from(paymentProofBucket)
+      .list(folder, { search: fileName, limit: 1 })
+
+    if (objectLookupError) {
+      throw new Error('Failed to verify payment proof upload: ' + objectLookupError.message)
+    }
+
+    if (!fileName || !objects?.some((object) => object.name === fileName)) {
+      throw new Error('Payment proof upload was not found. Please upload the file again.')
+    }
+
+    const { data: publicUrlData } = supabase.storage.from(paymentProofBucket).getPublicUrl(uploadReference.path)
+    uploadedStoragePath = uploadReference.path
 
     const paymentProofUploadedAt = new Date().toISOString()
 
@@ -128,8 +105,8 @@ export async function POST(request: NextRequest) {
       .update({
         payment_status: 'pending',
         payment_proof_url: publicUrlData?.publicUrl ?? null,
-        payment_proof_storage_path: storagePath,
-        payment_proof_file_name: fileNameWithExtension,
+        payment_proof_storage_path: uploadReference.path,
+        payment_proof_file_name: uploadReference.fileName,
         payment_proof_payer_name: payload.fullName.trim(),
         payment_proof_role: payload.role,
         payment_proof_uploaded_at: paymentProofUploadedAt,
@@ -142,6 +119,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!updatedUsers || updatedUsers.length === 0) {
+      await supabase.storage.from(paymentProofBucket).remove([uploadReference.path]).catch((removeError) => {
+        console.error('Failed to remove unmatched payment proof upload:', removeError instanceof Error ? removeError.message : 'Unknown error')
+      })
+      uploadedStoragePath = null
       return NextResponse.json(
         {
           status: 'not_found',
@@ -153,7 +134,7 @@ export async function POST(request: NextRequest) {
 
     const previousStoragePath = existingUser.payment_proof_storage_path as string | null | undefined
 
-    if (previousStoragePath && previousStoragePath !== storagePath) {
+    if (previousStoragePath && previousStoragePath !== uploadReference.path) {
       await supabase.storage.from(paymentProofBucket).remove([previousStoragePath]).catch((error) => {
         console.error('Failed to remove previous payment proof from storage:', error)
       })
@@ -168,6 +149,12 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     )
   } catch (error) {
+    if (uploadedStoragePath) {
+      await (await createClient()).storage.from(getPaymentProofBucketName()).remove([uploadedStoragePath]).catch((removeError) => {
+        console.error('Failed to remove unrecorded payment proof upload:', removeError instanceof Error ? removeError.message : 'Unknown error')
+      })
+    }
+
     if (error instanceof PaymentProofBucketError) {
       console.error('Payment proof bucket misconfiguration:', error.message)
 

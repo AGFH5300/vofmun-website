@@ -17,6 +17,8 @@ import { CountrySelect } from "@/components/country-select"
 import { PhoneInput } from "@/components/phone-input"
 import { toast } from "sonner"
 import { getRequestErrorMessage, getTooManyRequestsMessage } from "@/lib/http/client-errors"
+import { uploadFileDirectly } from "@/lib/uploads/client"
+import { validateUploadMetadata } from "@/lib/uploads/config"
 import {
   AlertCircle,
   Download,
@@ -89,6 +91,18 @@ export function SchoolDelegationForm() {
       setSpreadsheetFile(null)
       return
     }
+
+    const validationError = validateUploadMetadata({
+      purpose: "school-delegation-spreadsheet",
+      fileName: file.name,
+      mimeType: file.type,
+      size: file.size,
+    })
+    if (validationError) {
+      setErrors((prev) => ({ ...prev, spreadsheet: validationError }))
+      return
+    }
+
     setSpreadsheetFile(file)
   }
 
@@ -185,14 +199,6 @@ export function SchoolDelegationForm() {
     }
   }, [])
 
-  const fileToDataUrl = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = () => reject(new Error("Unable to read file"))
-      reader.readAsDataURL(file)
-    })
-
   const validateForm = () => {
     const newErrors: FormErrors = {}
 
@@ -266,6 +272,8 @@ export function SchoolDelegationForm() {
     setIsSubmitting(true)
 
     try {
+      const uploadReference = await uploadFileDirectly("school-delegation-spreadsheet", spreadsheetFile)
+
       const payload = {
         schoolName: formData.schoolName.trim(),
         schoolAddress: formData.schoolAddress.trim(),
@@ -284,11 +292,7 @@ export function SchoolDelegationForm() {
         heardAbout: formData.heardAbout.trim(),
         termsAccepted: formData.termsAccepted,
         spreadsheet: {
-          fileName: spreadsheetFile.name,
-          mimeType:
-            spreadsheetFile.type ||
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          dataUrl: await fileToDataUrl(spreadsheetFile),
+          uploadReference,
         },
       }
 
@@ -314,10 +318,10 @@ export function SchoolDelegationForm() {
       })
 
       resetForm()
-    } catch (error: any) {
-      console.error("School delegation submission failed", error)
+    } catch (error) {
+      console.error("School delegation submission failed", error instanceof Error ? error.message : "Unknown error")
       toast.error("Submission failed", {
-        description: error?.message || "We couldn't process your delegation right now. Please try again.",
+        description: error instanceof Error ? error.message : "We couldn't process your delegation right now. Please try again.",
       })
     } finally {
       setIsSubmitting(false)

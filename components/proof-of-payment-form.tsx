@@ -15,6 +15,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { UploadCloud, X, Loader2, FileText } from "lucide-react"
 import { HAS_STRIPE_PAYMENT_LINK, STRIPE_PAYMENT_URL } from "@/lib/payment-details"
 import { getRequestErrorMessage } from "@/lib/http/client-errors"
+import { uploadFileDirectly } from "@/lib/uploads/client"
+import { validateUploadMetadata } from "@/lib/uploads/config"
 
 const stripeButtonClasses =
   "inline-flex items-center justify-center gap-2 rounded-lg bg-[#635bff] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-[#4f47d8] active:bg-[#423ac7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635bff]"
@@ -73,13 +75,12 @@ export function ProofOfPaymentForm() {
   }, [])
 
   const handlePaymentProofSelect = useCallback((file: File) => {
-    const isImage = file.type.startsWith("image/")
-    const isPdf = file.type === "application/pdf"
+    const validationError = validateUploadMetadata({ purpose: "payment-proof", fileName: file.name, mimeType: file.type, size: file.size })
 
-    if (!isImage && !isPdf) {
+    if (validationError) {
       setErrors((prev) => ({
         ...prev,
-        paymentProof: "Please upload an image or PDF file (PNG, JPG, HEIC, or PDF).",
+        paymentProof: validationError,
       }))
       return
     }
@@ -204,23 +205,6 @@ export function ProofOfPaymentForm() {
     }
   }, [handlePaymentProofSelect, hasPaid])
 
-  const fileToDataURL = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => {
-        const result = reader.result
-        if (typeof result === "string") {
-          resolve(result)
-        } else {
-          reject(new Error("Failed to read file"))
-        }
-      }
-      reader.onerror = () => {
-        reject(new Error("Could not read the selected file"))
-      }
-      reader.readAsDataURL(file)
-    })
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -268,7 +252,7 @@ export function ProofOfPaymentForm() {
         throw new Error("Please attach your payment receipt before submitting")
       }
 
-      const paymentProofDataUrl = await fileToDataURL(paymentProofFile)
+      const uploadReference = await uploadFileDirectly("payment-proof", paymentProofFile)
 
       const response = await fetch("/api/payment-proof", {
         method: "POST",
@@ -280,9 +264,7 @@ export function ProofOfPaymentForm() {
           fullName: fullName.trim(),
           role: role as 'delegate' | 'chair' | 'admin',
           paymentProof: {
-            fileName: paymentProofFile.name ?? "payment-proof",
-            mimeType: paymentProofFile.type || "image/png",
-            dataUrl: paymentProofDataUrl,
+            uploadReference,
           },
         }),
       })
