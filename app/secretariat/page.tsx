@@ -78,7 +78,7 @@ Beyond coding, I enjoy leading tech initiatives across school clubs and events, 
 For VOFMUN, I serve as Head of Technology, where I keep things running smoothly behind the scenes and create the conference’s digital platforms, including the VOFMUN One web app and the site on which you are reading this.
 
 See more on my website: `,
-    websiteLink: "https://www.anshgupta.site",
+    websiteLink: "https://www.anshgupta.cc",
   },
 ];
 
@@ -601,7 +601,7 @@ export default function SecretariatPage() {
                       rel="noopener noreferrer"
                       className="text-blue-500 hover:underline ml-1"
                     >
-                      anshgupta.site
+                      anshgupta.cc
                     </a>
                   )}
                 </p>
