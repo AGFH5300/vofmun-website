@@ -2,11 +2,10 @@
 
 import Image from "next/image"
 import dynamic from "next/dynamic"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 
-const loadVofmunCleanGlobe = () => import("@/components/vofmun-clean-globe")
-const VofmunCleanGlobe = dynamic(loadVofmunCleanGlobe, { ssr: false })
+const VofmunCleanGlobe = dynamic(() => import("@/components/vofmun-clean-globe"), { ssr: false })
 import { getCountryByCode } from "@/lib/countries"
 
 type NationalityRow = {
@@ -23,9 +22,6 @@ export function NationalitiesSection() {
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isPreloaded, setIsPreloaded] = useState(false)
-  const [isActive, setIsActive] = useState(false)
-  const sectionRef = useRef<HTMLDivElement | null>(null)
 
   const rows = useMemo(() => Object.entries(counts)
     .map(([code, participants]): NationalityRow => ({
@@ -34,31 +30,6 @@ export function NationalitiesSection() {
       participants,
     }))
     .sort((a, b) => b.participants - a.participants), [counts])
-
-  useEffect(() => {
-    const element = sectionRef.current
-    if (!element) return
-
-    const preloadObserver = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        setIsPreloaded(true)
-        void loadVofmunCleanGlobe()
-        preloadObserver.disconnect()
-      }
-    }, { rootMargin: "1000px 0px" })
-
-    const activeObserver = new IntersectionObserver((entries) => {
-      setIsActive(entries.some((entry) => entry.isIntersecting))
-    }, { rootMargin: "120px 0px" })
-
-    preloadObserver.observe(element)
-    activeObserver.observe(element)
-
-    return () => {
-      preloadObserver.disconnect()
-      activeObserver.disconnect()
-    }
-  }, [])
 
   useEffect(() => {
     let isMounted = true
@@ -97,19 +68,7 @@ export function NationalitiesSection() {
       }
     }
 
-    if (!isPreloaded) {
-      return () => {
-        isMounted = false
-      }
-    }
-
     fetchNationalities()
-
-    if (!isActive) {
-      return () => {
-        isMounted = false
-      }
-    }
 
     const intervalId = window.setInterval(fetchNationalities, 120_000)
     const handleVisibilityChange = () => {
@@ -124,10 +83,10 @@ export function NationalitiesSection() {
       window.clearInterval(intervalId)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [isPreloaded, isActive])
+  }, [])
 
   return (
-    <div ref={sectionRef} className="rounded-2xl border border-[#B22222]/15 bg-white p-3 shadow-md sm:p-5 lg:p-6">
+    <div className="rounded-2xl border border-[#B22222]/15 bg-white p-3 shadow-md sm:p-5 lg:p-6">
       <h3 className="text-2xl font-bold text-[#B22222] font-serif">Where Our Participants Come From</h3>
       <p className="mt-2 text-sm text-gray-600 sm:text-base">
         A live snapshot of the countries shaping this year&apos;s debates, ideas, and diplomacy.
@@ -169,7 +128,7 @@ export function NationalitiesSection() {
           <Badge className="pointer-events-none absolute left-3 top-3 z-10 bg-[#B22222] text-white hover:bg-[#B22222]">
             Beta
           </Badge>
-          {isPreloaded ? <VofmunCleanGlobe counts={counts} isActive={isActive} /> : <div className="h-full w-full" aria-hidden="true" />}
+          <VofmunCleanGlobe counts={counts} />
         </div>
       </div>
     </div>
