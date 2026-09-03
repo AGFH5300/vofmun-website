@@ -22,7 +22,6 @@ const FeaturesSlideshow = dynamic(() => import("@/components/features-slideshow"
 const FoundersInfiniteCarousel = dynamic(() => import("@/components/founders-infinite-carousel").then((m) => m.FoundersInfiniteCarousel), { ssr: false, loading: () => <div className="h-96 w-full max-w-6xl mx-auto" aria-hidden="true" /> })
 const NationalitiesSection = dynamic(() => import("@/components/nationalities-section").then((m) => m.NationalitiesSection), { ssr: false, loading: () => <div className="h-[540px] w-full rounded-2xl border border-[#B22222]/15 bg-white" aria-hidden="true" /> })
 
-
 function LazyHydrate({
   children,
   fallback,
@@ -84,34 +83,6 @@ function LazyHydrate({
 }
 
 export default function HomePage() {
-  const [isNationalitiesReady, setIsNationalitiesReady] = useState(false)
-
-  useEffect(() => {
-    let idleTimer: ReturnType<typeof setTimeout> | null = null
-    let idleId: RequestIdleCallbackHandle | null = null
-    const windowWithIdle = window as Window & {
-      requestIdleCallback?: RequestIdleCallbackFn
-      cancelIdleCallback?: (handle: RequestIdleCallbackHandle) => void
-    }
-
-    if (windowWithIdle.requestIdleCallback) {
-      idleId = windowWithIdle.requestIdleCallback(() => {
-        setIsNationalitiesReady(true)
-      }, { timeout: 900 })
-    } else {
-      idleTimer = setTimeout(() => {
-        setIsNationalitiesReady(true)
-      }, 900)
-    }
-
-    return () => {
-      if (idleTimer) clearTimeout(idleTimer)
-      if (idleId !== null && windowWithIdle.cancelIdleCallback) {
-        windowWithIdle.cancelIdleCallback(idleId)
-      }
-    }
-  }, [])
-
   return (
     <div className="min-h-screen bg-[#ffecdd]">
       <EnhancedNavigation />
@@ -308,7 +279,7 @@ export default function HomePage() {
               VOFMUN is a celebration of global thinking, where debate and diplomacy connect people to make a true difference.
             </p>
             <div className="mt-10 max-w-6xl mx-auto">
-              {isNationalitiesReady ? <NationalitiesSection /> : <div className="h-[540px] w-full rounded-2xl border border-[#B22222]/15 bg-white" aria-hidden="true" />}
+              <NationalitiesSection />
             </div>
           </div>
         </section>
